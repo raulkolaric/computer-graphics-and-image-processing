@@ -14,6 +14,7 @@ class Gui extends JFrame {
     // mensagens
     private JLabel msg = new JLabel("Msg: ");
     private JButton jbPonto = new JButton("Ponto");
+    private JToggleButton jtModoReta = new JToggleButton("Modo Reta: OFF");
 
     // barra de menu
     private JToolBar barraComandos = new JToolBar();
@@ -38,12 +39,14 @@ class Gui extends JFrame {
 
         // Adicionando os componentes
         barraComandos.add(jbPonto);
+        barraComandos.add(jtModoReta);
         add(barraComandos, BorderLayout.NORTH);                
         add(areaDesenho, BorderLayout.CENTER);                
         add(msg, BorderLayout.SOUTH);
 
         Eventos eventos = new Eventos();
         jbPonto.addActionListener(eventos);
+        jtModoReta.addActionListener(eventos);
     }
 
     /**
@@ -69,6 +72,16 @@ class Gui extends JFrame {
             if (tipo == TiposPrimitivos.PONTO) {
                 // Enviando a Forma a ser desenhada e a cor da linha
                 areaDesenho.setTipo( tipo );
+            }
+
+            if (event.getSource() == jtModoReta){
+                boolean ativo = jtModoReta.isSelected();
+                areaDesenho.setModoReta(ativo);
+                if (ativo) {
+                    jtModoReta.setText("Modo Reta: ON");
+                } else {
+                    jtModoReta.setText("Modo Reta: OFF");
+                }
             }
         }
     } 

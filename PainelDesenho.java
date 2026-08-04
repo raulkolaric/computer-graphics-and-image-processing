@@ -28,6 +28,11 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     private int nPontos = 0;
     private int nRetas = 0;
 
+    // modo reta ativo ou nao
+    private boolean modoReta = false;
+    // contador de pontos clicados no modo reta (para formar pares)
+    private int nPontosModoReta = 0;
+
     /**
      * COnstrutor para objetos da classe PainelDesenho
      */
@@ -45,6 +50,26 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     public TiposPrimitivos getTipo(){
         return this.tipo;
+    }
+
+    /**
+     * setModoReta - define se o modo reta esta ativo ou nao
+     *
+     * @param modoReta boolean true para ativar o modo reta
+     */
+    public void setModoReta(boolean modoReta){
+        this.modoReta = modoReta;
+        // ao ativar o modo reta, reinicia a contagem de pares
+        nPontosModoReta = 0;
+    }
+
+    /**
+     * getModoReta - retorna se o modo reta esta ativo ou nao
+     *
+     * @return boolean true se o modo reta esta ativo
+     */
+    public boolean getModoReta(){
+        return this.modoReta;
     }
 
     /**
@@ -97,11 +122,14 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         pontos[nPontos] = ponto;
         nPontos++;
 
-        // a cada dois pontos clicados, cria uma reta entre eles
-        if (nPontos % 2 == 0) {
-            Reta reta = new Reta(pontos[nPontos - 2], pontos[nPontos - 1]);
-            retas[nRetas] = reta;
-            nRetas++;
+        // a cada dois pontos clicados no modo reta, cria uma reta entre eles
+        if (modoReta) {
+            nPontosModoReta++;
+            if (nPontosModoReta % 2 == 0) {
+                Reta reta = new Reta(pontos[nPontos - 2], pontos[nPontos - 1]);
+                retas[nRetas] = reta;
+                nRetas++;
+            }
         }
 
         this.msg.setText("Ponto: (" + xMouse + ", " + yMouse + ")");
