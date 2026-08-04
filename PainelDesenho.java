@@ -1,10 +1,8 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 
@@ -23,8 +21,17 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     TiposPrimitivos tipo;
     int divisoes;
     int xMouse, yMouse;
-    boolean primeiraVez = true;
-    int nPto = 0;
+
+    // vetores para guardar os pontos e as retas desenhados
+    private PontoGr[] pontos = new PontoGr[100];
+    private Reta[] retas = new Reta[50];
+    private int nPontos = 0;
+    private int nRetas = 0;
+
+    // modo reta ativo ou nao
+    private boolean modoReta = false;
+    // contador de pontos clicados no modo reta (para formar pares)
+    private int nPontosModoReta = 0;
 
     /**
      * COnstrutor para objetos da classe PainelDesenho
@@ -46,14 +53,54 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     /**
+     * setModoReta - define se o modo reta esta ativo ou nao
+     *
+     * @param modoReta boolean true para ativar o modo reta
+     */
+    public void setModoReta(boolean modoReta){
+        this.modoReta = modoReta;
+        // ao ativar o modo reta, reinicia a contagem de pares
+        nPontosModoReta = 0;
+    }
+
+    /**
+     * getModoReta - retorna se o modo reta esta ativo ou nao
+     *
+     * @return boolean true se o modo reta esta ativo
+     */
+    public boolean getModoReta(){
+        return this.modoReta;
+    }
+
+    /**
      * paintComponent - metodo para desenhar
      *
      * @param g A parameter
      */
     public void paintComponent(Graphics g) {   
-        if (! primeiraVez) {
-            FiguraPontos.desenharPonto(g, xMouse, yMouse, "p"+nPto, 10);
-            //FiguraPontos.desenharPontosAleatorios(g, 200, 10);
+        desenharRetas(g);
+        desenharPontos(g);
+    }
+
+    /**
+     * desenharPontos - desenha todos os pontos clicados na tela
+     *
+     * @param g Graphics - para desenhar
+     */
+    private void desenharPontos(Graphics g){
+        for (int i = 0; i < nPontos; i++) {
+            pontos[i].desenharPonto(g);
+        }
+    }
+
+    /**
+     * desenharRetas - desenha todas as retas formadas pelos pares de pontos
+     *
+     * @param g Graphics - para desenhar
+     */
+    private void desenharRetas(Graphics g){
+        for (int i = 0; i < nRetas; i++) {
+            FiguraPontos.desenharReta(g, retas[i]);
         }
     }
 
@@ -64,13 +111,29 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
      * @param e MouseEvent - click do mouse
      */
     public void mousePressed(MouseEvent e) { 
-        primeiraVez = false;
         xMouse = e.getX();
         yMouse = e.getY();
-        Graphics g = getGraphics();  
-        paint(g); // Aciona paintComponent
-        nPto++;
 
+        // cria um novo ponto na posicao do clique com cor aleatoria
+        Color cor = new Color((int) (Math.random() * 256),  
+                (int) (Math.random() * 256),  
+                (int) (Math.random() * 256));
+        PontoGr ponto = new PontoGr(xMouse, yMouse, cor, "p" + nPontos, 10);
+        pontos[nPontos] = ponto;
+        nPontos++;
+
+        // a cada dois pontos clicados no modo reta, cria uma reta entre eles
+        if (modoReta) {
+            nPontosModoReta++;
+            if (nPontosModoReta % 2 == 0) {
+                Reta reta = new Reta(pontos[nPontos - 2], pontos[nPontos - 1]);
+                retas[nRetas] = reta;
+                nRetas++;
+            }
+        }
+
+        this.msg.setText("Ponto: (" + xMouse + ", " + yMouse + ")");
+        repaint();
     }     
 
     public void mouseReleased(MouseEvent e) { 
@@ -96,6 +159,5 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
      */
     public void mouseMoved(MouseEvent e) {
         this.msg.setText("("+e.getX() + ", " + e.getY() + ")");
-        //System.out.println("("+e.getX() + ", " + e.getY() + ")");
     }
 }

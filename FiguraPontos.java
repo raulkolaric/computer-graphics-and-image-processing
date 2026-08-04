@@ -23,13 +23,13 @@ public class FiguraPontos {
             p.desenharPonto(g);
     }
 
-   /**
-    * desenharPontosAleatorios - desenha varios pontos em posicoes aleatorias e cores aleatorias
-    *
-    * @param g Graphics - contem funcoes graficas de biblioteca
-    * @param qtde int numero de pontos a serem desenhados
-    * @param diametro dimensao do ponto
-    */
+    /**
+     * desenharPontosAleatorios - desenha varios pontos em posicoes aleatorias e cores aleatorias
+     *
+     * @param g Graphics - contem funcoes graficas de biblioteca
+     * @param qtde int numero de pontos a serem desenhados
+     * @param diametro dimensao do ponto
+     */
    public static void desenharPontosAleatorios(Graphics g, int qtde, int diametro){
 
         for(int i=0; i < qtde; i++) {
@@ -43,6 +43,18 @@ public class FiguraPontos {
             PontoGr p = new PontoGr(x, y, cor, diametro);
             p.desenharPonto(g);
         }
+    }
+
+    /**
+     * desenharReta - desenha uma reta entre dois pontos
+     *
+     * @param g Graphics - contem funcoes graficas de biblioteca
+     * @param reta Reta - reta a ser desenhada
+     */
+    public static void desenharReta(Graphics g, Reta reta){
+        g.setColor(Color.BLACK);
+        g.drawLine((int)reta.getP1().getX(), (int)reta.getP1().getY(),
+                   (int)reta.getP2().getX(), (int)reta.getP2().getY());
     }
     
 }
