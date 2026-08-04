@@ -1,0 +1,18 @@
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.pdf
+*.class
+*.ctxt
+.DS_Store
+# Ignore Javadoc generated documentation
+/doc/
+/docs/
+/javadoc/
+
+#agentic
+.gemini
+
+#workspace rules
+.clinerules
