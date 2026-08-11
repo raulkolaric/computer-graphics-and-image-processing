@@ -7,6 +7,14 @@ import java.awt.*;
  * @version 20260803
  */
 public class FiguraPontos {
+    private static RenderizadorPrimitivos renderizador = new RenderizadorManual();
+
+    public static void setRenderizador(RenderizadorPrimitivos novoRenderizador) {
+        if (novoRenderizador == null) {
+            throw new IllegalArgumentException("O renderizador nao pode ser nulo");
+        }
+        renderizador = novoRenderizador;
+    }
     /**
      * desenharPonto - desenha ponto na posicao x,y
      * @param g Graphics - contem funcoes graficas de biblioteca
@@ -52,9 +60,13 @@ public class FiguraPontos {
      * @param reta Reta - reta a ser desenhada
      */
     public static void desenharReta(Graphics g, Reta reta){
-        g.setColor(Color.BLACK);
-        g.drawLine((int)reta.getP1().getX(), (int)reta.getP1().getY(),
-                   (int)reta.getP2().getX(), (int)reta.getP2().getY());
+        RetaGrafica grafica;
+        if (reta instanceof RetaGrafica) {
+            grafica = (RetaGrafica)reta;
+        } else {
+            grafica = new RetaGrafica(reta.getP1(), reta.getP2());
+        }
+        renderizador.desenharReta(g, grafica);
     }
 
     /**
@@ -64,13 +76,14 @@ public class FiguraPontos {
      * @param circulo Circulo - circulo a ser desenhado
      */
     public static void desenharCirculo(Graphics g, Circulo circulo){
-        int raio = (int)Math.round(circulo.getRaio());
-        int diametro = raio * 2;
-        int x = (int)Math.round(circulo.getCentro().getX()) - raio;
-        int y = (int)Math.round(circulo.getCentro().getY()) - raio;
-
-        g.setColor(Color.BLACK);
-        g.drawOval(x, y, diametro, diametro);
+        CirculoGrafico grafico;
+        if (circulo instanceof CirculoGrafico) {
+            grafico = (CirculoGrafico)circulo;
+        } else {
+            grafico = new CirculoGrafico(circulo.getCentro(), circulo.getPontoRaio(),
+                EstiloReta.PADRAO, AlgoritmoCirculo.SIMETRIA_OCTANTES);
+        }
+        renderizador.desenharCirculo(g, grafico);
     }
     
 }
