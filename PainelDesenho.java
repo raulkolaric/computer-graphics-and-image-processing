@@ -3,219 +3,216 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import javax.swing.JPanel;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-/**
- * Painel para desenhar primitivos graficos
- * 
- * @author Julio 
- * @version 20260803
- */
+/** Painel que recebe pontos pelo mouse, armazena a cena e a redesenha. */
 public class PainelDesenho extends JPanel implements MouseListener, MouseMotionListener {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
-    JLabel msg;
-    TiposPrimitivos tipo;
-    int divisoes;
-    int xMouse, yMouse;
 
-    // vetores para guardar os pontos e as retas desenhados
-    private PontoGr[] pontos = new PontoGr[100];
-    private Reta[] retas = new Reta[50];
-    private Circulo[] circulos = new Circulo[50];
-    private int nPontos = 0;
-    private int nRetas = 0;
-    private int nCirculos = 0;
+    private final JLabel msg;
+    private final List<PontoGr> pontos = new ArrayList<PontoGr>();
+    private final List<PrimitivoGrafico> primitivos = new ArrayList<PrimitivoGrafico>();
+    private final List<Ponto> pontosPendentes = new ArrayList<Ponto>();
 
-    // modo reta ativo ou nao
-    private boolean modoReta = false;
-    // contador de pontos clicados no modo reta (para formar pares)
-    private int nPontosModoReta = 0;
+    private TiposPrimitivos tipo;
+    private RenderizadorPrimitivos renderizador;
+    private Color corAtual = Color.BLACK;
+    private int espessuraAtual = 1;
+    private AlgoritmoCirculo algoritmoCirculo = AlgoritmoCirculo.SIMETRIA_OCTANTES;
 
-    // modo circulo ativo ou nao
-    private boolean modoCirculo = false;
-    // contador de pontos clicados no modo circulo (centro e raio)
-    private int nPontosModoCirculo = 0;
-
-    /**
-     * COnstrutor para objetos da classe PainelDesenho
-     */
     public PainelDesenho(JLabel msg, TiposPrimitivos tipo) {
+        this(msg, tipo, new RenderizadorManual());
+    }
+
+    public PainelDesenho(JLabel msg, TiposPrimitivos tipo,
+                          RenderizadorPrimitivos renderizador) {
+        if (msg == null || tipo == null || renderizador == null) {
+            throw new IllegalArgumentException("Mensagem, tipo e renderizador sao obrigatorios");
+        }
         this.tipo = tipo;
         this.msg = msg;
-        //       this.setBackground(Color.black);
-        this.addMouseListener(this); 
-        this.addMouseMotionListener(this);
-
+        this.renderizador = renderizador;
+        addMouseListener(this);
+        addMouseMotionListener(this);
     }
-    public void setTipo(TiposPrimitivos tipo){
+
+    public void setTipo(TiposPrimitivos tipo) {
+        if (tipo == null) {
+            throw new IllegalArgumentException("O tipo nao pode ser nulo");
+        }
         this.tipo = tipo;
+        pontosPendentes.clear();
+        msg.setText("Modo: " + tipo);
     }
 
-    public TiposPrimitivos getTipo(){
-        return this.tipo;
+    public TiposPrimitivos getTipo() {
+        return tipo;
     }
 
-    /**
-     * setModoReta - define se o modo reta esta ativo ou nao
-     *
-     * @param modoReta boolean true para ativar o modo reta
-     */
-    public void setModoReta(boolean modoReta){
-        this.modoReta = modoReta;
-        // ao ativar o modo reta, reinicia a contagem de pares
-        nPontosModoReta = 0;
-        if (modoReta) {
-            modoCirculo = false;
-            nPontosModoCirculo = 0;
+    public void setModoReta(boolean ativo) {
+        setTipo(ativo ? TiposPrimitivos.RETA : TiposPrimitivos.NENHUM);
+    }
+
+    public boolean getModoReta() {
+        return tipo == TiposPrimitivos.RETA;
+    }
+
+    public void setModoCirculo(boolean ativo) {
+        setTipo(ativo ? TiposPrimitivos.CIRCULO : TiposPrimitivos.NENHUM);
+    }
+
+    public boolean getModoCirculo() {
+        return tipo == TiposPrimitivos.CIRCULO;
+    }
+
+    public void setCorAtual(Color corAtual) {
+        if (corAtual == null) {
+            throw new IllegalArgumentException("A cor nao pode ser nula");
         }
+        this.corAtual = corAtual;
     }
 
-    /**
-     * getModoReta - retorna se o modo reta esta ativo ou nao
-     *
-     * @return boolean true se o modo reta esta ativo
-     */
-    public boolean getModoReta(){
-        return this.modoReta;
+    public Color getCorAtual() {
+        return corAtual;
     }
 
-    /**
-     * setModoCirculo - define se o modo circulo esta ativo ou nao
-     *
-     * @param modoCirculo boolean true para ativar o modo circulo
-     */
-    public void setModoCirculo(boolean modoCirculo){
-        this.modoCirculo = modoCirculo;
-        // ao ativar o modo circulo, o proximo ponto sera o centro
-        nPontosModoCirculo = 0;
-        if (modoCirculo) {
-            modoReta = false;
-            nPontosModoReta = 0;
+    public void setEspessuraAtual(int espessuraAtual) {
+        if (espessuraAtual < 1) {
+            throw new IllegalArgumentException("A espessura deve ser maior ou igual a 1");
         }
+        this.espessuraAtual = espessuraAtual;
     }
 
-    /**
-     * getModoCirculo - retorna se o modo circulo esta ativo ou nao
-     *
-     * @return boolean true se o modo circulo esta ativo
-     */
-    public boolean getModoCirculo(){
-        return this.modoCirculo;
+    public int getEspessuraAtual() {
+        return espessuraAtual;
     }
 
-    /**
-     * paintComponent - metodo para desenhar
-     *
-     * @param g A parameter
-     */
-    public void paintComponent(Graphics g) {   
-        super.paintComponent(g);
-        desenharCirculos(g);
-        desenharRetas(g);
-        desenharPontos(g);
-    }
-
-    /**
-     * desenharPontos - desenha todos os pontos clicados na tela
-     *
-     * @param g Graphics - para desenhar
-     */
-    private void desenharPontos(Graphics g){
-        for (int i = 0; i < nPontos; i++) {
-            pontos[i].desenharPonto(g);
+    public void setAlgoritmoCirculo(AlgoritmoCirculo algoritmoCirculo) {
+        if (algoritmoCirculo == null) {
+            throw new IllegalArgumentException("O algoritmo nao pode ser nulo");
         }
+        this.algoritmoCirculo = algoritmoCirculo;
     }
 
-    /**
-     * desenharRetas - desenha todas as retas formadas pelos pares de pontos
-     *
-     * @param g Graphics - para desenhar
-     */
-    private void desenharRetas(Graphics g){
-        for (int i = 0; i < nRetas; i++) {
-            FiguraPontos.desenharReta(g, retas[i]);
-        }
+    public AlgoritmoCirculo getAlgoritmoCirculo() {
+        return algoritmoCirculo;
     }
 
-    /**
-     * desenharCirculos - desenha todos os circulos formados pelos pares de pontos
-     *
-     * @param g Graphics - para desenhar
-     */
-    private void desenharCirculos(Graphics g){
-        for (int i = 0; i < nCirculos; i++) {
-            FiguraPontos.desenharCirculo(g, circulos[i]);
+    public void setRenderizador(RenderizadorPrimitivos renderizador) {
+        if (renderizador == null) {
+            throw new IllegalArgumentException("O renderizador nao pode ser nulo");
         }
-    }
-
-    // Capturando os Eventos com o mouse
-    /**
-     * Method mousePressed
-     *
-     * @param e MouseEvent - click do mouse
-     */
-    public void mousePressed(MouseEvent e) { 
-        xMouse = e.getX();
-        yMouse = e.getY();
-
-        // cria um novo ponto na posicao do clique com cor aleatoria
-        Color cor = new Color((int) (Math.random() * 256),  
-                (int) (Math.random() * 256),  
-                (int) (Math.random() * 256));
-        PontoGr ponto = new PontoGr(xMouse, yMouse, cor, "p" + nPontos, 10);
-        pontos[nPontos] = ponto;
-        nPontos++;
-
-        // a cada dois pontos clicados no modo reta, cria uma reta entre eles
-        if (modoReta) {
-            nPontosModoReta++;
-            if (nPontosModoReta % 2 == 0) {
-                Reta reta = new Reta(pontos[nPontos - 2], pontos[nPontos - 1]);
-                retas[nRetas] = reta;
-                nRetas++;
-            }
-        }
-
-        // no modo circulo, o primeiro ponto e o centro e o segundo define o raio
-        if (modoCirculo) {
-            nPontosModoCirculo++;
-            if (nPontosModoCirculo % 2 == 0) {
-                Circulo circulo = new Circulo(pontos[nPontos - 2], pontos[nPontos - 1]);
-                circulos[nCirculos] = circulo;
-                nCirculos++;
-            }
-        }
-
-        this.msg.setText("Ponto: (" + xMouse + ", " + yMouse + ")");
+        this.renderizador = renderizador;
         repaint();
-    }     
-
-    public void mouseReleased(MouseEvent e) { 
-    }           
-
-    public void mouseClicked(MouseEvent e) {
-        this.msg.setText("CLICOU: " + e.getButton());
     }
 
-    public void mouseEntered(MouseEvent e) {
+    public void adicionarPrimitivo(PrimitivoGrafico primitivo) {
+        if (primitivo == null) {
+            throw new IllegalArgumentException("O primitivo nao pode ser nulo");
+        }
+        primitivos.add(primitivo);
+        repaint();
     }
 
-    public void mouseExited(MouseEvent e) {
+    public List<PrimitivoGrafico> getPrimitivos() {
+        return Collections.unmodifiableList(new ArrayList<PrimitivoGrafico>(primitivos));
     }
 
-    public void mouseDragged(MouseEvent e) {
+    public int getQuantidadePrimitivos() {
+        return primitivos.size();
     }
 
-    /**
-     * mouseMoved evento de movimentação do mouse. Mostra posicao do mouse no painel
-     *
-     * @param e A parameter
-     */
+    public int getQuantidadePontos() {
+        return pontos.size();
+    }
+
+    public void limpar() {
+        pontos.clear();
+        primitivos.clear();
+        pontosPendentes.clear();
+        repaint();
+    }
+
+    public void redesenhar() {
+        repaint();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (PrimitivoGrafico primitivo : primitivos) {
+            primitivo.desenhar(g, renderizador);
+        }
+        for (PontoGr ponto : pontos) {
+            ponto.desenharPonto(g);
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        Ponto ponto = new Ponto(e.getX(), e.getY());
+
+        if (tipo == TiposPrimitivos.PONTO) {
+            int diametro = Math.max(4, espessuraAtual + 2);
+            pontos.add(new PontoGr(e.getX(), e.getY(), corAtual,
+                       "p" + pontos.size(), diametro));
+            msg.setText("Ponto criado em (" + e.getX() + ", " + e.getY() + ")");
+            repaint();
+            return;
+        }
+
+        if (tipo == TiposPrimitivos.NENHUM) {
+            msg.setText("Selecione um primitivo antes de clicar");
+            return;
+        }
+
+        pontosPendentes.add(ponto);
+        int necessarios = tipo.getQuantidadePontos();
+        if (pontosPendentes.size() == necessarios) {
+            criarPrimitivoPendente();
+            pontosPendentes.clear();
+            msg.setText(tipo + " criado. Selecione novos pontos.");
+        } else {
+            msg.setText(tipo + ": ponto " + pontosPendentes.size() + " de " + necessarios);
+        }
+        repaint();
+    }
+
+    private void criarPrimitivoPendente() {
+        EstiloReta estilo = new EstiloReta(corAtual, espessuraAtual);
+        Ponto p1 = pontosPendentes.get(0);
+        Ponto p2 = pontosPendentes.get(1);
+
+        switch (tipo) {
+            case RETA:
+                primitivos.add(new RetaGrafica(p1, p2, estilo));
+                break;
+            case RETANGULO:
+                primitivos.add(new Retangulo(p1, p2, estilo));
+                break;
+            case TRIANGULO:
+                primitivos.add(new Triangulo(p1, p2, pontosPendentes.get(2), estilo));
+                break;
+            case CIRCULO:
+                primitivos.add(new CirculoGrafico(p1, p2, estilo, algoritmoCirculo));
+                break;
+            default:
+                throw new IllegalStateException("Tipo sem construcao por multiplos pontos: " + tipo);
+        }
+    }
+
+    @Override
     public void mouseMoved(MouseEvent e) {
-        this.msg.setText("("+e.getX() + ", " + e.getY() + ")");
+        msg.setText("(" + e.getX() + ", " + e.getY() + ")");
     }
+
+    @Override public void mouseReleased(MouseEvent e) { }
+    @Override public void mouseClicked(MouseEvent e) { }
+    @Override public void mouseEntered(MouseEvent e) { }
+    @Override public void mouseExited(MouseEvent e) { }
+    @Override public void mouseDragged(MouseEvent e) { }
 }

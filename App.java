@@ -7,7 +7,12 @@
  */
 public class App {
     public static void main(String args[]) {
-        new Gui(700, 600); // define dimensao da janela (em pixels)
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new Gui(900, 600); // define dimensao da janela (em pixels)
+            }
+        });
     }
     
 }

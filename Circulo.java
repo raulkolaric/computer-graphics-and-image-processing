@@ -15,24 +15,24 @@ public class Circulo {
      * @param pontoRaio ponto sobre a circunferencia
      */
     public Circulo(Ponto centro, Ponto pontoRaio) {
-        this.centro = centro;
-        this.pontoRaio = pontoRaio;
+        this.centro = copiarPonto(centro, "O centro");
+        this.pontoRaio = copiarPonto(pontoRaio, "O ponto do raio");
     }
 
     public Ponto getCentro() {
-        return centro;
+        return new Ponto(centro);
     }
 
     public void setCentro(Ponto centro) {
-        this.centro = centro;
+        this.centro = copiarPonto(centro, "O centro");
     }
 
     public Ponto getPontoRaio() {
-        return pontoRaio;
+        return new Ponto(pontoRaio);
     }
 
     public void setPontoRaio(Ponto pontoRaio) {
-        this.pontoRaio = pontoRaio;
+        this.pontoRaio = copiarPonto(pontoRaio, "O ponto do raio");
     }
 
     /**
@@ -42,5 +42,12 @@ public class Circulo {
      */
     public double getRaio() {
         return centro.calcularDistancia(pontoRaio);
+    }
+
+    private static Ponto copiarPonto(Ponto ponto, String nome) {
+        if (ponto == null) {
+            throw new IllegalArgumentException(nome + " nao pode ser nulo");
+        }
+        return new Ponto(ponto);
     }
 }
