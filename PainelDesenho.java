@@ -25,13 +25,20 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     // vetores para guardar os pontos e as retas desenhados
     private PontoGr[] pontos = new PontoGr[100];
     private Reta[] retas = new Reta[50];
+    private Circulo[] circulos = new Circulo[50];
     private int nPontos = 0;
     private int nRetas = 0;
+    private int nCirculos = 0;
 
     // modo reta ativo ou nao
     private boolean modoReta = false;
     // contador de pontos clicados no modo reta (para formar pares)
     private int nPontosModoReta = 0;
+
+    // modo circulo ativo ou nao
+    private boolean modoCirculo = false;
+    // contador de pontos clicados no modo circulo (centro e raio)
+    private int nPontosModoCirculo = 0;
 
     /**
      * COnstrutor para objetos da classe PainelDesenho
@@ -61,6 +68,10 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.modoReta = modoReta;
         // ao ativar o modo reta, reinicia a contagem de pares
         nPontosModoReta = 0;
+        if (modoReta) {
+            modoCirculo = false;
+            nPontosModoCirculo = 0;
+        }
     }
 
     /**
@@ -73,11 +84,37 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     /**
+     * setModoCirculo - define se o modo circulo esta ativo ou nao
+     *
+     * @param modoCirculo boolean true para ativar o modo circulo
+     */
+    public void setModoCirculo(boolean modoCirculo){
+        this.modoCirculo = modoCirculo;
+        // ao ativar o modo circulo, o proximo ponto sera o centro
+        nPontosModoCirculo = 0;
+        if (modoCirculo) {
+            modoReta = false;
+            nPontosModoReta = 0;
+        }
+    }
+
+    /**
+     * getModoCirculo - retorna se o modo circulo esta ativo ou nao
+     *
+     * @return boolean true se o modo circulo esta ativo
+     */
+    public boolean getModoCirculo(){
+        return this.modoCirculo;
+    }
+
+    /**
      * paintComponent - metodo para desenhar
      *
      * @param g A parameter
      */
     public void paintComponent(Graphics g) {   
+        super.paintComponent(g);
+        desenharCirculos(g);
         desenharRetas(g);
         desenharPontos(g);
     }
@@ -101,6 +138,17 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     private void desenharRetas(Graphics g){
         for (int i = 0; i < nRetas; i++) {
             FiguraPontos.desenharReta(g, retas[i]);
+        }
+    }
+
+    /**
+     * desenharCirculos - desenha todos os circulos formados pelos pares de pontos
+     *
+     * @param g Graphics - para desenhar
+     */
+    private void desenharCirculos(Graphics g){
+        for (int i = 0; i < nCirculos; i++) {
+            FiguraPontos.desenharCirculo(g, circulos[i]);
         }
     }
 
@@ -129,6 +177,16 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
                 Reta reta = new Reta(pontos[nPontos - 2], pontos[nPontos - 1]);
                 retas[nRetas] = reta;
                 nRetas++;
+            }
+        }
+
+        // no modo circulo, o primeiro ponto e o centro e o segundo define o raio
+        if (modoCirculo) {
+            nPontosModoCirculo++;
+            if (nPontosModoCirculo % 2 == 0) {
+                Circulo circulo = new Circulo(pontos[nPontos - 2], pontos[nPontos - 1]);
+                circulos[nCirculos] = circulo;
+                nCirculos++;
             }
         }
 

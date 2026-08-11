@@ -56,5 +56,21 @@ public class FiguraPontos {
         g.drawLine((int)reta.getP1().getX(), (int)reta.getP1().getY(),
                    (int)reta.getP2().getX(), (int)reta.getP2().getY());
     }
+
+    /**
+     * desenharCirculo - desenha um circulo a partir de seu centro e raio
+     *
+     * @param g Graphics - contexto grafico
+     * @param circulo Circulo - circulo a ser desenhado
+     */
+    public static void desenharCirculo(Graphics g, Circulo circulo){
+        int raio = (int)Math.round(circulo.getRaio());
+        int diametro = raio * 2;
+        int x = (int)Math.round(circulo.getCentro().getX()) - raio;
+        int y = (int)Math.round(circulo.getCentro().getY()) - raio;
+
+        g.setColor(Color.BLACK);
+        g.drawOval(x, y, diametro, diametro);
+    }
     
 }

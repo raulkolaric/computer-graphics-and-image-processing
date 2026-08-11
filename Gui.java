@@ -15,6 +15,7 @@ class Gui extends JFrame {
     private JLabel msg = new JLabel("Msg: ");
     private JButton jbPonto = new JButton("Ponto");
     private JToggleButton jtModoReta = new JToggleButton("Modo Reta: OFF");
+    private JToggleButton jtModoCirculo = new JToggleButton("Modo Circulo: OFF");
 
     // barra de menu
     private JToolBar barraComandos = new JToolBar();
@@ -40,6 +41,7 @@ class Gui extends JFrame {
         // Adicionando os componentes
         barraComandos.add(jbPonto);
         barraComandos.add(jtModoReta);
+        barraComandos.add(jtModoCirculo);
         add(barraComandos, BorderLayout.NORTH);                
         add(areaDesenho, BorderLayout.CENTER);                
         add(msg, BorderLayout.SOUTH);
@@ -47,6 +49,7 @@ class Gui extends JFrame {
         Eventos eventos = new Eventos();
         jbPonto.addActionListener(eventos);
         jtModoReta.addActionListener(eventos);
+        jtModoCirculo.addActionListener(eventos);
     }
 
     /**
@@ -79,8 +82,22 @@ class Gui extends JFrame {
                 areaDesenho.setModoReta(ativo);
                 if (ativo) {
                     jtModoReta.setText("Modo Reta: ON");
+                    jtModoCirculo.setSelected(false);
+                    jtModoCirculo.setText("Modo Circulo: OFF");
                 } else {
                     jtModoReta.setText("Modo Reta: OFF");
+                }
+            }
+
+            if (event.getSource() == jtModoCirculo){
+                boolean ativo = jtModoCirculo.isSelected();
+                areaDesenho.setModoCirculo(ativo);
+                if (ativo) {
+                    jtModoCirculo.setText("Modo Circulo: ON");
+                    jtModoReta.setSelected(false);
+                    jtModoReta.setText("Modo Reta: OFF");
+                } else {
+                    jtModoCirculo.setText("Modo Circulo: OFF");
                 }
             }
         }
