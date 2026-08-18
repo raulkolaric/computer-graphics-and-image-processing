@@ -1,32 +1,35 @@
+package triangulo;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-/** Retangulo definido por dois cantos opostos e composto por quatro retas. */
-public class Retangulo implements PrimitivoGrafico {
+import ponto.Ponto;
+import renderizacao.PrimitivoGrafico;
+import renderizacao.RenderizadorPrimitivos;
+import reta.EstiloReta;
+import reta.RetaGrafica;
+
+/** Triangulo definido por tres vertices e composto por tres retas. */
+public class Triangulo implements PrimitivoGrafico {
     private final EstiloReta estilo;
     private final List<RetaGrafica> retas;
 
-    public Retangulo(Ponto canto1, Ponto canto2, Color cor, int espessura) {
-        this(canto1, canto2, new EstiloReta(cor, espessura));
+    public Triangulo(Ponto p1, Ponto p2, Ponto p3, Color cor, int espessura) {
+        this(p1, p2, p3, new EstiloReta(cor, espessura));
     }
 
-    public Retangulo(Ponto canto1, Ponto canto2, EstiloReta estilo) {
-        if (canto1 == null || canto2 == null || estilo == null) {
+    public Triangulo(Ponto p1, Ponto p2, Ponto p3, EstiloReta estilo) {
+        if (p1 == null || p2 == null || p3 == null || estilo == null) {
             throw new IllegalArgumentException("Pontos e estilo nao podem ser nulos");
         }
         this.estilo = estilo;
-        Ponto superiorEsquerdo = new Ponto(canto1.getX(), canto1.getY());
-        Ponto superiorDireito = new Ponto(canto2.getX(), canto1.getY());
-        Ponto inferiorDireito = new Ponto(canto2.getX(), canto2.getY());
-        Ponto inferiorEsquerdo = new Ponto(canto1.getX(), canto2.getY());
         this.retas = Collections.unmodifiableList(Arrays.asList(
-            new RetaGrafica(superiorEsquerdo, superiorDireito, estilo),
-            new RetaGrafica(superiorDireito, inferiorDireito, estilo),
-            new RetaGrafica(inferiorDireito, inferiorEsquerdo, estilo),
-            new RetaGrafica(inferiorEsquerdo, superiorEsquerdo, estilo)
+            new RetaGrafica(p1, p2, estilo),
+            new RetaGrafica(p2, p3, estilo),
+            new RetaGrafica(p3, p1, estilo)
         ));
     }
 

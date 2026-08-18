@@ -28,8 +28,8 @@ Arquitetura
 
 Compilacao e testes
 -------------------
-  javac *.java
-  java -ea -Djava.awt.headless=true TestaPrimitivos
+  javac -d bin *.java */*.java
+  java -ea -Djava.awt.headless=true -cp bin TestaPrimitivos
 
 Para abrir a interface:
-  java App
+  java -cp bin App

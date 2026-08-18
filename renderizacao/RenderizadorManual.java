@@ -1,4 +1,10 @@
+package renderizacao;
+
 import java.awt.Graphics;
+
+import circulo.CirculoGrafico;
+import reta.Reta;
+import reta.RetaGrafica;
 
 /** Rasterizador que desenha os primitivos ponto a ponto, sem drawLine/drawOval. */
 public class RenderizadorManual implements RenderizadorPrimitivos {

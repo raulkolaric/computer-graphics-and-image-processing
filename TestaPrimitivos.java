@@ -6,6 +6,17 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import javax.swing.JLabel;
 
+import circulo.AlgoritmoCirculo;
+import circulo.CirculoGrafico;
+import ponto.Ponto;
+import quadrado.Retangulo;
+import renderizacao.FiguraPontos;
+import renderizacao.RenderizadorManual;
+import renderizacao.RenderizadorPrimitivos;
+import reta.Reta;
+import reta.RetaGrafica;
+import triangulo.Triangulo;
+
 /** Testes de regressao executaveis sem interface grafica. */
 public class TestaPrimitivos {
     private static final RenderizadorManual RENDERIZADOR = new RenderizadorManual();

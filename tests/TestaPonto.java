@@ -1,4 +1,6 @@
- 
+package tests;
+
+import ponto.Ponto;
 
 /**
  * Write a description of class TestaPonto here.

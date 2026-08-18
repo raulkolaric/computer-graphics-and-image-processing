@@ -9,6 +9,18 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import circulo.AlgoritmoCirculo;
+import circulo.CirculoGrafico;
+import ponto.Ponto;
+import ponto.PontoGr;
+import quadrado.Retangulo;
+import renderizacao.PrimitivoGrafico;
+import renderizacao.RenderizadorManual;
+import renderizacao.RenderizadorPrimitivos;
+import reta.EstiloReta;
+import reta.RetaGrafica;
+import triangulo.Triangulo;
+
 /** Painel que recebe pontos pelo mouse, armazena a cena e a redesenha. */
 public class PainelDesenho extends JPanel implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;

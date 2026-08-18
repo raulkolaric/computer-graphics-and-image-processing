@@ -1,5 +1,11 @@
+package reta;
+
 import java.awt.Color;
 import java.awt.Graphics;
+
+import ponto.Ponto;
+import renderizacao.PrimitivoGrafico;
+import renderizacao.RenderizadorPrimitivos;
 
 /** Segmento de reta matematico acrescido de cor e espessura. */
 public class RetaGrafica extends Reta implements PrimitivoGrafico {

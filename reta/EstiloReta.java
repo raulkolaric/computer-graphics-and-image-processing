@@ -1,3 +1,5 @@
+package reta;
+
 import java.awt.Color;
 
 /** Cor e espessura compartilhadas pelos primitivos graficos. */

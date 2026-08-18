@@ -1,3 +1,7 @@
+package reta;
+
+import ponto.Ponto;
+
 
 /**
  * REta matematica.

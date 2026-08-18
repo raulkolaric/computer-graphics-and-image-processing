@@ -1,4 +1,14 @@
+package renderizacao;
+
 import java.awt.*;
+
+import circulo.AlgoritmoCirculo;
+import circulo.Circulo;
+import circulo.CirculoGrafico;
+import ponto.PontoGr;
+import reta.EstiloReta;
+import reta.Reta;
+import reta.RetaGrafica;
 
 /**
  * Contem metodos para desenhar o ponto.

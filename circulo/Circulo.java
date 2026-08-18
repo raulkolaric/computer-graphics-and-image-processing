@@ -1,3 +1,7 @@
+package circulo;
+
+import ponto.Ponto;
+
 /**
  * Circulo definido por um ponto central e um ponto sobre a circunferencia.
  *

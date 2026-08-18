@@ -1,4 +1,9 @@
+package renderizacao;
+
 import java.awt.Graphics;
+
+import circulo.CirculoGrafico;
+import reta.RetaGrafica;
 
 /**
  * Estrategia de renderizacao. Uma implementacao futura pode delegar para

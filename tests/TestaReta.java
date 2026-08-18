@@ -1,3 +1,6 @@
+package tests;
+
+import reta.Reta;
 
 /**
  * Write a description of class TestaReta here.

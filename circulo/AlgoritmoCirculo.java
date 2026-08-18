@@ -1,3 +1,5 @@
+package circulo;
+
 /** Algoritmos manuais disponiveis para rasterizar a circunferencia. */
 public enum AlgoritmoCirculo {
     EQUACAO_REDUZIDA("Equacao reduzida"),

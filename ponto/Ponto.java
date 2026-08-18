@@ -1,3 +1,5 @@
+package ponto;
+
 /**
  * Representacao de ponto matematico
  * 

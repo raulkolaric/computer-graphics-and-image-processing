@@ -1,5 +1,12 @@
+package circulo;
+
 import java.awt.Color;
 import java.awt.Graphics;
+
+import ponto.Ponto;
+import renderizacao.PrimitivoGrafico;
+import renderizacao.RenderizadorPrimitivos;
+import reta.EstiloReta;
 
 /** Circulo matematico acrescido de estilo e algoritmo de rasterizacao. */
 public class CirculoGrafico extends Circulo implements PrimitivoGrafico {
