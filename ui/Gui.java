@@ -1,3 +1,5 @@
+package ui;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -16,7 +18,7 @@ import javax.swing.SpinnerNumberModel;
 import circulo.AlgoritmoCirculo;
 
 /** Janela de edicao dos primitivos graficos. */
-class Gui extends JFrame {
+public class Gui extends JFrame {
     private static final long serialVersionUID = 1L;
 
     private final JLabel msg = new JLabel("Selecione um primitivo");

@@ -1,9 +1,6 @@
-/**
- * TiposPrimitivos - constantes com os tipos de primitivos
- * 
- * @author Julio
- * @version 20260803
- */
+package ui;
+
+/** Tipos de primitivos que podem ser criados na interface. */
 public enum TiposPrimitivos {
     PONTO(1), RETA(2), RETANGULO(2), TRIANGULO(3), CIRCULO(2), NENHUM(0);
 

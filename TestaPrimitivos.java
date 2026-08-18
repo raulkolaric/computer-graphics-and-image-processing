@@ -16,6 +16,8 @@ import renderizacao.RenderizadorPrimitivos;
 import reta.Reta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
+import ui.PainelDesenho;
+import ui.TiposPrimitivos;
 
 /** Testes de regressao executaveis sem interface grafica. */
 public class TestaPrimitivos {
