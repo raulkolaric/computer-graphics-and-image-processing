@@ -1,7 +1,7 @@
 package ponto;
 
 /**
- * Representacao de ponto matematico
+ * Representa um ponto no plano cartesiano.
  * 
  * @author julio
  *
@@ -10,21 +10,22 @@ package ponto;
 public class Ponto {
     private double x;
     private double y;
-    /**
-     * Construtores
-     */
+    /** Cria o ponto na origem. */
     public Ponto() {
         setX(0);
         setY(0);
     }
 
+    /** Cria uma copia do ponto informado.
+     * @param p ponto a copiar
+     */
     public Ponto(Ponto p) {
         setX(p.getX());
         setY(p.getY());
     }
-    /**
-     * @param x
-     * @param y
+    /** Cria um ponto com as coordenadas informadas.
+     * @param x coordenada horizontal
+     * @param y coordenada vertical
      */
     public Ponto(double x, double y) {
         setX(x);
@@ -32,37 +33,36 @@ public class Ponto {
     }
     
     
-    /**
-     * @return the x
+    /** Retorna a coordenada horizontal.
+     * @return coordenada horizontal
      */
     public double getX() {
         return x;
     }
-    /**
-     * @param x the x to set
+    /** Define a coordenada horizontal.
+     * @param x nova coordenada horizontal
      */
     public void setX(double x) {
         this.x = x;
     }
-    /**
-     * @return the y
+    /** Retorna a coordenada vertical.
+     * @return coordenada vertical
      */
     public double getY() {
         return y;
     }
-    /**
-     * @param y the y to set
+    /** Define a coordenada vertical.
+     * @param y nova coordenada vertical
      */
     public void setY(double y) {
         this.y = y;
     }
     
     /**
-     * Calcula a distancia entre o ponto que vem como parametro
+     * Calcula a distancia euclidiana até outro ponto.
      * 
-     * @param p ponto externo
-     * 
-     * @return d double valor da distancia
+     * @param p ponto de destino
+     * @return distância entre os pontos
      * 
      */
     public double calcularDistancia(Ponto p) {

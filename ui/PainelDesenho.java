@@ -38,10 +38,19 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     private int espessuraAtual = 1;
     private AlgoritmoCirculo algoritmoCirculo = AlgoritmoCirculo.SIMETRIA_OCTANTES;
 
+    /** Cria um painel usando o renderizador manual padrão.
+     * @param msg etiqueta usada para exibir mensagens
+     * @param tipo tipo de primitivo inicialmente selecionado
+     */
     public PainelDesenho(JLabel msg, TiposPrimitivos tipo) {
         this(msg, tipo, new RenderizadorManual());
     }
 
+    /** Cria um painel com o renderizador informado.
+     * @param msg etiqueta usada para exibir mensagens
+     * @param tipo tipo de primitivo inicialmente selecionado
+     * @param renderizador renderizador dos primitivos
+     */
     public PainelDesenho(JLabel msg, TiposPrimitivos tipo,
                           RenderizadorPrimitivos renderizador) {
         if (msg == null || tipo == null || renderizador == null) {
@@ -54,6 +63,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         addMouseMotionListener(this);
     }
 
+    /** Seleciona o tipo de primitivo e limpa pontos pendentes.
+     * @param tipo novo tipo de primitivo
+     */
     public void setTipo(TiposPrimitivos tipo) {
         if (tipo == null) {
             throw new IllegalArgumentException("O tipo nao pode ser nulo");
@@ -63,26 +75,44 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         msg.setText("Modo: " + tipo);
     }
 
+    /** Retorna o tipo de primitivo selecionado.
+     * @return tipo selecionado
+     */
     public TiposPrimitivos getTipo() {
         return tipo;
     }
 
+    /** Ativa ou desativa o modo de criação de retas.
+     * @param ativo {@code true} para ativar o modo
+     */
     public void setModoReta(boolean ativo) {
         setTipo(ativo ? TiposPrimitivos.RETA : TiposPrimitivos.NENHUM);
     }
 
+    /** Verifica se o modo de reta está ativo.
+     * @return {@code true} se o modo de reta estiver ativo
+     */
     public boolean getModoReta() {
         return tipo == TiposPrimitivos.RETA;
     }
 
+    /** Ativa ou desativa o modo de criação de círculos.
+     * @param ativo {@code true} para ativar o modo
+     */
     public void setModoCirculo(boolean ativo) {
         setTipo(ativo ? TiposPrimitivos.CIRCULO : TiposPrimitivos.NENHUM);
     }
 
+    /** Verifica se o modo de círculo está ativo.
+     * @return {@code true} se o modo de círculo estiver ativo
+     */
     public boolean getModoCirculo() {
         return tipo == TiposPrimitivos.CIRCULO;
     }
 
+    /** Define a cor usada nos novos primitivos.
+     * @param corAtual nova cor
+     */
     public void setCorAtual(Color corAtual) {
         if (corAtual == null) {
             throw new IllegalArgumentException("A cor nao pode ser nula");
@@ -90,10 +120,16 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.corAtual = corAtual;
     }
 
+    /** Retorna a cor usada nos novos primitivos.
+     * @return cor atual
+     */
     public Color getCorAtual() {
         return corAtual;
     }
 
+    /** Define a espessura usada nos novos primitivos.
+     * @param espessuraAtual nova espessura em pixels
+     */
     public void setEspessuraAtual(int espessuraAtual) {
         if (espessuraAtual < 1) {
             throw new IllegalArgumentException("A espessura deve ser maior ou igual a 1");
@@ -101,10 +137,16 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.espessuraAtual = espessuraAtual;
     }
 
+    /** Retorna a espessura usada nos novos primitivos.
+     * @return espessura atual
+     */
     public int getEspessuraAtual() {
         return espessuraAtual;
     }
 
+    /** Define o algoritmo usado para novos círculos.
+     * @param algoritmoCirculo novo algoritmo
+     */
     public void setAlgoritmoCirculo(AlgoritmoCirculo algoritmoCirculo) {
         if (algoritmoCirculo == null) {
             throw new IllegalArgumentException("O algoritmo nao pode ser nulo");
@@ -112,10 +154,16 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.algoritmoCirculo = algoritmoCirculo;
     }
 
+    /** Retorna o algoritmo usado para novos círculos.
+     * @return algoritmo atual
+     */
     public AlgoritmoCirculo getAlgoritmoCirculo() {
         return algoritmoCirculo;
     }
 
+    /** Substitui o renderizador e solicita uma nova pintura.
+     * @param renderizador novo renderizador
+     */
     public void setRenderizador(RenderizadorPrimitivos renderizador) {
         if (renderizador == null) {
             throw new IllegalArgumentException("O renderizador nao pode ser nulo");
@@ -124,6 +172,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
+    /** Adiciona um primitivo à cena e solicita uma nova pintura.
+     * @param primitivo primitivo a adicionar
+     */
     public void adicionarPrimitivo(PrimitivoGrafico primitivo) {
         if (primitivo == null) {
             throw new IllegalArgumentException("O primitivo nao pode ser nulo");
@@ -132,18 +183,28 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
+    /** Retorna uma visão não modificável dos primitivos da cena.
+     * @return primitivos armazenados
+     */
     public List<PrimitivoGrafico> getPrimitivos() {
         return Collections.unmodifiableList(new ArrayList<PrimitivoGrafico>(primitivos));
     }
 
+    /** Retorna a quantidade de primitivos armazenados.
+     * @return quantidade de primitivos
+     */
     public int getQuantidadePrimitivos() {
         return primitivos.size();
     }
 
+    /** Retorna a quantidade de pontos armazenados.
+     * @return quantidade de pontos
+     */
     public int getQuantidadePontos() {
         return pontos.size();
     }
 
+    /** Remove pontos, primitivos e seleções pendentes da cena. */
     public void limpar() {
         pontos.clear();
         primitivos.clear();
@@ -151,6 +212,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
+    /** Solicita que o painel seja redesenhado. */
     public void redesenhar() {
         repaint();
     }

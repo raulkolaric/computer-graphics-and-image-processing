@@ -12,15 +12,26 @@ import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 
-/** Retangulo definido por dois cantos opostos e composto por quatro retas. */
+/** Retângulo definido por dois cantos opostos e composto por quatro retas. */
 public class Retangulo implements PrimitivoGrafico {
     private final EstiloReta estilo;
     private final List<RetaGrafica> retas;
 
+    /** Cria um retângulo com cor e espessura.
+     * @param canto1 primeiro canto
+     * @param canto2 canto oposto ao primeiro
+     * @param cor cor das retas
+     * @param espessura espessura das retas em pixels
+     */
     public Retangulo(Ponto canto1, Ponto canto2, Color cor, int espessura) {
         this(canto1, canto2, new EstiloReta(cor, espessura));
     }
 
+    /** Cria um retângulo com o estilo informado.
+     * @param canto1 primeiro canto
+     * @param canto2 canto oposto ao primeiro
+     * @param estilo estilo das retas
+     */
     public Retangulo(Ponto canto1, Ponto canto2, EstiloReta estilo) {
         if (canto1 == null || canto2 == null || estilo == null) {
             throw new IllegalArgumentException("Pontos e estilo nao podem ser nulos");
@@ -38,20 +49,29 @@ public class Retangulo implements PrimitivoGrafico {
         ));
     }
 
+    /** Retorna cópias das quatro retas que formam o retângulo.
+     * @return retas do retângulo
+     */
     public List<RetaGrafica> getRetas() {
         return copiarRetas();
     }
 
+    /** @return cor das retas do retângulo */
     @Override
     public Color getCor() {
         return estilo.getCor();
     }
 
+    /** @return espessura das retas, em pixels */
     @Override
     public int getEspessura() {
         return estilo.getEspessura();
     }
 
+    /** Desenha as quatro retas do retângulo.
+     * @param g superfície de desenho
+     * @param renderizador renderizador a utilizar
+     */
     @Override
     public void desenhar(Graphics g, RenderizadorPrimitivos renderizador) {
         for (RetaGrafica reta : retas) {
