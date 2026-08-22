@@ -23,7 +23,9 @@ public class Circulo {
         this.pontoRaio = copiarPonto(pontoRaio, "O ponto do raio");
     }
 
-    /** @return cópia do centro do círculo */
+    /** Retorna uma cópia do centro do círculo.
+     * @return cópia do centro do círculo
+     */
     public Ponto getCentro() {
         return new Ponto(centro);
     }
@@ -35,7 +37,9 @@ public class Circulo {
         this.centro = copiarPonto(centro, "O centro");
     }
 
-    /** @return cópia do ponto que define o raio */
+    /** Retorna uma cópia do ponto que define o raio.
+     * @return cópia do ponto que define o raio
+     */
     public Ponto getPontoRaio() {
         return new Ponto(pontoRaio);
     }

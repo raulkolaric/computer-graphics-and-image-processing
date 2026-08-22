@@ -70,12 +70,16 @@ public class Reta {
         this.p2 = copiarPonto(p, "P2");
     }
     
-    /** @return cópia do primeiro extremo */
+    /** Retorna uma cópia do primeiro extremo.
+     * @return cópia do primeiro extremo
+     */
     public Ponto getP1(){
         return new Ponto(this.p1);
     }
     
-    /** @return cópia do segundo extremo */
+    /** Retorna uma cópia do segundo extremo.
+     * @return cópia do segundo extremo
+     */
     public Ponto getP2(){
         return new Ponto(this.p2);
     }
@@ -87,12 +91,16 @@ public class Reta {
         return new Ponto(ponto);
     }
 
-    /** @return {@code true} quando os extremos têm a mesma coordenada X */
+    /** Verifica se a reta é vertical.
+     * @return {@code true} quando os extremos têm a mesma coordenada X
+     */
     public boolean isVertical(){
         return Double.compare(p1.getX(), p2.getX()) == 0;
     }
 
-    /** @return {@code true} quando os dois extremos coincidem */
+    /** Verifica se a reta é degenerada.
+     * @return {@code true} quando os dois extremos coincidem
+     */
     public boolean isDegenerada(){
         return isVertical() && Double.compare(p1.getY(), p2.getY()) == 0;
     }

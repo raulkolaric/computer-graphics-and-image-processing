@@ -41,7 +41,9 @@ public class CirculoGrafico extends Circulo implements PrimitivoGrafico {
         this.algoritmo = algoritmo;
     }
 
-    /** @return algoritmo usado para rasterizar o círculo */
+    /** Retorna o algoritmo usado para rasterizar o círculo.
+     * @return algoritmo de rasterização
+     */
     public AlgoritmoCirculo getAlgoritmo() {
         return algoritmo;
     }

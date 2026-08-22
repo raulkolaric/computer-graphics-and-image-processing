@@ -75,7 +75,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         msg.setText("Modo: " + tipo);
     }
 
-    /** @return tipo de primitivo selecionado */
+    /** Retorna o tipo de primitivo selecionado.
+     * @return tipo selecionado
+     */
     public TiposPrimitivos getTipo() {
         return tipo;
     }
@@ -87,7 +89,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         setTipo(ativo ? TiposPrimitivos.RETA : TiposPrimitivos.NENHUM);
     }
 
-    /** @return {@code true} se o modo de reta estiver ativo */
+    /** Verifica se o modo de reta está ativo.
+     * @return {@code true} se o modo de reta estiver ativo
+     */
     public boolean getModoReta() {
         return tipo == TiposPrimitivos.RETA;
     }
@@ -99,7 +103,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         setTipo(ativo ? TiposPrimitivos.CIRCULO : TiposPrimitivos.NENHUM);
     }
 
-    /** @return {@code true} se o modo de círculo estiver ativo */
+    /** Verifica se o modo de círculo está ativo.
+     * @return {@code true} se o modo de círculo estiver ativo
+     */
     public boolean getModoCirculo() {
         return tipo == TiposPrimitivos.CIRCULO;
     }
@@ -114,7 +120,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.corAtual = corAtual;
     }
 
-    /** @return cor usada nos novos primitivos */
+    /** Retorna a cor usada nos novos primitivos.
+     * @return cor atual
+     */
     public Color getCorAtual() {
         return corAtual;
     }
@@ -129,7 +137,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.espessuraAtual = espessuraAtual;
     }
 
-    /** @return espessura usada nos novos primitivos */
+    /** Retorna a espessura usada nos novos primitivos.
+     * @return espessura atual
+     */
     public int getEspessuraAtual() {
         return espessuraAtual;
     }
@@ -144,7 +154,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.algoritmoCirculo = algoritmoCirculo;
     }
 
-    /** @return algoritmo usado para novos círculos */
+    /** Retorna o algoritmo usado para novos círculos.
+     * @return algoritmo atual
+     */
     public AlgoritmoCirculo getAlgoritmoCirculo() {
         return algoritmoCirculo;
     }
@@ -171,17 +183,23 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    /** @return visão não modificável dos primitivos da cena */
+    /** Retorna uma visão não modificável dos primitivos da cena.
+     * @return primitivos armazenados
+     */
     public List<PrimitivoGrafico> getPrimitivos() {
         return Collections.unmodifiableList(new ArrayList<PrimitivoGrafico>(primitivos));
     }
 
-    /** @return quantidade de primitivos armazenados */
+    /** Retorna a quantidade de primitivos armazenados.
+     * @return quantidade de primitivos
+     */
     public int getQuantidadePrimitivos() {
         return primitivos.size();
     }
 
-    /** @return quantidade de pontos armazenados */
+    /** Retorna a quantidade de pontos armazenados.
+     * @return quantidade de pontos
+     */
     public int getQuantidadePontos() {
         return pontos.size();
     }

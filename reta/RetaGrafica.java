@@ -42,7 +42,9 @@ public class RetaGrafica extends Reta implements PrimitivoGrafico {
         this.estilo = estilo;
     }
 
-    /** @return estilo usado pelo segmento */
+    /** Retorna o estilo usado pelo segmento.
+     * @return estilo usado pelo segmento
+     */
     public EstiloReta getEstilo() {
         return estilo;
     }

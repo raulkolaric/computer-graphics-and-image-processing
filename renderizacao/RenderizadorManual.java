@@ -11,6 +11,10 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
     private static final long MAX_PASSOS_RETA = 2_000_000L;
     private static final int MAX_RAIO = 100_000;
 
+    /** Cria um renderizador manual. */
+    public RenderizadorManual() {
+    }
+
     /** Desenha uma reta sem usar {@code Graphics.drawLine}.
      * @param g superfície de desenho
      * @param reta reta a desenhar

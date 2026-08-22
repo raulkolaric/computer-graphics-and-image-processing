@@ -33,19 +33,27 @@ public class Ponto {
     }
     
     
-    /** @return coordenada horizontal */
+    /** Retorna a coordenada horizontal.
+     * @return coordenada horizontal
+     */
     public double getX() {
         return x;
     }
-    /** @param x nova coordenada horizontal */
+    /** Define a coordenada horizontal.
+     * @param x nova coordenada horizontal
+     */
     public void setX(double x) {
         this.x = x;
     }
-    /** @return coordenada vertical */
+    /** Retorna a coordenada vertical.
+     * @return coordenada vertical
+     */
     public double getY() {
         return y;
     }
-    /** @param y nova coordenada vertical */
+    /** Define a coordenada vertical.
+     * @param y nova coordenada vertical
+     */
     public void setY(double y) {
         this.y = y;
     }

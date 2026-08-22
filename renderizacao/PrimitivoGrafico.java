@@ -11,9 +11,13 @@ public interface PrimitivoGrafico {
      */
     void desenhar(Graphics g, RenderizadorPrimitivos renderizador);
 
-    /** @return cor usada no desenho */
+    /** Retorna a cor usada no desenho.
+     * @return cor usada no desenho
+     */
     Color getCor();
 
-    /** @return espessura usada no desenho, em pixels */
+    /** Retorna a espessura usada no desenho.
+     * @return espessura em pixels
+     */
     int getEspessura();
 }
