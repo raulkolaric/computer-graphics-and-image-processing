@@ -49,7 +49,9 @@ public class Retangulo implements PrimitivoGrafico {
         ));
     }
 
-    /** @return cópias das quatro retas que formam o retângulo */
+    /** Retorna cópias das quatro retas que formam o retângulo.
+     * @return retas do retângulo
+     */
     public List<RetaGrafica> getRetas() {
         return copiarRetas();
     }

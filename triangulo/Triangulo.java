@@ -46,7 +46,9 @@ public class Triangulo implements PrimitivoGrafico {
         ));
     }
 
-    /** @return cópias das três retas que formam o triângulo */
+    /** Retorna cópias das três retas que formam o triângulo.
+     * @return retas do triângulo
+     */
     public List<RetaGrafica> getRetas() {
         return copiarRetas();
     }
