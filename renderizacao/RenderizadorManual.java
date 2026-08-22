@@ -6,11 +6,15 @@ import circulo.CirculoGrafico;
 import reta.Reta;
 import reta.RetaGrafica;
 
-/** Rasterizador que desenha os primitivos ponto a ponto, sem drawLine/drawOval. */
+/** Rasterizador que desenha os primitivos ponto a ponto. */
 public class RenderizadorManual implements RenderizadorPrimitivos {
     private static final long MAX_PASSOS_RETA = 2_000_000L;
     private static final int MAX_RAIO = 100_000;
 
+    /** Desenha uma reta sem usar {@code Graphics.drawLine}.
+     * @param g superfície de desenho
+     * @param reta reta a desenhar
+     */
     @Override
     public void desenharReta(Graphics g, RetaGrafica reta) {
         g.setColor(reta.getCor());
@@ -56,6 +60,10 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
         }
     }
 
+    /** Desenha um círculo usando o algoritmo configurado no objeto.
+     * @param g superfície de desenho
+     * @param circulo círculo a desenhar
+     */
     @Override
     public void desenharCirculo(Graphics g, CirculoGrafico circulo) {
         g.setColor(circulo.getCor());
