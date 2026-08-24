@@ -36,6 +36,9 @@ public class Gui extends JFrame {
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
     private final JComboBox<AlgoritmoCirculo> jcAlgoritmo =
         new JComboBox<AlgoritmoCirculo>(AlgoritmoCirculo.values());
+    private final JComboBox<Object> jcFiltroRedesenho = new JComboBox<Object>(new Object[] {
+        "Todos", TiposPrimitivos.PONTO, TiposPrimitivos.RETA,
+        TiposPrimitivos.RETANGULO, TiposPrimitivos.TRIANGULO, TiposPrimitivos.CIRCULO });
     private final JToolBar barraComandos = new JToolBar();
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
@@ -76,6 +79,8 @@ public class Gui extends JFrame {
         barraComandos.add(new JLabel(" Circulo: "));
         barraComandos.add(jcAlgoritmo);
         barraComandos.addSeparator();
+        barraComandos.add(new JLabel(" Redesenhar: "));
+        barraComandos.add(jcFiltroRedesenho);
         barraComandos.add(jbRedesenhar);
         barraComandos.add(jbLimpar);
 
@@ -128,7 +133,9 @@ public class Gui extends JFrame {
                     jbCor.setBackground(selecionada);
                 }
             } else if (origem == jbRedesenhar) {
-                areaDesenho.redesenhar();
+                Object filtro = jcFiltroRedesenho.getSelectedItem();
+                areaDesenho.redesenhar(filtro instanceof TiposPrimitivos
+                    ? (TiposPrimitivos)filtro : null);
                 msg.setText("Cena redesenhada a partir da estrutura de dados");
             } else if (origem == jbLimpar) {
                 areaDesenho.limpar();
