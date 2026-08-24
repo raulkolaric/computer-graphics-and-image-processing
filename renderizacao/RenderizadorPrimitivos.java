@@ -6,8 +6,9 @@ import circulo.CirculoGrafico;
 import reta.RetaGrafica;
 
 /**
- * Estrategia de renderizacao. Uma implementacao futura pode delegar para
- * Graphics.drawLine/drawOval sem alterar os primitivos ou o painel.
+ * Estratégia de renderização. Uma implementação pode delegar para
+ * {@code Graphics.drawLine} ou {@code Graphics.drawOval} sem alterar os
+ * primitivos ou o painel.
  */
 public interface RenderizadorPrimitivos {
     /** Renderiza uma reta gráfica.

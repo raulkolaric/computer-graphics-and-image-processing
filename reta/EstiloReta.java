@@ -4,13 +4,16 @@ import java.awt.Color;
 
 /** Cor e espessura compartilhadas pelos primitivos graficos. */
 public class EstiloReta {
-    /** Default black, one-pixel style. */
+    /** Estilo padrão preto com espessura de um pixel. */
     public static final EstiloReta PADRAO = new EstiloReta(Color.BLACK, 1);
 
     private final Color cor;
     private final int espessura;
 
-    /** Creates a style with the specified color and thickness. */
+    /** Cria um estilo com a cor e a espessura informadas.
+     * @param cor cor do desenho
+     * @param espessura espessura em pixels
+     */
     public EstiloReta(Color cor, int espessura) {
         if (cor == null) {
             throw new IllegalArgumentException("A cor nao pode ser nula");
@@ -22,12 +25,16 @@ public class EstiloReta {
         this.espessura = espessura;
     }
 
-    /** Returns the color. */
+    /** Retorna a cor do estilo.
+     * @return cor do desenho
+     */
     public Color getCor() {
         return cor;
     }
 
-    /** Returns the thickness in pixels. */
+    /** Retorna a espessura do estilo em pixels.
+     * @return espessura do desenho
+     */
     public int getEspessura() {
         return espessura;
     }

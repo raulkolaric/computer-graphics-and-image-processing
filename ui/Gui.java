@@ -45,7 +45,10 @@ public class Gui extends JFrame {
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
 
-    /** Creates and displays the application window. */
+    /** Cria e exibe a janela da aplicação.
+     * @param larg largura da janela em pixels
+     * @param alt altura da janela em pixels
+     */
     public Gui(int larg, int alt) {
         super("Primitivos Graficos");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

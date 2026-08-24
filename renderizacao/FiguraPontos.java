@@ -19,7 +19,9 @@ import reta.RetaGrafica;
 public class FiguraPontos {
     private static RenderizadorPrimitivos renderizador = new RenderizadorManual();
 
-    /** Replaces the renderer used by the legacy facade methods. */
+    /** Substitui o renderizador usado pelos métodos legados da fachada.
+     * @param novoRenderizador novo renderizador
+     */
     public static void setRenderizador(RenderizadorPrimitivos novoRenderizador) {
         if (novoRenderizador == null) {
             throw new IllegalArgumentException("O renderizador nao pode ser nulo");

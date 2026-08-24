@@ -4,7 +4,7 @@ import ponto.Ponto;
 
 
 /**
- * REta matematica.
+ * Reta matemática definida por dois pontos extremos.
  *
  * @author Julio
  * @version 12/08/2020
@@ -132,9 +132,8 @@ public class Reta {
     
     
     /**
-     * Method toString
-     *
-     * @return The return value
+     * Retorna a representação textual da reta e de sua equação.
+     * @return representação textual da reta
      */
     public String toString(){
         String s = "P1: " + getP1().toString() + " P2: " + getP2().toString();

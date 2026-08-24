@@ -25,6 +25,9 @@ import ui.TiposPrimitivos;
 public class TestaPrimitivos {
     private static final RenderizadorManual RENDERIZADOR = new RenderizadorManual();
 
+    /** Executa todos os testes de regressão.
+     * @param args argumentos da linha de comando, não utilizados
+     */
     public static void main(String[] args) {
         testarRetaMatematica();
         testarDirecoesDaReta();

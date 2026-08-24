@@ -2,17 +2,17 @@ package ui;
 
 /** Tipos de primitivos que podem ser criados na interface. */
 public enum TiposPrimitivos {
-    /** A single point. */
+    /** Um único ponto. */
     PONTO(1),
-    /** A line segment. */
+    /** Um segmento de reta. */
     RETA(2),
-    /** A rectangle. */
+    /** Um retângulo. */
     RETANGULO(2),
-    /** A triangle. */
+    /** Um triângulo. */
     TRIANGULO(3),
-    /** A circle. */
+    /** Um círculo. */
     CIRCULO(2),
-    /** No primitive selected. */
+    /** Nenhum primitivo selecionado. */
     NENHUM(0);
 
     private final int quantidadePontos;
