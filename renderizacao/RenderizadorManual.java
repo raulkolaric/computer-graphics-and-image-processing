@@ -158,7 +158,13 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
 
     private void plotar(Graphics g, int x, int y, int espessura) {
         int deslocamento = espessura / 2;
-        g.fillRect(x - deslocamento, y - deslocamento, espessura, espessura);
+        long esquerda = (long)x - deslocamento;
+        long topo = (long)y - deslocamento;
+        if (esquerda < Integer.MIN_VALUE || topo < Integer.MIN_VALUE
+                || esquerda > Integer.MAX_VALUE || topo > Integer.MAX_VALUE) {
+            return;
+        }
+        g.fillRect((int)esquerda, (int)topo, espessura, espessura);
     }
 
     private int converterCoordenada(double coordenada) {

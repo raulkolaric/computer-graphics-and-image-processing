@@ -8,6 +8,7 @@ import ui.Gui;
  * @version (número de versão ou data)
  */
 public class App {
+    /** Starts the desktop application. */
     public static void main(String args[]) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override

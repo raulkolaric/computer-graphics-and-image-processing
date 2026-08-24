@@ -3,6 +3,7 @@ package ponto;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/** A point with drawing color, label, and diameter. */
 public class PontoGr extends Ponto {
     Color corPto = Color.BLACK; // cor do ponto
     String nomePto = ""; // nome do ponto
@@ -103,58 +104,42 @@ public class PontoGr extends Ponto {
     }
 
 
-    /**
-     * @return the corPto
-     */
+    /** Returns the point color. */
     public Color getCorPto() {
         return corPto;
     }
 
-    /**
-     * @param corPto the corPto to set
-     */
+    /** Sets the point color. */
     public void setCorPto(Color corPto) {
         this.corPto = corPto;
     }
 
-    /**
-     * @return the nomePto
-     */
+    /** Returns the point label. */
     public String getNomePto() {
         return nomePto;
     }
 
-    /**
-     * @param nomePto the nomePto to set
-     */
+    /** Sets the point label. */
     public void setNomePto(String nomePto) {
         this.nomePto = nomePto;
     }
 
-    /**
-     * @return the corNomePto
-     */
+    /** Returns the label color. */
     public Color getCorNomePto() {
         return corNomePto;
     }
 
-    /**
-     * @param corNomePto the corNomePto to set
-     */
+    /** Sets the label color. */
     public void setCorNomePto(Color corNomePto) {
         this.corNomePto = corNomePto;
     }
 
-    /**
-     * @return the diametro
-     */
+    /** Returns the diameter in pixels. */
     public int getDiametro() {
         return diametro;
     }
 
-    /**
-     * @param diametro the diametro to set
-     */
+    /** Sets the diameter in pixels. */
     public void setDiametro(int diametro) {
         this.diametro = diametro;
     }

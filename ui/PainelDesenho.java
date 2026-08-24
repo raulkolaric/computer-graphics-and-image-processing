@@ -29,7 +29,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     private final JLabel msg;
     private final List<PontoGr> pontos = new ArrayList<PontoGr>();
+    private final List<PontoGr> pontosVisiveis = new ArrayList<PontoGr>();
     private final List<PrimitivoGrafico> primitivos = new ArrayList<PrimitivoGrafico>();
+    private final List<PrimitivoGrafico> primitivosVisiveis = new ArrayList<PrimitivoGrafico>();
     private final List<Ponto> pontosPendentes = new ArrayList<Ponto>();
 
     private TiposPrimitivos tipo;
@@ -180,6 +182,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
             throw new IllegalArgumentException("O primitivo nao pode ser nulo");
         }
         primitivos.add(primitivo);
+        primitivosVisiveis.add(primitivo);
         repaint();
     }
 
@@ -204,26 +207,58 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return pontos.size();
     }
 
-    /** Remove pontos, primitivos e seleções pendentes da cena. */
+    /** Limpa a tela sem remover os primitivos armazenados na estrutura de dados. */
     public void limpar() {
-        pontos.clear();
-        primitivos.clear();
+        pontosVisiveis.clear();
+        primitivosVisiveis.clear();
         pontosPendentes.clear();
         repaint();
     }
 
-    /** Solicita que o painel seja redesenhado. */
+    /** Redesenha todos os primitivos armazenados. */
     public void redesenhar() {
+        redesenhar(null);
+    }
+
+    /** Redesenha somente os primitivos do tipo informado, ou todos se for nulo.
+     * @param filtro tipo a redesenhar
+     */
+    public void redesenhar(TiposPrimitivos filtro) {
+        primitivosVisiveis.clear();
+        pontosVisiveis.clear();
+        if (filtro == null) {
+            primitivosVisiveis.addAll(primitivos);
+            pontosVisiveis.addAll(pontos);
+        } else {
+            for (PrimitivoGrafico primitivo : primitivos) {
+                if (corresponde(primitivo, filtro)) {
+                    primitivosVisiveis.add(primitivo);
+                }
+            }
+            if (filtro == TiposPrimitivos.PONTO) {
+                pontosVisiveis.addAll(pontos);
+            }
+        }
         repaint();
+    }
+
+    private boolean corresponde(PrimitivoGrafico primitivo, TiposPrimitivos filtro) {
+        switch (filtro) {
+            case RETA: return primitivo instanceof RetaGrafica;
+            case RETANGULO: return primitivo instanceof Retangulo;
+            case TRIANGULO: return primitivo instanceof Triangulo;
+            case CIRCULO: return primitivo instanceof CirculoGrafico;
+            default: return false;
+        }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (PrimitivoGrafico primitivo : primitivos) {
+        for (PrimitivoGrafico primitivo : primitivosVisiveis) {
             primitivo.desenhar(g, renderizador);
         }
-        for (PontoGr ponto : pontos) {
+        for (PontoGr ponto : pontosVisiveis) {
             ponto.desenharPonto(g);
         }
     }
@@ -234,8 +269,10 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
         if (tipo == TiposPrimitivos.PONTO) {
             int diametro = Math.max(4, espessuraAtual + 2);
-            pontos.add(new PontoGr(e.getX(), e.getY(), corAtual,
-                       "p" + pontos.size(), diametro));
+            PontoGr pontoGr = new PontoGr(e.getX(), e.getY(), corAtual,
+                       "p" + pontos.size(), diametro);
+            pontos.add(pontoGr);
+            pontosVisiveis.add(pontoGr);
             msg.setText("Ponto criado em (" + e.getX() + ", " + e.getY() + ")");
             repaint();
             return;
@@ -265,16 +302,16 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
         switch (tipo) {
             case RETA:
-                primitivos.add(new RetaGrafica(p1, p2, estilo));
+                adicionarPrimitivo(new RetaGrafica(p1, p2, estilo));
                 break;
             case RETANGULO:
-                primitivos.add(new Retangulo(p1, p2, estilo));
+                adicionarPrimitivo(new Retangulo(p1, p2, estilo));
                 break;
             case TRIANGULO:
-                primitivos.add(new Triangulo(p1, p2, pontosPendentes.get(2), estilo));
+                adicionarPrimitivo(new Triangulo(p1, p2, pontosPendentes.get(2), estilo));
                 break;
             case CIRCULO:
-                primitivos.add(new CirculoGrafico(p1, p2, estilo, algoritmoCirculo));
+                adicionarPrimitivo(new CirculoGrafico(p1, p2, estilo, algoritmoCirculo));
                 break;
             default:
                 throw new IllegalStateException("Tipo sem construcao por multiplos pontos: " + tipo);

@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -13,7 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.JPanel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.BoxLayout;
 
 import circulo.AlgoritmoCirculo;
 
@@ -33,10 +38,16 @@ public class Gui extends JFrame {
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
     private final JComboBox<AlgoritmoCirculo> jcAlgoritmo =
         new JComboBox<AlgoritmoCirculo>(AlgoritmoCirculo.values());
+    private final JComboBox<Object> jcFiltroRedesenho = new JComboBox<Object>(new Object[] {
+        "Todos", TiposPrimitivos.PONTO, TiposPrimitivos.RETA,
+        TiposPrimitivos.RETANGULO, TiposPrimitivos.TRIANGULO, TiposPrimitivos.CIRCULO });
     private final JToolBar barraComandos = new JToolBar();
+    private final JToolBar barraEstilo = new JToolBar();
+    private final JToolBar barraCena = new JToolBar();
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
 
+    /** Creates and displays the application window. */
     public Gui(int larg, int alt) {
         super("Primitivos Graficos");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -49,21 +60,39 @@ public class Gui extends JFrame {
         modos.add(jtCirculo);
 
         barraComandos.add(jtPonto);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtReta);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtRetangulo);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtTriangulo);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtCirculo);
-        barraComandos.addSeparator();
-        barraComandos.add(jbCor);
-        barraComandos.add(new JLabel(" Espessura: "));
-        barraComandos.add(jsEspessura);
-        barraComandos.add(new JLabel(" Circulo: "));
-        barraComandos.add(jcAlgoritmo);
-        barraComandos.addSeparator();
-        barraComandos.add(jbRedesenhar);
-        barraComandos.add(jbLimpar);
+        for (JToggleButton botao : new JToggleButton[] {
+                jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo }) {
+            botao.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+            botao.setBorderPainted(true);
+            botao.addItemListener(event -> botao.setBorder(BorderFactory.createLineBorder(
+                event.getStateChange() == ItemEvent.SELECTED ? Color.BLUE : Color.GRAY,
+                event.getStateChange() == ItemEvent.SELECTED ? 2 : 1)));
+        }
+        barraEstilo.add(jbCor);
+        barraEstilo.add(new JLabel(" Espessura: "));
+        barraEstilo.add(jsEspessura);
+        barraEstilo.add(new JLabel(" Circulo: "));
+        barraEstilo.add(jcAlgoritmo);
 
-        add(barraComandos, BorderLayout.NORTH);
+        barraCena.add(new JLabel(" Redesenhar: "));
+        barraCena.add(jcFiltroRedesenho);
+        barraCena.add(jbRedesenhar);
+        barraCena.add(jbLimpar);
+
+        JPanel menu = new JPanel();
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
+        menu.add(barraComandos);
+        menu.add(barraEstilo);
+        menu.add(barraCena);
+        add(menu, BorderLayout.NORTH);
         add(areaDesenho, BorderLayout.CENTER);
         add(msg, BorderLayout.SOUTH);
 
@@ -82,6 +111,8 @@ public class Gui extends JFrame {
             (AlgoritmoCirculo)jcAlgoritmo.getSelectedItem()));
 
         jcAlgoritmo.setSelectedItem(AlgoritmoCirculo.SIMETRIA_OCTANTES);
+        jtPonto.setSelected(true);
+        areaDesenho.setTipo(TiposPrimitivos.PONTO);
         jbCor.setBackground(Color.BLACK);
         setSize(larg, alt);
         setLocationRelativeTo(null);
@@ -110,7 +141,9 @@ public class Gui extends JFrame {
                     jbCor.setBackground(selecionada);
                 }
             } else if (origem == jbRedesenhar) {
-                areaDesenho.redesenhar();
+                Object filtro = jcFiltroRedesenho.getSelectedItem();
+                areaDesenho.redesenhar(filtro instanceof TiposPrimitivos
+                    ? (TiposPrimitivos)filtro : null);
                 msg.setText("Cena redesenhada a partir da estrutura de dados");
             } else if (origem == jbLimpar) {
                 areaDesenho.limpar();
