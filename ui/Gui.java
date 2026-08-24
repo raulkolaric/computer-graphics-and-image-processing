@@ -16,7 +16,9 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.JPanel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.BoxLayout;
 
 import circulo.AlgoritmoCirculo;
 
@@ -40,6 +42,8 @@ public class Gui extends JFrame {
         "Todos", TiposPrimitivos.PONTO, TiposPrimitivos.RETA,
         TiposPrimitivos.RETANGULO, TiposPrimitivos.TRIANGULO, TiposPrimitivos.CIRCULO });
     private final JToolBar barraComandos = new JToolBar();
+    private final JToolBar barraEstilo = new JToolBar();
+    private final JToolBar barraCena = new JToolBar();
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
 
@@ -72,19 +76,23 @@ public class Gui extends JFrame {
                 event.getStateChange() == ItemEvent.SELECTED ? Color.BLUE : Color.GRAY,
                 event.getStateChange() == ItemEvent.SELECTED ? 2 : 1)));
         }
-        barraComandos.addSeparator();
-        barraComandos.add(jbCor);
-        barraComandos.add(new JLabel(" Espessura: "));
-        barraComandos.add(jsEspessura);
-        barraComandos.add(new JLabel(" Circulo: "));
-        barraComandos.add(jcAlgoritmo);
-        barraComandos.addSeparator();
-        barraComandos.add(new JLabel(" Redesenhar: "));
-        barraComandos.add(jcFiltroRedesenho);
-        barraComandos.add(jbRedesenhar);
-        barraComandos.add(jbLimpar);
+        barraEstilo.add(jbCor);
+        barraEstilo.add(new JLabel(" Espessura: "));
+        barraEstilo.add(jsEspessura);
+        barraEstilo.add(new JLabel(" Circulo: "));
+        barraEstilo.add(jcAlgoritmo);
 
-        add(barraComandos, BorderLayout.NORTH);
+        barraCena.add(new JLabel(" Redesenhar: "));
+        barraCena.add(jcFiltroRedesenho);
+        barraCena.add(jbRedesenhar);
+        barraCena.add(jbLimpar);
+
+        JPanel menu = new JPanel();
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
+        menu.add(barraComandos);
+        menu.add(barraEstilo);
+        menu.add(barraCena);
+        add(menu, BorderLayout.NORTH);
         add(areaDesenho, BorderLayout.CENTER);
         add(msg, BorderLayout.SOUTH);
 
