@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -37,6 +40,7 @@ public class Gui extends JFrame {
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
 
+    /** Creates and displays the application window. */
     public Gui(int larg, int alt) {
         super("Primitivos Graficos");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -49,10 +53,22 @@ public class Gui extends JFrame {
         modos.add(jtCirculo);
 
         barraComandos.add(jtPonto);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtReta);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtRetangulo);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtTriangulo);
+        barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtCirculo);
+        for (JToggleButton botao : new JToggleButton[] {
+                jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo }) {
+            botao.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+            botao.setBorderPainted(true);
+            botao.addItemListener(event -> botao.setBorder(BorderFactory.createLineBorder(
+                event.getStateChange() == ItemEvent.SELECTED ? Color.BLUE : Color.GRAY,
+                event.getStateChange() == ItemEvent.SELECTED ? 2 : 1)));
+        }
         barraComandos.addSeparator();
         barraComandos.add(jbCor);
         barraComandos.add(new JLabel(" Espessura: "));
@@ -82,6 +98,8 @@ public class Gui extends JFrame {
             (AlgoritmoCirculo)jcAlgoritmo.getSelectedItem()));
 
         jcAlgoritmo.setSelectedItem(AlgoritmoCirculo.SIMETRIA_OCTANTES);
+        jtPonto.setSelected(true);
+        areaDesenho.setTipo(TiposPrimitivos.PONTO);
         jbCor.setBackground(Color.BLACK);
         setSize(larg, alt);
         setLocationRelativeTo(null);

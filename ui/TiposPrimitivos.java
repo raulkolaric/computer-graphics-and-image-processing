@@ -2,7 +2,18 @@ package ui;
 
 /** Tipos de primitivos que podem ser criados na interface. */
 public enum TiposPrimitivos {
-    PONTO(1), RETA(2), RETANGULO(2), TRIANGULO(3), CIRCULO(2), NENHUM(0);
+    /** A single point. */
+    PONTO(1),
+    /** A line segment. */
+    RETA(2),
+    /** A rectangle. */
+    RETANGULO(2),
+    /** A triangle. */
+    TRIANGULO(3),
+    /** A circle. */
+    CIRCULO(2),
+    /** No primitive selected. */
+    NENHUM(0);
 
     private final int quantidadePontos;
 
@@ -10,6 +21,9 @@ public enum TiposPrimitivos {
         this.quantidadePontos = quantidadePontos;
     }
 
+    /** Retorna quantos cliques são necessários para criar o primitivo.
+     * @return quantidade de cliques
+     */
     public int getQuantidadePontos() {
         return quantidadePontos;
     }

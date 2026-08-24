@@ -99,6 +99,10 @@ public class TestaPrimitivos {
             rejeitouExtrema = true;
         }
         verificar(rejeitouExtrema, "reta extrema e rejeitada sem travar o rasterizador");
+
+        new RetaGrafica(new Ponto(Integer.MIN_VALUE, 0),
+            new Ponto(Integer.MIN_VALUE + 1, 0), Color.BLACK, 3)
+            .desenhar(novaImagem().getGraphics(), RENDERIZADOR);
     }
 
     private static void testarPrimitivosCompostos() {
