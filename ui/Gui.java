@@ -10,7 +10,6 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
@@ -32,7 +31,6 @@ public class Gui extends JFrame {
     private final JToggleButton jtRetangulo = new JToggleButton("Retangulo");
     private final JToggleButton jtTriangulo = new JToggleButton("Triangulo");
     private final JToggleButton jtCirculo = new JToggleButton("Circulo");
-    private final JButton jbCor = new JButton("Cor");
     private final JButton jbRedesenhar = new JButton("Redesenhar");
     private final JButton jbLimpar = new JButton("Limpar");
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
@@ -76,7 +74,6 @@ public class Gui extends JFrame {
                 event.getStateChange() == ItemEvent.SELECTED ? Color.BLUE : Color.GRAY,
                 event.getStateChange() == ItemEvent.SELECTED ? 2 : 1)));
         }
-        barraEstilo.add(jbCor);
         barraEstilo.add(new JLabel(" Espessura: "));
         barraEstilo.add(jsEspessura);
         barraEstilo.add(new JLabel(" Circulo: "));
@@ -102,7 +99,6 @@ public class Gui extends JFrame {
         jtRetangulo.addActionListener(eventos);
         jtTriangulo.addActionListener(eventos);
         jtCirculo.addActionListener(eventos);
-        jbCor.addActionListener(eventos);
         jbRedesenhar.addActionListener(eventos);
         jbLimpar.addActionListener(eventos);
         jsEspessura.addChangeListener(event ->
@@ -113,7 +109,6 @@ public class Gui extends JFrame {
         jcAlgoritmo.setSelectedItem(AlgoritmoCirculo.SIMETRIA_OCTANTES);
         jtPonto.setSelected(true);
         areaDesenho.setTipo(TiposPrimitivos.PONTO);
-        jbCor.setBackground(Color.BLACK);
         setSize(larg, alt);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -133,13 +128,6 @@ public class Gui extends JFrame {
                 areaDesenho.setTipo(TiposPrimitivos.TRIANGULO);
             } else if (origem == jtCirculo) {
                 areaDesenho.setTipo(TiposPrimitivos.CIRCULO);
-            } else if (origem == jbCor) {
-                Color selecionada = JColorChooser.showDialog(
-                    Gui.this, "Cor dos proximos primitivos", areaDesenho.getCorAtual());
-                if (selecionada != null) {
-                    areaDesenho.setCorAtual(selecionada);
-                    jbCor.setBackground(selecionada);
-                }
             } else if (origem == jbRedesenhar) {
                 Object filtro = jcFiltroRedesenho.getSelectedItem();
                 areaDesenho.redesenhar(filtro instanceof TiposPrimitivos
