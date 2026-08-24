@@ -2,7 +2,12 @@ package reta;
 
 import java.awt.Color;
 
-/** Cor e espessura compartilhadas pelos primitivos graficos. */
+/**
+ * Cor e espessura compartilhadas pelos primitivos graficos.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class EstiloReta {
     /** Estilo padrão preto com espessura de um pixel. */
     public static final EstiloReta PADRAO = new EstiloReta(Color.BLACK, 1);
@@ -13,6 +18,7 @@ public class EstiloReta {
     /** Cria um estilo com a cor e a espessura informadas.
      * @param cor cor do desenho
      * @param espessura espessura em pixels
+     * @throws IllegalArgumentException se a cor for nula ou se a espessura for menor que um
      */
     public EstiloReta(Color cor, int espessura) {
         if (cor == null) {

@@ -2,7 +2,12 @@ package tests;
 
 import reta.Reta;
 
-/** Executa um exemplo simples de criação e exibição de uma reta. */
+/**
+ * Executa um exemplo simples de criação e exibição de uma reta.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class TestaReta
 {
     /** Executa o exemplo de reta.

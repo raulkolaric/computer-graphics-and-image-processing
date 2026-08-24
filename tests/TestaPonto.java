@@ -2,7 +2,12 @@ package tests;
 
 import ponto.Ponto;
 
-/** Executa um exemplo simples de criação e uso de pontos. */
+/**
+ * Executa um exemplo simples de criação e uso de pontos.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class TestaPonto{
     /** Executa o exemplo de pontos.
      * @param args argumentos da linha de comando, não utilizados

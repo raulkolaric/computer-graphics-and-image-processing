@@ -1,7 +1,12 @@
 
 import ui.Gui;
 
-/** Ponto de entrada da aplicação de desenho de primitivos gráficos. */
+/**
+ * Ponto de entrada da aplicação de desenho de primitivos gráficos.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class App {
     /** Inicia a aplicação gráfica na fila de eventos do Swing.
      * @param args argumentos da linha de comando, não utilizados

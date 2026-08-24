@@ -3,7 +3,12 @@ package ponto;
 import java.awt.Color;
 import java.awt.Graphics;
 
-/** Ponto com cor de desenho, rótulo e diâmetro. */
+/**
+ * Ponto com cor de desenho, rótulo e diâmetro.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class PontoGr extends Ponto {
     Color corPto = Color.BLACK; // cor do ponto
     String nomePto = ""; // nome do ponto

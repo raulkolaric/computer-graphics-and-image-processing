@@ -9,6 +9,9 @@ import reta.RetaGrafica;
  * Estratégia de renderização. Uma implementação pode delegar para
  * {@code Graphics.drawLine} ou {@code Graphics.drawOval} sem alterar os
  * primitivos ou o painel.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
  */
 public interface RenderizadorPrimitivos {
     /** Renderiza uma reta gráfica.

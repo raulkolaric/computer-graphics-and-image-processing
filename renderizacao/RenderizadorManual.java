@@ -6,7 +6,12 @@ import circulo.CirculoGrafico;
 import reta.Reta;
 import reta.RetaGrafica;
 
-/** Rasterizador que desenha os primitivos ponto a ponto. */
+/**
+ * Rasterizador que desenha os primitivos ponto a ponto.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class RenderizadorManual implements RenderizadorPrimitivos {
     private static final long MAX_PASSOS_RETA = 2_000_000L;
     private static final int MAX_RAIO = 100_000;
@@ -18,6 +23,7 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
     /** Desenha uma reta sem usar {@code Graphics.drawLine}.
      * @param g superfície de desenho
      * @param reta reta a desenhar
+     * @throws IllegalArgumentException se as coordenadas excederem os limites de rasterização
      */
     @Override
     public void desenharReta(Graphics g, RetaGrafica reta) {
@@ -67,6 +73,7 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
     /** Desenha um círculo usando o algoritmo configurado no objeto.
      * @param g superfície de desenho
      * @param circulo círculo a desenhar
+     * @throws IllegalArgumentException se o raio ou as coordenadas excederem os limites de rasterização
      */
     @Override
     public void desenharCirculo(Graphics g, CirculoGrafico circulo) {

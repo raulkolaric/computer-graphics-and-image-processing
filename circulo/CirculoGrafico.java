@@ -8,7 +8,12 @@ import renderizacao.PrimitivoGrafico;
 import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
 
-/** Círculo com estilo e algoritmo de rasterização. */
+/**
+ * Círculo com estilo e algoritmo de rasterização.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class CirculoGrafico extends Circulo implements PrimitivoGrafico {
     private final EstiloReta estilo;
     private final AlgoritmoCirculo algoritmo;
@@ -19,6 +24,7 @@ public class CirculoGrafico extends Circulo implements PrimitivoGrafico {
      * @param cor cor do círculo
      * @param espessura espessura em pixels
      * @param algoritmo algoritmo de rasterização
+     * @throws IllegalArgumentException se algum argumento for nulo ou se a espessura for menor que um
      */
     public CirculoGrafico(Ponto centro, Ponto pontoRaio, Color cor, int espessura,
                           AlgoritmoCirculo algoritmo) {
@@ -30,6 +36,7 @@ public class CirculoGrafico extends Circulo implements PrimitivoGrafico {
      * @param pontoRaio ponto que define o raio
      * @param estilo estilo de renderização
      * @param algoritmo algoritmo de rasterização
+     * @throws IllegalArgumentException se algum argumento for nulo
      */
     public CirculoGrafico(Ponto centro, Ponto pontoRaio, EstiloReta estilo,
                           AlgoritmoCirculo algoritmo) {

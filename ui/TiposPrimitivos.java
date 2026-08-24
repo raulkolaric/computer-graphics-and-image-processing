@@ -1,6 +1,11 @@
 package ui;
 
-/** Tipos de primitivos que podem ser criados na interface. */
+/**
+ * Tipos de primitivos que podem ser criados na interface.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public enum TiposPrimitivos {
     /** Um único ponto. */
     PONTO(1),

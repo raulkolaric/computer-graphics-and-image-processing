@@ -21,7 +21,12 @@ import triangulo.Triangulo;
 import ui.PainelDesenho;
 import ui.TiposPrimitivos;
 
-/** Testes de regressao executaveis sem interface grafica. */
+/**
+ * Testes de regressao executaveis sem interface grafica.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class TestaPrimitivos {
     private static final RenderizadorManual RENDERIZADOR = new RenderizadorManual();
 

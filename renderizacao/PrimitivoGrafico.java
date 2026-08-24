@@ -3,7 +3,12 @@ package renderizacao;
 import java.awt.Color;
 import java.awt.Graphics;
 
-/** Contrato para objetos que podem ser armazenados e redesenhados. */
+/**
+ * Contrato para objetos que podem ser armazenados e redesenhados.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public interface PrimitivoGrafico {
     /** Desenha o primitivo.
      * @param g superfície de desenho

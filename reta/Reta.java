@@ -6,8 +6,8 @@ import ponto.Ponto;
 /**
  * Reta matemática definida por dois pontos extremos.
  *
- * @author Julio
- * @version 12/08/2020
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
  */
 public class Reta {
  
@@ -39,6 +39,7 @@ public class Reta {
     /** Cria uma reta copiando os dois pontos extremos.
      * @param p1 primeiro ponto
      * @param p2 segundo ponto
+     * @throws IllegalArgumentException se algum ponto for nulo
      */
     public Reta(Ponto p1, Ponto p2) {
         this.p1 = copiarPonto(p1, "P1");
@@ -47,6 +48,7 @@ public class Reta {
     
     /** Cria uma copia da reta informada.
      * @param r reta a copiar
+     * @throws IllegalArgumentException se a reta for nula
      */
     public Reta (Reta r){
         if (r == null) {
@@ -58,6 +60,7 @@ public class Reta {
     
     /** Define o primeiro extremo da reta.
      * @param p novo primeiro extremo
+     * @throws IllegalArgumentException se o ponto for nulo
      */
     public void setP1(Ponto p){
         this.p1 = copiarPonto(p, "P1");
@@ -65,20 +68,21 @@ public class Reta {
     
     /** Define o segundo extremo da reta.
      * @param p novo segundo extremo
+     * @throws IllegalArgumentException se o ponto for nulo
      */
     public void setP2(Ponto p){
         this.p2 = copiarPonto(p, "P2");
     }
     
-    /** Retorna uma cópia do primeiro extremo.
-     * @return cópia do primeiro extremo
+    /** Retorna uma cópia defensiva do primeiro extremo.
+     * @return nova instância com as coordenadas do primeiro extremo
      */
     public Ponto getP1(){
         return new Ponto(this.p1);
     }
     
-    /** Retorna uma cópia do segundo extremo.
-     * @return cópia do segundo extremo
+    /** Retorna uma cópia defensiva do segundo extremo.
+     * @return nova instância com as coordenadas do segundo extremo
      */
     public Ponto getP2(){
         return new Ponto(this.p2);

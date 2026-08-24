@@ -3,8 +3,8 @@ package ponto;
 /**
  * Representa um ponto no plano cartesiano.
  * 
- * @author julio
- *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
  */
 
 public class Ponto {
@@ -74,6 +74,11 @@ public class Ponto {
     }
 
     
+    /**
+     * Retorna as coordenadas do ponto em formato textual.
+     *
+     * @return coordenadas no formato {@code (x, y)}
+     */
     @Override
     public String toString() {
         return "Ponto [" + getX() + ", " + getY() +  "]";

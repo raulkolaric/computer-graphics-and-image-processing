@@ -12,7 +12,12 @@ import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 
-/** Triângulo definido por três vértices e composto por três retas. */
+/**
+ * Triângulo definido por três vértices e composto por três retas.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class Triangulo implements PrimitivoGrafico {
     private final EstiloReta estilo;
     private final List<RetaGrafica> retas;
@@ -23,6 +28,7 @@ public class Triangulo implements PrimitivoGrafico {
      * @param p3 terceiro vértice
      * @param cor cor das retas
      * @param espessura espessura das retas em pixels
+     * @throws IllegalArgumentException se algum ponto ou a cor for nulo, ou se a espessura for menor que um
      */
     public Triangulo(Ponto p1, Ponto p2, Ponto p3, Color cor, int espessura) {
         this(p1, p2, p3, new EstiloReta(cor, espessura));
@@ -33,6 +39,7 @@ public class Triangulo implements PrimitivoGrafico {
      * @param p2 segundo vértice
      * @param p3 terceiro vértice
      * @param estilo estilo das retas
+     * @throws IllegalArgumentException se algum ponto ou o estilo for nulo
      */
     public Triangulo(Ponto p1, Ponto p2, Ponto p3, EstiloReta estilo) {
         if (p1 == null || p2 == null || p3 == null || estilo == null) {
@@ -46,8 +53,8 @@ public class Triangulo implements PrimitivoGrafico {
         ));
     }
 
-    /** Retorna cópias das três retas que formam o triângulo.
-     * @return retas do triângulo
+    /** Retorna uma visão não modificável com cópias defensivas das três retas.
+     * @return lista não modificável de novas instâncias das retas do triângulo
      */
     public List<RetaGrafica> getRetas() {
         return copiarRetas();

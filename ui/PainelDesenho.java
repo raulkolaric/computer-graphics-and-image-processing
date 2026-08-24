@@ -23,7 +23,12 @@ import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
 
-/** Painel que recebe pontos pelo mouse, armazena a cena e a redesenha. */
+/**
+ * Painel que recebe pontos pelo mouse, armazena a cena e a redesenha.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class PainelDesenho extends JPanel implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;
 
@@ -42,6 +47,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     /** Cria um painel usando o renderizador manual padrão.
      * @param msg etiqueta usada para exibir mensagens
      * @param tipo tipo de primitivo inicialmente selecionado
+     * @throws IllegalArgumentException se algum argumento for nulo
      */
     public PainelDesenho(JLabel msg, TiposPrimitivos tipo) {
         this(msg, tipo, new RenderizadorManual());
@@ -51,6 +57,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
      * @param msg etiqueta usada para exibir mensagens
      * @param tipo tipo de primitivo inicialmente selecionado
      * @param renderizador renderizador dos primitivos
+     * @throws IllegalArgumentException se algum argumento for nulo
      */
     public PainelDesenho(JLabel msg, TiposPrimitivos tipo,
                           RenderizadorPrimitivos renderizador) {
@@ -66,6 +73,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     /** Seleciona o tipo de primitivo e limpa pontos pendentes.
      * @param tipo novo tipo de primitivo
+     * @throws IllegalArgumentException se o tipo for nulo
      */
     public void setTipo(TiposPrimitivos tipo) {
         if (tipo == null) {
@@ -113,6 +121,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     /** Define a espessura usada nos novos primitivos.
      * @param espessuraAtual nova espessura em pixels
+     * @throws IllegalArgumentException se a espessura for menor que um
      */
     public void setEspessuraAtual(int espessuraAtual) {
         if (espessuraAtual < 1) {
@@ -130,6 +139,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     /** Define o algoritmo usado para novos círculos.
      * @param algoritmoCirculo novo algoritmo
+     * @throws IllegalArgumentException se o algoritmo for nulo
      */
     public void setAlgoritmoCirculo(AlgoritmoCirculo algoritmoCirculo) {
         if (algoritmoCirculo == null) {
@@ -147,6 +157,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     /** Substitui o renderizador e solicita uma nova pintura.
      * @param renderizador novo renderizador
+     * @throws IllegalArgumentException se o renderizador for nulo
      */
     public void setRenderizador(RenderizadorPrimitivos renderizador) {
         if (renderizador == null) {
@@ -158,6 +169,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     /** Adiciona um primitivo à cena e solicita uma nova pintura.
      * @param primitivo primitivo a adicionar
+     * @throws IllegalArgumentException se o primitivo for nulo
      */
     public void adicionarPrimitivo(PrimitivoGrafico primitivo) {
         if (primitivo == null) {
@@ -169,7 +181,8 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     /** Retorna uma visão não modificável dos primitivos da cena.
-     * @return primitivos armazenados
+     * A lista é uma cópia, mas seus elementos são as instâncias armazenadas.
+     * @return cópia não modificável da lista de primitivos armazenados
      */
     public List<PrimitivoGrafico> getPrimitivos() {
         return Collections.unmodifiableList(new ArrayList<PrimitivoGrafico>(primitivos));

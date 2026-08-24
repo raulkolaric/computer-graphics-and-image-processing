@@ -12,7 +12,12 @@ import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 
-/** Retângulo definido por dois cantos opostos e composto por quatro retas. */
+/**
+ * Retângulo definido por dois cantos opostos e composto por quatro retas.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class Retangulo implements PrimitivoGrafico {
     private final EstiloReta estilo;
     private final List<RetaGrafica> retas;
@@ -22,6 +27,7 @@ public class Retangulo implements PrimitivoGrafico {
      * @param canto2 canto oposto ao primeiro
      * @param cor cor das retas
      * @param espessura espessura das retas em pixels
+     * @throws IllegalArgumentException se algum ponto ou a cor for nulo, ou se a espessura for menor que um
      */
     public Retangulo(Ponto canto1, Ponto canto2, Color cor, int espessura) {
         this(canto1, canto2, new EstiloReta(cor, espessura));
@@ -31,6 +37,7 @@ public class Retangulo implements PrimitivoGrafico {
      * @param canto1 primeiro canto
      * @param canto2 canto oposto ao primeiro
      * @param estilo estilo das retas
+     * @throws IllegalArgumentException se algum ponto ou o estilo for nulo
      */
     public Retangulo(Ponto canto1, Ponto canto2, EstiloReta estilo) {
         if (canto1 == null || canto2 == null || estilo == null) {
@@ -49,8 +56,8 @@ public class Retangulo implements PrimitivoGrafico {
         ));
     }
 
-    /** Retorna cópias das quatro retas que formam o retângulo.
-     * @return retas do retângulo
+    /** Retorna uma visão não modificável com cópias defensivas das quatro retas.
+     * @return lista não modificável de novas instâncias das retas do retângulo
      */
     public List<RetaGrafica> getRetas() {
         return copiarRetas();

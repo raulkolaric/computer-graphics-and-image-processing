@@ -21,7 +21,12 @@ import javax.swing.BoxLayout;
 
 import circulo.AlgoritmoCirculo;
 
-/** Janela de edicao dos primitivos graficos. */
+/**
+ * Janela de edicao dos primitivos graficos.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class Gui extends JFrame {
     private static final long serialVersionUID = 1L;
 

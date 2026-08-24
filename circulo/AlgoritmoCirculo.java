@@ -1,6 +1,11 @@
 package circulo;
 
-/** Algoritmos manuais disponiveis para rasterizar a circunferencia. */
+/**
+ * Algoritmos manuais disponiveis para rasterizar a circunferencia.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public enum AlgoritmoCirculo {
     /** Equação reduzida com raiz quadrada. */
     EQUACAO_REDUZIDA("Equacao reduzida"),
@@ -15,6 +20,11 @@ public enum AlgoritmoCirculo {
         this.descricao = descricao;
     }
 
+    /**
+     * Retorna a descrição do algoritmo exibida na interface.
+     *
+     * @return descrição do algoritmo
+     */
     @Override
     public String toString() {
         return descricao;

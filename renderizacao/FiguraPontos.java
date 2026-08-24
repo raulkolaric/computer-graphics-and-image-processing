@@ -13,14 +13,15 @@ import reta.RetaGrafica;
 /**
  * Contem metodos para desenhar o ponto.
  * 
- * @author Julio
- * @version 20260803
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
  */
 public class FiguraPontos {
     private static RenderizadorPrimitivos renderizador = new RenderizadorManual();
 
     /** Substitui o renderizador usado pelos métodos legados da fachada.
      * @param novoRenderizador novo renderizador
+     * @throws IllegalArgumentException se o renderizador for nulo
      */
     public static void setRenderizador(RenderizadorPrimitivos novoRenderizador) {
         if (novoRenderizador == null) {
