@@ -33,3 +33,10 @@ Compilacao e testes
 
 Para abrir a interface:
   java -cp bin App
+
+Autores
+-------
+- Raul Kolaric
+- Liam Lopes
+- Rafael Infantini
+- Guilherme Coutinho
