@@ -12,7 +12,7 @@ Uso
    - reta, retangulo e circulo: dois pontos;
    - triangulo: tres pontos;
    - ponto: um ponto.
-4. Informe a espessura antes de criar o primitivo. Os primitivos sao desenhados em preto.
+4. Escolha a cor e informe a espessura antes de criar o primitivo.
 5. Para circulos, escolha entre equacao reduzida, parametrico ou simetria.
 6. Use Redesenhar para reconstruir a cena armazenada em memoria.
 

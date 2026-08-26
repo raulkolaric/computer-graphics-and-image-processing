@@ -41,6 +41,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     private TiposPrimitivos tipo;
     private RenderizadorPrimitivos renderizador;
+    private Color corAtual = Color.BLACK;
     private int espessuraAtual = 1;
     private AlgoritmoCirculo algoritmoCirculo = AlgoritmoCirculo.SIMETRIA_OCTANTES;
 
@@ -117,6 +118,24 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
      */
     public boolean getModoCirculo() {
         return tipo == TiposPrimitivos.CIRCULO;
+    }
+
+    /** Define a cor usada nos novos primitivos.
+     * @param corAtual nova cor
+     * @throws IllegalArgumentException se a cor for nula
+     */
+    public void setCorAtual(Color corAtual) {
+        if (corAtual == null) {
+            throw new IllegalArgumentException("A cor nao pode ser nula");
+        }
+        this.corAtual = corAtual;
+    }
+
+    /** Retorna a cor usada nos novos primitivos.
+     * @return cor atual
+     */
+    public Color getCorAtual() {
+        return corAtual;
     }
 
     /** Define a espessura usada nos novos primitivos.
@@ -264,7 +283,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
         if (tipo == TiposPrimitivos.PONTO) {
             int diametro = Math.max(4, espessuraAtual + 2);
-            PontoGr pontoGr = new PontoGr(e.getX(), e.getY(), Color.BLACK,
+            PontoGr pontoGr = new PontoGr(e.getX(), e.getY(), corAtual,
                        "p" + pontos.size(), diametro);
             pontos.add(pontoGr);
             pontosVisiveis.add(pontoGr);
@@ -291,7 +310,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     private void criarPrimitivoPendente() {
-        EstiloReta estilo = new EstiloReta(Color.BLACK, espessuraAtual);
+        EstiloReta estilo = new EstiloReta(corAtual, espessuraAtual);
         Ponto p1 = pontosPendentes.get(0);
         Ponto p2 = pontosPendentes.get(1);
 

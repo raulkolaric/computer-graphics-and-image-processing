@@ -40,6 +40,7 @@ public class TestaPrimitivos {
         testarCirculos();
         testarArmazenamentoERedesenho();
         testarEntradaMouse();
+        testarCorDaEntradaMouse();
         testarTrocaDeRenderizador();
         System.out.println("TestaPrimitivos: todos os testes passaram");
     }
@@ -231,6 +232,16 @@ public class TestaPrimitivos {
             "troca de modo descarta ponto pendente");
         clicar(painel, 15, 15);
         verificar(painel.getQuantidadePrimitivos() == 3, "retangulo criado");
+    }
+
+    private static void testarCorDaEntradaMouse() {
+        PainelDesenho painel = new PainelDesenho(new JLabel(), TiposPrimitivos.RETA);
+        painel.setCorAtual(Color.BLUE);
+        clicar(painel, 10, 10);
+        clicar(painel, 30, 30);
+
+        RetaGrafica reta = (RetaGrafica)painel.getPrimitivos().get(0);
+        verificar(reta.getCor().equals(Color.BLUE), "cor selecionada aplicada ao primitivo");
     }
 
     private static void testarTrocaDeRenderizador() {
