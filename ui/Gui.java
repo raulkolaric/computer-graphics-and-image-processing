@@ -11,14 +11,16 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JColorChooser;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.JPanel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.BoxLayout;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
 
 import circulo.AlgoritmoCirculo;
 
@@ -142,12 +144,17 @@ public class Gui extends JFrame {
             } else if (origem == jtCirculo) {
                 areaDesenho.setTipo(TiposPrimitivos.CIRCULO);
             } else if (origem == jbCor) {
-                Color selecionada = JColorChooser.showDialog(
-                    Gui.this, "Cor dos proximos primitivos", areaDesenho.getCorAtual());
-                if (selecionada != null) {
-                    areaDesenho.setCorAtual(selecionada);
-                    jbCor.setBackground(selecionada);
-                }
+                JColorChooser seletor = new JColorChooser(areaDesenho.getCorAtual());
+                AbstractColorChooserPanel[] paineis = seletor.getChooserPanels();
+                seletor.setChooserPanels(new AbstractColorChooserPanel[] { paineis[0] });
+                seletor.setPreviewPanel(new JPanel());
+                JDialog dialogo = JColorChooser.createDialog(Gui.this,
+                    "Cor dos proximos primitivos", true, seletor, confirmacao -> {
+                        Color selecionada = seletor.getColor();
+                        areaDesenho.setCorAtual(selecionada);
+                        jbCor.setBackground(selecionada);
+                    }, null);
+                dialogo.setVisible(true);
             } else if (origem == jbRedesenhar) {
                 Object filtro = jcFiltroRedesenho.getSelectedItem();
                 areaDesenho.redesenhar(filtro instanceof TiposPrimitivos
