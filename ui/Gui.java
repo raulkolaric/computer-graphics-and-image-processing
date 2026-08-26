@@ -62,6 +62,10 @@ public class Gui extends JFrame {
         super("Primitivos Graficos");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        barraComandos.setFloatable(false);
+        barraEstilo.setFloatable(false);
+        barraCena.setFloatable(false);
+
         ButtonGroup modos = new ButtonGroup();
         modos.add(jtPonto);
         modos.add(jtReta);
