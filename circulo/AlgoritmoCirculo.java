@@ -1,7 +1,7 @@
 package circulo;
 
 /**
- * Algoritmos manuais disponiveis para rasterizar a circunferencia.
+ * Algoritmos manuais disponíveis para rasterizar uma circunferência.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24

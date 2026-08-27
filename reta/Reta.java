@@ -46,7 +46,9 @@ public class Reta {
         this.p2 = copiarPonto(p2, "P2");
     }
     
-    /** Cria uma copia da reta informada.
+    /**
+     * Cria uma cópia da reta informada.
+     *
      * @param r reta a copiar
      * @throws IllegalArgumentException se a reta for nula
      */

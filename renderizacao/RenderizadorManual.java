@@ -45,8 +45,8 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
             return;
         }
 
-        // A grade grafica usa coordenadas inteiras; a equacao e calculada
-        // entre os extremos ja convertidos para pixels.
+        // A grade gráfica usa coordenadas inteiras; a equação é calculada
+        // entre os extremos já convertidos para pixels.
         Reta retaRaster = new Reta(x1, y1, x2, y2);
         double m = retaRaster.calcularM();
         double b = retaRaster.calcularB();

@@ -22,7 +22,7 @@ import javax.swing.BoxLayout;
 import circulo.AlgoritmoCirculo;
 
 /**
- * Janela de edicao dos primitivos graficos.
+ * Janela de edição dos primitivos gráficos.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
@@ -50,7 +50,9 @@ public class Gui extends JFrame {
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
 
-    /** Cria e exibe a janela da aplicação.
+    /**
+     * Cria e exibe a janela da aplicação.
+     *
      * @param larg largura da janela em pixels
      * @param alt altura da janela em pixels
      */
