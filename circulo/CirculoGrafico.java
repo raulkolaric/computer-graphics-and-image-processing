@@ -55,13 +55,13 @@ public class CirculoGrafico extends Circulo implements PrimitivoGrafico {
         return algoritmo;
     }
 
-    /** @return cor do círculo */
+    /** {@inheritDoc} */
     @Override
     public Color getCor() {
         return estilo.getCor();
     }
 
-    /** @return espessura do círculo em pixels */
+    /** {@inheritDoc} */
     @Override
     public int getEspessura() {
         return estilo.getEspessura();

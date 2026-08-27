@@ -1,69 +1,83 @@
 package ponto;
 
 /**
- * Representa um ponto no plano cartesiano.
+ * Representa um ponto mutável no plano cartesiano bidimensional.
  * 
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
  */
-
 public class Ponto {
     private double x;
     private double y;
-    /** Cria o ponto na origem. */
+
+    /** Cria um ponto na origem, com coordenadas {@code (0, 0)}. */
     public Ponto() {
         setX(0);
         setY(0);
     }
 
-    /** Cria uma copia do ponto informado.
+    /**
+     * Cria uma cópia do ponto informado.
+     *
      * @param p ponto a copiar
      */
     public Ponto(Ponto p) {
         setX(p.getX());
         setY(p.getY());
     }
-    /** Cria um ponto com as coordenadas informadas.
-     * @param x coordenada horizontal
-     * @param y coordenada vertical
+
+    /**
+     * Cria um ponto com as coordenadas informadas.
+     *
+     * @param x coordenada no eixo horizontal
+     * @param y coordenada no eixo vertical
      */
     public Ponto(double x, double y) {
         setX(x);
         setY(y);
     }
-    
-    
-    /** Retorna a coordenada horizontal.
-     * @return coordenada horizontal
+
+    /**
+     * Retorna a coordenada horizontal.
+     *
+     * @return coordenada horizontal deste ponto
      */
     public double getX() {
         return x;
     }
-    /** Define a coordenada horizontal.
+
+    /**
+     * Define a coordenada horizontal.
+     *
      * @param x nova coordenada horizontal
      */
     public void setX(double x) {
         this.x = x;
     }
-    /** Retorna a coordenada vertical.
-     * @return coordenada vertical
+
+    /**
+     * Retorna a coordenada vertical.
+     *
+     * @return coordenada vertical deste ponto
      */
     public double getY() {
         return y;
     }
-    /** Define a coordenada vertical.
+
+    /**
+     * Define a coordenada vertical.
+     *
      * @param y nova coordenada vertical
      */
     public void setY(double y) {
         this.y = y;
     }
-    
+
     /**
-     * Calcula a distancia euclidiana até outro ponto.
+     * Calcula a distância euclidiana deste ponto até o ponto informado.
      * 
      * @param p ponto de destino
-     * @return distância entre os pontos
-     * 
+     * @return distância cartesiana entre os dois pontos
      */
     public double calcularDistancia(Ponto p) {
         
@@ -75,9 +89,9 @@ public class Ponto {
 
     
     /**
-     * Retorna as coordenadas do ponto em formato textual.
+     * Retorna a representação textual deste ponto.
      *
-     * @return coordenadas no formato {@code (x, y)}
+     * @return texto no formato {@code Ponto [x, y]}
      */
     @Override
     public String toString() {

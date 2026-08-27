@@ -63,13 +63,13 @@ public class Retangulo implements PrimitivoGrafico {
         return copiarRetas();
     }
 
-    /** @return cor das retas do retângulo */
+    /** {@inheritDoc} */
     @Override
     public Color getCor() {
         return estilo.getCor();
     }
 
-    /** @return espessura das retas, em pixels */
+    /** {@inheritDoc} */
     @Override
     public int getEspessura() {
         return estilo.getEspessura();

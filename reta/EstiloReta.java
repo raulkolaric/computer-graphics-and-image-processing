@@ -3,7 +3,7 @@ package reta;
 import java.awt.Color;
 
 /**
- * Cor e espessura compartilhadas pelos primitivos graficos.
+ * Cor e espessura compartilhadas pelos primitivos gráficos.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24

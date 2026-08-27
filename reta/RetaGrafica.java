@@ -57,13 +57,13 @@ public class RetaGrafica extends Reta implements PrimitivoGrafico {
         return estilo;
     }
 
-    /** @return cor do segmento */
+    /** {@inheritDoc} */
     @Override
     public Color getCor() {
         return estilo.getCor();
     }
 
-    /** @return espessura do segmento em pixels */
+    /** {@inheritDoc} */
     @Override
     public int getEspessura() {
         return estilo.getEspessura();

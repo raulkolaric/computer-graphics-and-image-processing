@@ -22,7 +22,7 @@ import ui.PainelDesenho;
 import ui.TiposPrimitivos;
 
 /**
- * Testes de regressao executaveis sem interface grafica.
+ * Testes de regressão executáveis sem abrir a interface gráfica.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
