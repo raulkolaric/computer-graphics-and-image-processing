@@ -1,0 +1,10 @@
+{
+  "versao": 1,
+  "pontos": [
+  ],
+  "primitivos": [
+    {"tipo": "reta", "pontos": [{"x": 225.0, "y": 180.0, "cor": "#FF000000"}, {"x": 577.0, "y": 225.0, "cor": "#FF000000"}], "cor": "#FF000000", "espessura": 1},
+    {"tipo": "reta", "pontos": [{"x": 369.0, "y": 341.0, "cor": "#FF000000"}, {"x": 111.0, "y": 265.0, "cor": "#FF000000"}], "cor": "#FF000000", "espessura": 1},
+    {"tipo": "reta", "pontos": [{"x": 451.0, "y": 95.0, "cor": "#FF000000"}, {"x": 449.0, "y": 273.0, "cor": "#FF000000"}], "cor": "#FF000000", "espessura": 1}
+  ]
+}

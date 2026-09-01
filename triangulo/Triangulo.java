@@ -37,6 +37,12 @@ public class Triangulo implements PrimitivoGrafico {
         return copiarRetas();
     }
 
+    /** Retorna os vertices originais do triangulo, na ordem de criacao. */
+    public List<Ponto> getVertices() {
+        return Collections.unmodifiableList(Arrays.asList(
+            retas.get(0).getP1(), retas.get(0).getP2(), retas.get(1).getP2()));
+    }
+
     @Override
     public Color getCor() {
         return estilo.getCor();

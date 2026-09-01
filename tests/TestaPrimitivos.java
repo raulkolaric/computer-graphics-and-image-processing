@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import javax.swing.JLabel;
@@ -33,6 +35,7 @@ public class TestaPrimitivos {
         testarArmazenamentoERedesenho();
         testarEntradaMouse();
         testarTrocaDeRenderizador();
+        testarPersistenciaJson();
         System.out.println("TestaPrimitivos: todos os testes passaram");
     }
 
@@ -223,6 +226,45 @@ public class TestaPrimitivos {
             new Reta(1, 1, 5, 5));
         verificar(contador.retas == 5, "fachada legada permite trocar o renderizador");
         FiguraPontos.setRenderizador(RENDERIZADOR);
+    }
+
+    private static void testarPersistenciaJson() {
+        Path arquivo = null;
+        try {
+            arquivo = Files.createTempFile("projeto-primitivos-", ".json");
+            PainelDesenho original = new PainelDesenho(new JLabel(), TiposPrimitivos.PONTO);
+            original.setCorAtual(Color.BLUE);
+            original.setEspessuraAtual(4);
+            clicar(original, 11, 12);
+            original.adicionarPrimitivo(new RetaGrafica(new Ponto(1, 2), new Ponto(30, 40),
+                Color.RED, 2));
+            original.adicionarPrimitivo(new Retangulo(new Ponto(3, 4), new Ponto(20, 30),
+                Color.GREEN, 3));
+            original.adicionarPrimitivo(new Triangulo(new Ponto(4, 5), new Ponto(10, 20),
+                new Ponto(30, 6), Color.MAGENTA, 2));
+            original.adicionarPrimitivo(new CirculoGrafico(new Ponto(40, 40), new Ponto(55, 40),
+                Color.ORANGE, 5, AlgoritmoCirculo.PARAMETRICO));
+            original.salvarProjeto(arquivo);
+            verificar(Files.readString(arquivo).contains("\"primitivos\""), "arquivo JSON criado");
+
+            PainelDesenho recarregado = new PainelDesenho(new JLabel(), TiposPrimitivos.NENHUM);
+            recarregado.carregarProjeto(arquivo);
+            verificar(recarregado.getQuantidadePontos() == 1, "ponto restaurado do JSON");
+            verificar(recarregado.getQuantidadePrimitivos() == 4, "formas restauradas do JSON");
+            verificar(recarregado.getPrimitivos().get(0) instanceof RetaGrafica, "reta restaurada");
+            verificar(recarregado.getPrimitivos().get(1) instanceof Retangulo, "retangulo restaurado");
+            verificar(recarregado.getPrimitivos().get(2) instanceof Triangulo, "triangulo restaurado");
+            CirculoGrafico circulo = (CirculoGrafico)recarregado.getPrimitivos().get(3);
+            verificar(circulo.getAlgoritmo() == AlgoritmoCirculo.PARAMETRICO, "algoritmo do circulo restaurado");
+            verificar(circulo.getEspessura() == 5 && circulo.getCor().equals(Color.ORANGE),
+                "estilo do circulo restaurado");
+        } catch (Exception erro) {
+            throw new AssertionError("persistencia JSON", erro);
+        } finally {
+            if (arquivo != null) {
+                try { Files.deleteIfExists(arquivo); } catch (Exception ignorado) { }
+            }
+        }
     }
 
     private static void clicar(PainelDesenho painel, int x, int y) {

@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +24,7 @@ import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
+import persistencia.PersistenciaProjeto;
 
 /** Painel que recebe pontos pelo mouse, armazena a cena e a redesenha. */
 public class PainelDesenho extends JPanel implements MouseListener, MouseMotionListener {
@@ -142,6 +145,22 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     public int getQuantidadePontos() {
         return pontos.size();
+    }
+
+    /** Salva a cena atual no arquivo informado, sem alterar o desenho em tela. */
+    public void salvarProjeto(Path arquivo) throws IOException {
+        PersistenciaProjeto.salvar(arquivo, pontos, primitivos);
+    }
+
+    /** Substitui a cena pela cena valida armazenada no arquivo informado. */
+    public void carregarProjeto(Path arquivo) throws IOException {
+        PersistenciaProjeto.Cena cena = PersistenciaProjeto.carregar(arquivo);
+        pontos.clear();
+        pontos.addAll(cena.getPontos());
+        primitivos.clear();
+        primitivos.addAll(cena.getPrimitivos());
+        pontosPendentes.clear();
+        repaint();
     }
 
     public void limpar() {

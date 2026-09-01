@@ -42,6 +42,16 @@ public class Retangulo implements PrimitivoGrafico {
         return copiarRetas();
     }
 
+    /** Retorna os dois cantos opostos que definem o retangulo. */
+    public Ponto getCanto1() {
+        return retas.get(0).getP1();
+    }
+
+    /** Retorna os dois cantos opostos que definem o retangulo. */
+    public Ponto getCanto2() {
+        return retas.get(2).getP1();
+    }
+
     @Override
     public Color getCor() {
         return estilo.getCor();
