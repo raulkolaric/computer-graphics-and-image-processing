@@ -42,6 +42,8 @@ public class Gui extends JFrame {
     private final JButton jbCor = new JButton("Cor");
     private final JButton jbRedesenhar = new JButton("Redesenhar");
     private final JButton jbLimpar = new JButton("Limpar");
+    private final JButton jbSalvar = new JButton("Salvar projeto");
+    private final JButton jbRecarregar = new JButton("Recarregar projeto");
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
     private final JComboBox<AlgoritmoCirculo> jcAlgoritmo =
         new JComboBox<AlgoritmoCirculo>(AlgoritmoCirculo.values());
@@ -53,6 +55,7 @@ public class Gui extends JFrame {
     private final JToolBar barraCena = new JToolBar();
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
+    private final Path arquivoProjeto = Path.of("projeto-anterior.json").toAbsolutePath();
 
     /**
      * Cria e exibe a janela da aplicação.
@@ -121,6 +124,8 @@ public class Gui extends JFrame {
         jbCor.addActionListener(eventos);
         jbRedesenhar.addActionListener(eventos);
         jbLimpar.addActionListener(eventos);
+        jbSalvar.addActionListener(eventos);
+        jbRecarregar.addActionListener(eventos);
         jsEspessura.addChangeListener(event ->
             areaDesenho.setEspessuraAtual((Integer)jsEspessura.getValue()));
         jcAlgoritmo.addActionListener(event -> areaDesenho.setAlgoritmoCirculo(
@@ -130,6 +135,7 @@ public class Gui extends JFrame {
         jtPonto.setSelected(true);
         areaDesenho.setTipo(TiposPrimitivos.PONTO);
         jbCor.setBackground(Color.BLACK);
+        atualizarDisponibilidadeRecarga();
         setSize(larg, alt);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -169,7 +175,31 @@ public class Gui extends JFrame {
             } else if (origem == jbLimpar) {
                 areaDesenho.limpar();
                 msg.setText("Cena limpa");
+            } else if (origem == jbSalvar) {
+                try {
+                    areaDesenho.salvarProjeto(arquivoProjeto);
+                    atualizarDisponibilidadeRecarga();
+                    msg.setText("Projeto salvo em " + arquivoProjeto.getFileName());
+                } catch (IOException erro) {
+                    mostrarErro("Nao foi possivel salvar o projeto", erro);
+                }
+            } else if (origem == jbRecarregar) {
+                try {
+                    areaDesenho.carregarProjeto(arquivoProjeto);
+                    msg.setText("Projeto anterior recarregado");
+                } catch (IOException erro) {
+                    mostrarErro("Nao foi possivel recarregar o projeto", erro);
+                }
             }
         }
+    }
+
+    private void atualizarDisponibilidadeRecarga() {
+        jbRecarregar.setEnabled(Files.isRegularFile(arquivoProjeto));
+    }
+
+    private void mostrarErro(String titulo, IOException erro) {
+        msg.setText(titulo + ": " + erro.getMessage());
+        JOptionPane.showMessageDialog(this, erro.getMessage(), titulo, JOptionPane.ERROR_MESSAGE);
     }
 }

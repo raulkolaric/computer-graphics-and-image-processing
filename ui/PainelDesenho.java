@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +24,7 @@ import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
+import persistencia.PersistenciaProjeto;
 
 /**
  * Painel que recebe pontos pelo mouse, armazena a cena e a redesenha.

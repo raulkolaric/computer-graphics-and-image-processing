@@ -15,6 +15,9 @@ Uso
 4. Escolha a cor e informe a espessura antes de criar o primitivo.
 5. Para circulos, escolha entre equacao reduzida, parametrico ou simetria.
 6. Use Redesenhar para reconstruir a cena armazenada em memoria.
+7. Use Salvar projeto para gravar a cena em `projeto-anterior.json`. Ao abrir a
+   aplicacao, Recarregar projeto fica habilitado se esse arquivo existir; ele
+   restaura pontos, formas, coordenadas, cor, espessura e algoritmo do circulo.
 
 Arquitetura
 -----------
@@ -22,6 +25,7 @@ Arquitetura
 - RetaGrafica e CirculoGrafico acrescentam estilo e renderizacao.
 - Retangulo e Triangulo sao compostos exclusivamente por RetaGrafica.
 - PainelDesenho armazena uma lista dinamica de PrimitivoGrafico.
+- PersistenciaProjeto grava e le a cena no formato JSON, sem dependencia externa.
 - RenderizadorPrimitivos isola o mecanismo de desenho. Atualmente a
   implementacao manual usa a equacao reduzida da reta e algoritmos manuais
   de circulo. Uma implementacao de biblioteca pode ser injetada no painel.
