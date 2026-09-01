@@ -12,7 +12,7 @@ Uso
    - reta, retangulo e circulo: dois pontos;
    - triangulo: tres pontos;
    - ponto: um ponto.
-4. Escolha a cor e a espessura antes de criar o primitivo.
+4. Escolha a cor e informe a espessura antes de criar o primitivo.
 5. Para circulos, escolha entre equacao reduzida, parametrico ou simetria.
 6. Use Redesenhar para reconstruir a cena armazenada em memoria.
 7. Use Salvar projeto para gravar a cena em `projeto-anterior.json`. Ao abrir a
@@ -33,7 +33,14 @@ Arquitetura
 Compilacao e testes
 -------------------
   javac -d bin *.java */*.java
-  java -ea -Djava.awt.headless=true -cp bin TestaPrimitivos
+  java -ea -Djava.awt.headless=true -cp bin tests.TestaPrimitivos
 
 Para abrir a interface:
   java -cp bin App
+
+Autores
+-------
+- Raul Kolaric
+- Liam Lopes
+- Rafael Infantini
+- Guilherme Coutinho

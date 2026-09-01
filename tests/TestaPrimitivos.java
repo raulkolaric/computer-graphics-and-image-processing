@@ -23,10 +23,18 @@ import triangulo.Triangulo;
 import ui.PainelDesenho;
 import ui.TiposPrimitivos;
 
-/** Testes de regressao executaveis sem interface grafica. */
+/**
+ * Testes de regressão executáveis sem abrir a interface gráfica.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class TestaPrimitivos {
     private static final RenderizadorManual RENDERIZADOR = new RenderizadorManual();
 
+    /** Executa todos os testes de regressão.
+     * @param args argumentos da linha de comando, não utilizados
+     */
     public static void main(String[] args) {
         testarRetaMatematica();
         testarDirecoesDaReta();
@@ -34,6 +42,7 @@ public class TestaPrimitivos {
         testarCirculos();
         testarArmazenamentoERedesenho();
         testarEntradaMouse();
+        testarCorDaEntradaMouse();
         testarTrocaDeRenderizador();
         testarPersistenciaJson();
         System.out.println("TestaPrimitivos: todos os testes passaram");
@@ -102,6 +111,10 @@ public class TestaPrimitivos {
             rejeitouExtrema = true;
         }
         verificar(rejeitouExtrema, "reta extrema e rejeitada sem travar o rasterizador");
+
+        new RetaGrafica(new Ponto(Integer.MIN_VALUE, 0),
+            new Ponto(Integer.MIN_VALUE + 1, 0), Color.BLACK, 3)
+            .desenhar(novaImagem().getGraphics(), RENDERIZADOR);
     }
 
     private static void testarPrimitivosCompostos() {
@@ -183,6 +196,21 @@ public class TestaPrimitivos {
         painel.paint(g2);
         g2.dispose();
         verificar(checksum(primeira) == checksum(segunda), "redesenho deterministico da cena");
+
+        painel.limpar();
+        BufferedImage limpa = novaImagem();
+        Graphics g3 = limpa.getGraphics();
+        painel.paint(g3);
+        g3.dispose();
+        verificar(painel.getQuantidadePrimitivos() == 120,
+            "limpar nao remove primitivos da estrutura de dados");
+        painel.redesenhar();
+        BufferedImage restaurada = novaImagem();
+        Graphics g4 = restaurada.getGraphics();
+        painel.paint(g4);
+        g4.dispose();
+        verificar(checksum(primeira) == checksum(restaurada),
+            "redesenhar restaura a cena armazenada");
     }
 
     private static void testarEntradaMouse() {
@@ -207,6 +235,16 @@ public class TestaPrimitivos {
             "troca de modo descarta ponto pendente");
         clicar(painel, 15, 15);
         verificar(painel.getQuantidadePrimitivos() == 3, "retangulo criado");
+    }
+
+    private static void testarCorDaEntradaMouse() {
+        PainelDesenho painel = new PainelDesenho(new JLabel(), TiposPrimitivos.RETA);
+        painel.setCorAtual(Color.BLUE);
+        clicar(painel, 10, 10);
+        clicar(painel, 30, 30);
+
+        RetaGrafica reta = (RetaGrafica)painel.getPrimitivos().get(0);
+        verificar(reta.getCor().equals(Color.BLUE), "cor selecionada aplicada ao primitivo");
     }
 
     private static void testarTrocaDeRenderizador() {

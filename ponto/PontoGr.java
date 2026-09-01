@@ -3,18 +3,23 @@ package ponto;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * Ponto com cor de desenho, rótulo e diâmetro.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class PontoGr extends Ponto {
-    Color corPto = Color.BLACK; // cor do ponto
-    String nomePto = ""; // nome do ponto
-    Color corNomePto  = Color.BLACK; // cor do nome (string) do ponto  
-    int diametro = 1; // diametro do ponto, default = 1
+    Color corPto = Color.BLACK; // Cor do ponto.
+    String nomePto = ""; // Rótulo do ponto.
+    Color corNomePto  = Color.BLACK; // Cor do rótulo.
+    int diametro = 1; // Diâmetro do ponto em pixels.
  
-    // Construtores
     /**
-     * PontoGr Constructor
+     * Cria um ponto gráfico nas coordenadas informadas.
      *
-     * @param x int coordenada x do ponto
-     * @param y int coordenada Y do ponto
+     * @param x coordenada X do ponto
+     * @param y coordenada Y do ponto
      */
     PontoGr(int x, int y){
         super((double)x, (double)y);
@@ -24,11 +29,11 @@ public class PontoGr extends Ponto {
     }
 
     /**
-     * PontoGr Constructor
+     * Cria um ponto gráfico com a cor informada.
      *
-     * @param x int coordenada x do ponto
-     * @param y int coordenada Y do ponto
-     * @param cor int cor do ponto
+     * @param x coordenada X do ponto
+     * @param y coordenada Y do ponto
+     * @param cor cor do ponto
      */
     PontoGr(int x, int y, Color cor){
         super((double)x, (double)y);
@@ -38,12 +43,12 @@ public class PontoGr extends Ponto {
     }
 
     /**
-     * Constroi um ponto na posicao x, y e com os atributos
+     * Cria um ponto gráfico com cor e diâmetro.
      * 
-     * @param x coordenada x
-     * @param y coordenada y
-     * @param corPonto corReta do ponto a ser construido
-     * @param diametro diametro do ponto
+     * @param x coordenada horizontal
+     * @param y coordenada vertical
+     * @param corPonto cor do ponto
+     * @param diametro diâmetro do ponto em pixels
      */
     public PontoGr(int x, int y, Color corPonto, int diametro){
         this(x, y, corPonto);
@@ -51,25 +56,25 @@ public class PontoGr extends Ponto {
     }
 
     /**
-     * Constroi um ponto na posicao x, y e com os atributos
+     * Cria um ponto gráfico com cor, rótulo e diâmetro.
      * 
-     * @param x coordenada x
-     * @param y coordenada y
-     * @param corPonto corReta do ponto a ser construido
-     * @param nomePonto nome do ponto
-     * @param diametro diametro do ponto
+     * @param x coordenada horizontal
+     * @param y coordenada vertical
+     * @param corPonto cor do ponto
+     * @param nomePonto rótulo do ponto
+     * @param diametro diâmetro do ponto em pixels
      */
     public PontoGr(int x, int y, Color corPonto, String nomePonto, int diametro){
         this(x, y, corPonto, diametro);
         setNomePto(nomePonto);
     }
     /**
-     * PontoGr Constructor
+     * Cria um ponto gráfico com rótulo.
      *
-     * @param x int coordenada x do ponto
-     * @param y int coordenada Y do ponto
-     * @param cor int cor do ponto
-     * @param str String nome do ponto
+     * @param x coordenada X do ponto
+     * @param y coordenada Y do ponto
+     * @param cor cor do ponto
+     * @param str nome do ponto
      */
     PontoGr(int x, int y, Color cor, String str){
         super((double)x, (double)y);
@@ -79,10 +84,10 @@ public class PontoGr extends Ponto {
     }
 
     /**
-     * PontoGr Constructor
+     * Cria uma cópia do ponto gráfico com outra cor.
      *
-     * @param p2d PontoGr
-     * @param cor int cor do ponto
+     * @param p2d ponto gráfico a copiar
+     * @param cor nova cor do ponto
      */
     PontoGr(PontoGr p2d, Color cor){
         super(p2d);     
@@ -92,8 +97,7 @@ public class PontoGr extends Ponto {
     }
 
     /**
-     * PontoGr Constructor
-     *
+     * Cria um ponto gráfico na origem.
      */
     PontoGr(){
         super();     
@@ -104,72 +108,88 @@ public class PontoGr extends Ponto {
 
 
     /**
-     * @return the corPto
+     * Retorna a cor do ponto.
+     *
+     * @return cor do ponto
      */
     public Color getCorPto() {
         return corPto;
     }
 
     /**
-     * @param corPto the corPto to set
+     * Define a cor do ponto.
+     *
+     * @param corPto nova cor do ponto
      */
     public void setCorPto(Color corPto) {
         this.corPto = corPto;
     }
 
     /**
-     * @return the nomePto
+     * Retorna o rótulo do ponto.
+     *
+     * @return rótulo do ponto
      */
     public String getNomePto() {
         return nomePto;
     }
 
     /**
-     * @param nomePto the nomePto to set
+     * Define o rótulo do ponto.
+     *
+     * @param nomePto novo rótulo
      */
     public void setNomePto(String nomePto) {
         this.nomePto = nomePto;
     }
 
     /**
-     * @return the corNomePto
+     * Retorna a cor do rótulo.
+     *
+     * @return cor do rótulo
      */
     public Color getCorNomePto() {
         return corNomePto;
     }
 
     /**
-     * @param corNomePto the corNomePto to set
+     * Define a cor do rótulo.
+     *
+     * @param corNomePto nova cor do rótulo
      */
     public void setCorNomePto(Color corNomePto) {
         this.corNomePto = corNomePto;
     }
 
     /**
-     * @return the diametro
+     * Retorna o diâmetro em pixels.
+     *
+     * @return diâmetro do ponto
      */
     public int getDiametro() {
         return diametro;
     }
 
     /**
-     * @param diametro the diametro to set
+     * Define o diâmetro em pixels.
+     *
+     * @param diametro novo diâmetro
      */
     public void setDiametro(int diametro) {
         this.diametro = diametro;
     }
 
     /**
-     * desenha um ponto utilizando o oval 
+     * Desenha o ponto e seu rótulo.
      * 
-     * @param g contexto grafico
+     * @param g superfície de desenho
      */
     public void desenharPonto(Graphics g){
-        // desenha ponto como um oval
+        // Desenha o ponto como um círculo preenchido.
         g.setColor(getCorPto());
         g.fillOval((int)getX() -(getDiametro()/2), (int)getY() - (getDiametro()/2), getDiametro(), getDiametro());
 
-        // desenha nome do ponto
+        // Posiciona o rótulo à direita do ponto.
         g.setColor(getCorNomePto());
         g.drawString(getNomePto(), (int)getX() + getDiametro(), (int)getY());
     }

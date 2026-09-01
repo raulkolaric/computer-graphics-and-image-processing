@@ -6,11 +6,25 @@ import circulo.CirculoGrafico;
 import reta.Reta;
 import reta.RetaGrafica;
 
-/** Rasterizador que desenha os primitivos ponto a ponto, sem drawLine/drawOval. */
+/**
+ * Rasterizador que desenha os primitivos ponto a ponto.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class RenderizadorManual implements RenderizadorPrimitivos {
     private static final long MAX_PASSOS_RETA = 2_000_000L;
     private static final int MAX_RAIO = 100_000;
 
+    /** Cria um renderizador manual. */
+    public RenderizadorManual() {
+    }
+
+    /** Desenha uma reta sem usar {@code Graphics.drawLine}.
+     * @param g superfície de desenho
+     * @param reta reta a desenhar
+     * @throws IllegalArgumentException se as coordenadas excederem os limites de rasterização
+     */
     @Override
     public void desenharReta(Graphics g, RetaGrafica reta) {
         g.setColor(reta.getCor());
@@ -31,8 +45,8 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
             return;
         }
 
-        // A grade grafica usa coordenadas inteiras; a equacao e calculada
-        // entre os extremos ja convertidos para pixels.
+        // A grade gráfica usa coordenadas inteiras; a equação é calculada
+        // entre os extremos já convertidos para pixels.
         Reta retaRaster = new Reta(x1, y1, x2, y2);
         double m = retaRaster.calcularM();
         double b = retaRaster.calcularB();
@@ -56,6 +70,11 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
         }
     }
 
+    /** Desenha um círculo usando o algoritmo configurado no objeto.
+     * @param g superfície de desenho
+     * @param circulo círculo a desenhar
+     * @throws IllegalArgumentException se o raio ou as coordenadas excederem os limites de rasterização
+     */
     @Override
     public void desenharCirculo(Graphics g, CirculoGrafico circulo) {
         g.setColor(circulo.getCor());
@@ -146,7 +165,13 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
 
     private void plotar(Graphics g, int x, int y, int espessura) {
         int deslocamento = espessura / 2;
-        g.fillRect(x - deslocamento, y - deslocamento, espessura, espessura);
+        long esquerda = (long)x - deslocamento;
+        long topo = (long)y - deslocamento;
+        if (esquerda < Integer.MIN_VALUE || topo < Integer.MIN_VALUE
+                || esquerda > Integer.MAX_VALUE || topo > Integer.MAX_VALUE) {
+            return;
+        }
+        g.fillRect((int)esquerda, (int)topo, espessura, espessura);
     }
 
     private int converterCoordenada(double coordenada) {

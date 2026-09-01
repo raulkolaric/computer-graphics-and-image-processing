@@ -11,14 +11,20 @@ import reta.Reta;
 import reta.RetaGrafica;
 
 /**
- * Contem metodos para desenhar o ponto.
+ * Fachada legada para desenhar pontos, retas e círculos.
  * 
- * @author Julio
- * @version 20260803
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
  */
 public class FiguraPontos {
     private static RenderizadorPrimitivos renderizador = new RenderizadorManual();
 
+    /**
+     * Substitui o renderizador usado pelos métodos legados da fachada.
+     *
+     * @param novoRenderizador novo renderizador
+     * @throws IllegalArgumentException se o renderizador for nulo
+     */
     public static void setRenderizador(RenderizadorPrimitivos novoRenderizador) {
         if (novoRenderizador == null) {
             throw new IllegalArgumentException("O renderizador nao pode ser nulo");
@@ -26,12 +32,13 @@ public class FiguraPontos {
         renderizador = novoRenderizador;
     }
     /**
-     * desenharPonto - desenha ponto na posicao x,y
-     * @param g Graphics - contem funcoes graficas de biblioteca
-     * @param x int coordenada x do ponto
-     * @param y int coordenada Y do ponto
-     * @param nome String nome do ponto
-     * @param diametro int diametro do ponto
+     * Desenha um ponto com cor aleatória e o rótulo informado.
+     *
+     * @param g superfície de desenho
+     * @param x coordenada horizontal do ponto
+     * @param y coordenada vertical do ponto
+     * @param nome rótulo do ponto
+     * @param diametro diâmetro do ponto em pixels
      */
     public static void desenharPonto(Graphics g, int x, int y, String nome, int diametro){
             Color cor = new Color((int) (Math.random() * 256),  
@@ -42,19 +49,19 @@ public class FiguraPontos {
     }
 
     /**
-     * desenharPontosAleatorios - desenha varios pontos em posicoes aleatorias e cores aleatorias
+     * Desenha pontos com posições e cores aleatórias.
      *
-     * @param g Graphics - contem funcoes graficas de biblioteca
-     * @param qtde int numero de pontos a serem desenhados
-     * @param diametro dimensao do ponto
+     * @param g superfície de desenho
+     * @param qtde quantidade de pontos
+     * @param diametro diâmetro de cada ponto em pixels
      */
    public static void desenharPontosAleatorios(Graphics g, int qtde, int diametro){
 
         for(int i=0; i < qtde; i++) {
-            int x = (int) (Math.random() * 701); // 701 e 601 largura e altura da janela (em pixels)
+            int x = (int) (Math.random() * 701); // Limites da janela em pixels.
             int y = (int) (Math.random() * 601);
 
-            // R, G e B aleatorio
+            // Sorteia separadamente os componentes RGB.
             Color cor = new Color((int) (Math.random() * 256),  
                     (int) (Math.random() * 256),  
                     (int) (Math.random() * 256));
@@ -64,10 +71,10 @@ public class FiguraPontos {
     }
 
     /**
-     * desenharReta - desenha uma reta entre dois pontos
+     * Desenha a reta com o renderizador configurado.
      *
-     * @param g Graphics - contem funcoes graficas de biblioteca
-     * @param reta Reta - reta a ser desenhada
+     * @param g superfície de desenho
+     * @param reta reta a desenhar
      */
     public static void desenharReta(Graphics g, Reta reta){
         RetaGrafica grafica;
@@ -80,10 +87,10 @@ public class FiguraPontos {
     }
 
     /**
-     * desenharCirculo - desenha um circulo a partir de seu centro e raio
+     * Desenha o círculo com o renderizador configurado.
      *
-     * @param g Graphics - contexto grafico
-     * @param circulo Circulo - circulo a ser desenhado
+     * @param g superfície de desenho
+     * @param circulo círculo a desenhar
      */
     public static void desenharCirculo(Graphics g, Circulo circulo){
         CirculoGrafico grafico;

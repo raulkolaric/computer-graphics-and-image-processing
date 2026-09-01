@@ -26,13 +26,20 @@ import reta.RetaGrafica;
 import triangulo.Triangulo;
 import persistencia.PersistenciaProjeto;
 
-/** Painel que recebe pontos pelo mouse, armazena a cena e a redesenha. */
+/**
+ * Painel que recebe pontos pelo mouse, armazena a cena e a redesenha.
+ *
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
+ */
 public class PainelDesenho extends JPanel implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;
 
     private final JLabel msg;
     private final List<PontoGr> pontos = new ArrayList<PontoGr>();
+    private final List<PontoGr> pontosVisiveis = new ArrayList<PontoGr>();
     private final List<PrimitivoGrafico> primitivos = new ArrayList<PrimitivoGrafico>();
+    private final List<PrimitivoGrafico> primitivosVisiveis = new ArrayList<PrimitivoGrafico>();
     private final List<Ponto> pontosPendentes = new ArrayList<Ponto>();
 
     private TiposPrimitivos tipo;
@@ -41,10 +48,21 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     private int espessuraAtual = 1;
     private AlgoritmoCirculo algoritmoCirculo = AlgoritmoCirculo.SIMETRIA_OCTANTES;
 
+    /** Cria um painel usando o renderizador manual padrão.
+     * @param msg etiqueta usada para exibir mensagens
+     * @param tipo tipo de primitivo inicialmente selecionado
+     * @throws IllegalArgumentException se algum argumento for nulo
+     */
     public PainelDesenho(JLabel msg, TiposPrimitivos tipo) {
         this(msg, tipo, new RenderizadorManual());
     }
 
+    /** Cria um painel com o renderizador informado.
+     * @param msg etiqueta usada para exibir mensagens
+     * @param tipo tipo de primitivo inicialmente selecionado
+     * @param renderizador renderizador dos primitivos
+     * @throws IllegalArgumentException se algum argumento for nulo
+     */
     public PainelDesenho(JLabel msg, TiposPrimitivos tipo,
                           RenderizadorPrimitivos renderizador) {
         if (msg == null || tipo == null || renderizador == null) {
@@ -57,6 +75,10 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         addMouseMotionListener(this);
     }
 
+    /** Seleciona o tipo de primitivo e limpa pontos pendentes.
+     * @param tipo novo tipo de primitivo
+     * @throws IllegalArgumentException se o tipo for nulo
+     */
     public void setTipo(TiposPrimitivos tipo) {
         if (tipo == null) {
             throw new IllegalArgumentException("O tipo nao pode ser nulo");
@@ -66,26 +88,45 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         msg.setText("Modo: " + tipo);
     }
 
+    /** Retorna o tipo de primitivo selecionado.
+     * @return tipo selecionado
+     */
     public TiposPrimitivos getTipo() {
         return tipo;
     }
 
+    /** Ativa ou desativa o modo de criação de retas.
+     * @param ativo {@code true} para ativar o modo
+     */
     public void setModoReta(boolean ativo) {
         setTipo(ativo ? TiposPrimitivos.RETA : TiposPrimitivos.NENHUM);
     }
 
+    /** Verifica se o modo de reta está ativo.
+     * @return {@code true} se o modo de reta estiver ativo
+     */
     public boolean getModoReta() {
         return tipo == TiposPrimitivos.RETA;
     }
 
+    /** Ativa ou desativa o modo de criação de círculos.
+     * @param ativo {@code true} para ativar o modo
+     */
     public void setModoCirculo(boolean ativo) {
         setTipo(ativo ? TiposPrimitivos.CIRCULO : TiposPrimitivos.NENHUM);
     }
 
+    /** Verifica se o modo de círculo está ativo.
+     * @return {@code true} se o modo de círculo estiver ativo
+     */
     public boolean getModoCirculo() {
         return tipo == TiposPrimitivos.CIRCULO;
     }
 
+    /** Define a cor usada nos novos primitivos.
+     * @param corAtual nova cor
+     * @throws IllegalArgumentException se a cor for nula
+     */
     public void setCorAtual(Color corAtual) {
         if (corAtual == null) {
             throw new IllegalArgumentException("A cor nao pode ser nula");
@@ -93,10 +134,17 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.corAtual = corAtual;
     }
 
+    /** Retorna a cor usada nos novos primitivos.
+     * @return cor atual
+     */
     public Color getCorAtual() {
         return corAtual;
     }
 
+    /** Define a espessura usada nos novos primitivos.
+     * @param espessuraAtual nova espessura em pixels
+     * @throws IllegalArgumentException se a espessura for menor que um
+     */
     public void setEspessuraAtual(int espessuraAtual) {
         if (espessuraAtual < 1) {
             throw new IllegalArgumentException("A espessura deve ser maior ou igual a 1");
@@ -104,10 +152,17 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.espessuraAtual = espessuraAtual;
     }
 
+    /** Retorna a espessura usada nos novos primitivos.
+     * @return espessura atual
+     */
     public int getEspessuraAtual() {
         return espessuraAtual;
     }
 
+    /** Define o algoritmo usado para novos círculos.
+     * @param algoritmoCirculo novo algoritmo
+     * @throws IllegalArgumentException se o algoritmo for nulo
+     */
     public void setAlgoritmoCirculo(AlgoritmoCirculo algoritmoCirculo) {
         if (algoritmoCirculo == null) {
             throw new IllegalArgumentException("O algoritmo nao pode ser nulo");
@@ -115,10 +170,17 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.algoritmoCirculo = algoritmoCirculo;
     }
 
+    /** Retorna o algoritmo usado para novos círculos.
+     * @return algoritmo atual
+     */
     public AlgoritmoCirculo getAlgoritmoCirculo() {
         return algoritmoCirculo;
     }
 
+    /** Substitui o renderizador e solicita uma nova pintura.
+     * @param renderizador novo renderizador
+     * @throws IllegalArgumentException se o renderizador for nulo
+     */
     public void setRenderizador(RenderizadorPrimitivos renderizador) {
         if (renderizador == null) {
             throw new IllegalArgumentException("O renderizador nao pode ser nulo");
@@ -127,60 +189,93 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
+    /** Adiciona um primitivo à cena e solicita uma nova pintura.
+     * @param primitivo primitivo a adicionar
+     * @throws IllegalArgumentException se o primitivo for nulo
+     */
     public void adicionarPrimitivo(PrimitivoGrafico primitivo) {
         if (primitivo == null) {
             throw new IllegalArgumentException("O primitivo nao pode ser nulo");
         }
         primitivos.add(primitivo);
+        primitivosVisiveis.add(primitivo);
         repaint();
     }
 
+    /** Retorna uma visão não modificável dos primitivos da cena.
+     * A lista é uma cópia, mas seus elementos são as instâncias armazenadas.
+     * @return cópia não modificável da lista de primitivos armazenados
+     */
     public List<PrimitivoGrafico> getPrimitivos() {
         return Collections.unmodifiableList(new ArrayList<PrimitivoGrafico>(primitivos));
     }
 
+    /** Retorna a quantidade de primitivos armazenados.
+     * @return quantidade de primitivos
+     */
     public int getQuantidadePrimitivos() {
         return primitivos.size();
     }
 
+    /** Retorna a quantidade de pontos armazenados.
+     * @return quantidade de pontos
+     */
     public int getQuantidadePontos() {
         return pontos.size();
     }
 
-    /** Salva a cena atual no arquivo informado, sem alterar o desenho em tela. */
-    public void salvarProjeto(Path arquivo) throws IOException {
-        PersistenciaProjeto.salvar(arquivo, pontos, primitivos);
-    }
-
-    /** Substitui a cena pela cena valida armazenada no arquivo informado. */
-    public void carregarProjeto(Path arquivo) throws IOException {
-        PersistenciaProjeto.Cena cena = PersistenciaProjeto.carregar(arquivo);
-        pontos.clear();
-        pontos.addAll(cena.getPontos());
-        primitivos.clear();
-        primitivos.addAll(cena.getPrimitivos());
-        pontosPendentes.clear();
-        repaint();
-    }
-
+    /** Limpa a tela sem remover os primitivos armazenados na estrutura de dados. */
     public void limpar() {
-        pontos.clear();
-        primitivos.clear();
+        pontosVisiveis.clear();
+        primitivosVisiveis.clear();
         pontosPendentes.clear();
         repaint();
     }
 
+    /** Redesenha todos os primitivos armazenados. */
     public void redesenhar() {
+        redesenhar(null);
+    }
+
+    /** Redesenha somente os primitivos do tipo informado, ou todos se for nulo.
+     * @param filtro tipo a redesenhar
+     */
+    public void redesenhar(TiposPrimitivos filtro) {
+        primitivosVisiveis.clear();
+        pontosVisiveis.clear();
+        if (filtro == null) {
+            primitivosVisiveis.addAll(primitivos);
+            pontosVisiveis.addAll(pontos);
+        } else {
+            for (PrimitivoGrafico primitivo : primitivos) {
+                if (corresponde(primitivo, filtro)) {
+                    primitivosVisiveis.add(primitivo);
+                }
+            }
+            if (filtro == TiposPrimitivos.PONTO) {
+                pontosVisiveis.addAll(pontos);
+            }
+        }
         repaint();
+    }
+
+    private boolean corresponde(PrimitivoGrafico primitivo, TiposPrimitivos filtro) {
+        switch (filtro) {
+            case RETA: return primitivo instanceof RetaGrafica;
+            case RETANGULO: return primitivo instanceof Retangulo;
+            case TRIANGULO: return primitivo instanceof Triangulo;
+            case CIRCULO: return primitivo instanceof CirculoGrafico;
+            default: return false;
+        }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (PrimitivoGrafico primitivo : primitivos) {
+        for (PrimitivoGrafico primitivo : primitivosVisiveis) {
             primitivo.desenhar(g, renderizador);
         }
-        for (PontoGr ponto : pontos) {
+        for (PontoGr ponto : pontosVisiveis) {
             ponto.desenharPonto(g);
         }
     }
@@ -191,8 +286,10 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
         if (tipo == TiposPrimitivos.PONTO) {
             int diametro = Math.max(4, espessuraAtual + 2);
-            pontos.add(new PontoGr(e.getX(), e.getY(), corAtual,
-                       "p" + pontos.size(), diametro));
+            PontoGr pontoGr = new PontoGr(e.getX(), e.getY(), corAtual,
+                       "p" + pontos.size(), diametro);
+            pontos.add(pontoGr);
+            pontosVisiveis.add(pontoGr);
             msg.setText("Ponto criado em (" + e.getX() + ", " + e.getY() + ")");
             repaint();
             return;
@@ -222,16 +319,16 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
         switch (tipo) {
             case RETA:
-                primitivos.add(new RetaGrafica(p1, p2, estilo));
+                adicionarPrimitivo(new RetaGrafica(p1, p2, estilo));
                 break;
             case RETANGULO:
-                primitivos.add(new Retangulo(p1, p2, estilo));
+                adicionarPrimitivo(new Retangulo(p1, p2, estilo));
                 break;
             case TRIANGULO:
-                primitivos.add(new Triangulo(p1, p2, pontosPendentes.get(2), estilo));
+                adicionarPrimitivo(new Triangulo(p1, p2, pontosPendentes.get(2), estilo));
                 break;
             case CIRCULO:
-                primitivos.add(new CirculoGrafico(p1, p2, estilo, algoritmoCirculo));
+                adicionarPrimitivo(new CirculoGrafico(p1, p2, estilo, algoritmoCirculo));
                 break;
             default:
                 throw new IllegalStateException("Tipo sem construcao por multiplos pontos: " + tipo);

@@ -3,12 +3,15 @@ package tests;
 import ponto.Ponto;
 
 /**
- * Write a description of class TestaPonto here.
+ * Executa um exemplo simples de criação e uso de pontos.
  *
- * @author (your name)
- * @version (a version number or a date)
+ * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+ * @version 2026/08/24
  */
 public class TestaPonto{
+    /** Executa o exemplo de pontos.
+     * @param args argumentos da linha de comando, não utilizados
+     */
     public static void main(String args[]) {
         Ponto p1 = new Ponto();
         Ponto p2 = new Ponto(1, 1);
