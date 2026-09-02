@@ -5,6 +5,9 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -14,6 +17,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
@@ -39,9 +43,11 @@ public class Gui extends JFrame {
     private final JToggleButton jtRetangulo = new JToggleButton("Retangulo");
     private final JToggleButton jtTriangulo = new JToggleButton("Triangulo");
     private final JToggleButton jtCirculo = new JToggleButton("Circulo");
+    private final JToggleButton jtSelecao = new JToggleButton("Selecionar");
     private final JButton jbCor = new JButton("Cor");
     private final JButton jbRedesenhar = new JButton("Redesenhar");
     private final JButton jbLimpar = new JButton("Limpar");
+    private final JButton jbExcluir = new JButton("Excluir selecionado");
     private final JButton jbSalvar = new JButton("Salvar projeto");
     private final JButton jbRecarregar = new JButton("Recarregar projeto");
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
@@ -77,6 +83,7 @@ public class Gui extends JFrame {
         modos.add(jtRetangulo);
         modos.add(jtTriangulo);
         modos.add(jtCirculo);
+        modos.add(jtSelecao);
 
         barraComandos.add(jtPonto);
         barraComandos.add(Box.createHorizontalStrut(4));
@@ -87,8 +94,10 @@ public class Gui extends JFrame {
         barraComandos.add(jtTriangulo);
         barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtCirculo);
+        barraComandos.add(Box.createHorizontalStrut(4));
+        barraComandos.add(jtSelecao);
         for (JToggleButton botao : new JToggleButton[] {
-                jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo }) {
+                jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo, jtSelecao }) {
             botao.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
             botao.setBorderPainted(true);
             botao.addItemListener(event -> botao.setBorder(BorderFactory.createLineBorder(
@@ -105,6 +114,9 @@ public class Gui extends JFrame {
         barraCena.add(jcFiltroRedesenho);
         barraCena.add(jbRedesenhar);
         barraCena.add(jbLimpar);
+        barraCena.add(jbExcluir);
+        barraCena.add(jbSalvar);
+        barraCena.add(jbRecarregar);
 
         JPanel menu = new JPanel();
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
@@ -121,9 +133,11 @@ public class Gui extends JFrame {
         jtRetangulo.addActionListener(eventos);
         jtTriangulo.addActionListener(eventos);
         jtCirculo.addActionListener(eventos);
+        jtSelecao.addActionListener(eventos);
         jbCor.addActionListener(eventos);
         jbRedesenhar.addActionListener(eventos);
         jbLimpar.addActionListener(eventos);
+        jbExcluir.addActionListener(eventos);
         jbSalvar.addActionListener(eventos);
         jbRecarregar.addActionListener(eventos);
         jsEspessura.addChangeListener(event ->
@@ -155,6 +169,8 @@ public class Gui extends JFrame {
                 areaDesenho.setTipo(TiposPrimitivos.TRIANGULO);
             } else if (origem == jtCirculo) {
                 areaDesenho.setTipo(TiposPrimitivos.CIRCULO);
+            } else if (origem == jtSelecao) {
+                areaDesenho.setTipo(TiposPrimitivos.SELECAO);
             } else if (origem == jbCor) {
                 JColorChooser seletor = new JColorChooser(areaDesenho.getCorAtual());
                 AbstractColorChooserPanel[] paineis = seletor.getChooserPanels();
@@ -175,6 +191,9 @@ public class Gui extends JFrame {
             } else if (origem == jbLimpar) {
                 areaDesenho.limpar();
                 msg.setText("Cena limpa");
+            } else if (origem == jbExcluir) {
+                msg.setText(areaDesenho.excluirSelecionado()
+                    ? "Primitivo excluido" : "Selecione um primitivo para excluir");
             } else if (origem == jbSalvar) {
                 try {
                     areaDesenho.salvarProjeto(arquivoProjeto);

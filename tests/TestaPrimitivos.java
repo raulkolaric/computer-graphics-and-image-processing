@@ -42,6 +42,8 @@ public class TestaPrimitivos {
         testarCirculos();
         testarArmazenamentoERedesenho();
         testarEntradaMouse();
+        testarElasticos();
+        testarSelecaoEExclusao();
         testarCorDaEntradaMouse();
         testarTrocaDeRenderizador();
         testarPersistenciaJson();
@@ -247,6 +249,65 @@ public class TestaPrimitivos {
         verificar(reta.getCor().equals(Color.BLUE), "cor selecionada aplicada ao primitivo");
     }
 
+    private static void testarElasticos() {
+        for (TiposPrimitivos tipo : new TiposPrimitivos[] {
+                TiposPrimitivos.RETA, TiposPrimitivos.RETANGULO, TiposPrimitivos.CIRCULO }) {
+            PainelDesenho painel = new PainelDesenho(new JLabel(), tipo);
+            painel.setSize(120, 120);
+            BufferedImage vazia = novaImagem();
+            Graphics gVazio = vazia.getGraphics();
+            painel.paint(gVazio);
+            gVazio.dispose();
+
+            clicar(painel, 15, 15);
+            mover(painel, 70, 55);
+            BufferedImage previa = novaImagem();
+            Graphics gPrevia = previa.getGraphics();
+            painel.paint(gPrevia);
+            gPrevia.dispose();
+            verificar(painel.getQuantidadePrimitivos() == 0,
+                tipo + " elastico nao armazena forma incompleta");
+            verificar(checksum(vazia) != checksum(previa), tipo + " exibe elastico");
+
+            clicar(painel, 70, 55);
+            verificar(painel.getQuantidadePrimitivos() == 1,
+                tipo + " confirma forma no segundo clique");
+        }
+    }
+
+    private static void testarSelecaoEExclusao() {
+        PainelDesenho painel = new PainelDesenho(new JLabel(), TiposPrimitivos.PONTO);
+        painel.setSize(140, 140);
+        clicar(painel, 10, 10);
+        painel.setTipo(TiposPrimitivos.SELECAO);
+        clicar(painel, 10, 10);
+        verificar(painel.temSelecao(), "ponto selecionado");
+        verificar(painel.excluirSelecionado() && painel.getQuantidadePontos() == 0,
+            "ponto selecionado excluido");
+
+        painel.adicionarPrimitivo(new RetaGrafica(
+            new Ponto(10, 20), new Ponto(60, 20), Color.BLACK, 1));
+        clicar(painel, 35, 20);
+        verificar(painel.excluirSelecionado(), "reta selecionada e excluida");
+
+        painel.adicionarPrimitivo(new Retangulo(
+            new Ponto(75, 10), new Ponto(120, 45), Color.BLACK, 1));
+        clicar(painel, 90, 25);
+        verificar(painel.excluirSelecionado(), "retangulo selecionado e excluido");
+
+        painel.adicionarPrimitivo(new Triangulo(new Ponto(10, 65),
+            new Ponto(60, 65), new Ponto(35, 110), Color.BLACK, 1));
+        clicar(painel, 35, 80);
+        verificar(painel.excluirSelecionado(), "triangulo selecionado e excluido");
+
+        painel.adicionarPrimitivo(new CirculoGrafico(new Ponto(100, 90),
+            new Ponto(120, 90), Color.BLACK, 1, AlgoritmoCirculo.SIMETRIA_OCTANTES));
+        clicar(painel, 100, 90);
+        verificar(painel.excluirSelecionado(), "circulo selecionado e excluido");
+        verificar(painel.getQuantidadePrimitivos() == 0,
+            "todos os primitivos selecionados foram removidos");
+    }
+
     private static void testarTrocaDeRenderizador() {
         ContadorRenderizador contador = new ContadorRenderizador();
         Retangulo retangulo = new Retangulo(new Ponto(1, 1), new Ponto(10, 10),
@@ -271,6 +332,7 @@ public class TestaPrimitivos {
         try {
             arquivo = Files.createTempFile("projeto-primitivos-", ".json");
             PainelDesenho original = new PainelDesenho(new JLabel(), TiposPrimitivos.PONTO);
+            original.setSize(120, 120);
             original.setCorAtual(Color.BLUE);
             original.setEspessuraAtual(4);
             clicar(original, 11, 12);
@@ -283,15 +345,19 @@ public class TestaPrimitivos {
             original.adicionarPrimitivo(new CirculoGrafico(new Ponto(40, 40), new Ponto(55, 40),
                 Color.ORANGE, 5, AlgoritmoCirculo.PARAMETRICO));
             original.salvarProjeto(arquivo);
-            verificar(Files.readString(arquivo).contains("\"primitivos\""), "arquivo JSON criado");
+            String json = Files.readString(arquivo);
+            verificar(json.contains("\"figura\"") && json.contains("\"reta\"")
+                && json.contains("\"id\": \"circulo_1\""),
+                "arquivo JSON criado no formato da atividade");
 
             PainelDesenho recarregado = new PainelDesenho(new JLabel(), TiposPrimitivos.NENHUM);
+            recarregado.setSize(120, 120);
             recarregado.carregarProjeto(arquivo);
             verificar(recarregado.getQuantidadePontos() == 1, "ponto restaurado do JSON");
             verificar(recarregado.getQuantidadePrimitivos() == 4, "formas restauradas do JSON");
             verificar(recarregado.getPrimitivos().get(0) instanceof RetaGrafica, "reta restaurada");
-            verificar(recarregado.getPrimitivos().get(1) instanceof Retangulo, "retangulo restaurado");
-            verificar(recarregado.getPrimitivos().get(2) instanceof Triangulo, "triangulo restaurado");
+            verificar(recarregado.getPrimitivos().get(1) instanceof Triangulo, "triangulo restaurado");
+            verificar(recarregado.getPrimitivos().get(2) instanceof Retangulo, "retangulo restaurado");
             CirculoGrafico circulo = (CirculoGrafico)recarregado.getPrimitivos().get(3);
             verificar(circulo.getAlgoritmo() == AlgoritmoCirculo.PARAMETRICO, "algoritmo do circulo restaurado");
             verificar(circulo.getEspessura() == 5 && circulo.getCor().equals(Color.ORANGE),
@@ -308,6 +374,11 @@ public class TestaPrimitivos {
     private static void clicar(PainelDesenho painel, int x, int y) {
         painel.mousePressed(new MouseEvent(painel, MouseEvent.MOUSE_PRESSED,
             System.currentTimeMillis(), 0, x, y, 1, false));
+    }
+
+    private static void mover(PainelDesenho painel, int x, int y) {
+        painel.mouseMoved(new MouseEvent(painel, MouseEvent.MOUSE_MOVED,
+            System.currentTimeMillis(), 0, x, y, 0, false));
     }
 
     private static BufferedImage novaImagem() {

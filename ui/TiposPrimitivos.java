@@ -17,6 +17,8 @@ public enum TiposPrimitivos {
     TRIANGULO(3),
     /** Um círculo. */
     CIRCULO(2),
+    /** Seleção de um primitivo existente. */
+    SELECAO(1),
     /** Nenhum primitivo selecionado. */
     NENHUM(0);
 
