@@ -19,6 +19,8 @@ import reta.RetaGrafica;
  * @version 2026/08/24
  */
 public class Retangulo implements PrimitivoGrafico {
+    private final Ponto canto1;
+    private final Ponto canto2;
     private final EstiloReta estilo;
     private final List<RetaGrafica> retas;
 
@@ -43,6 +45,8 @@ public class Retangulo implements PrimitivoGrafico {
         if (canto1 == null || canto2 == null || estilo == null) {
             throw new IllegalArgumentException("Pontos e estilo nao podem ser nulos");
         }
+        this.canto1 = new Ponto(canto1);
+        this.canto2 = new Ponto(canto2);
         this.estilo = estilo;
         Ponto superiorEsquerdo = new Ponto(canto1.getX(), canto1.getY());
         Ponto superiorDireito = new Ponto(canto2.getX(), canto1.getY());
@@ -61,6 +65,20 @@ public class Retangulo implements PrimitivoGrafico {
      */
     public List<RetaGrafica> getRetas() {
         return copiarRetas();
+    }
+
+    /** Retorna uma cópia defensiva do primeiro canto informado.
+     * @return primeiro canto usado para construir o retângulo
+     */
+    public Ponto getCanto1() {
+        return new Ponto(canto1);
+    }
+
+    /** Retorna uma cópia defensiva do canto oposto ao primeiro.
+     * @return segundo canto usado para construir o retângulo
+     */
+    public Ponto getCanto2() {
+        return new Ponto(canto2);
     }
 
     /** {@inheritDoc} */

@@ -20,6 +20,7 @@ import reta.RetaGrafica;
  */
 public class Triangulo implements PrimitivoGrafico {
     private final EstiloReta estilo;
+    private final List<Ponto> vertices;
     private final List<RetaGrafica> retas;
 
     /** Cria um triângulo com cor e espessura.
@@ -46,6 +47,8 @@ public class Triangulo implements PrimitivoGrafico {
             throw new IllegalArgumentException("Pontos e estilo nao podem ser nulos");
         }
         this.estilo = estilo;
+        this.vertices = Collections.unmodifiableList(Arrays.asList(
+            new Ponto(p1), new Ponto(p2), new Ponto(p3)));
         this.retas = Collections.unmodifiableList(Arrays.asList(
             new RetaGrafica(p1, p2, estilo),
             new RetaGrafica(p2, p3, estilo),
@@ -58,6 +61,14 @@ public class Triangulo implements PrimitivoGrafico {
      */
     public List<RetaGrafica> getRetas() {
         return copiarRetas();
+    }
+
+    /** Retorna cópias defensivas dos três vértices na ordem de construção.
+     * @return lista não modificável de novas instâncias dos vértices
+     */
+    public List<Ponto> getVertices() {
+        return Collections.unmodifiableList(Arrays.asList(
+            new Ponto(vertices.get(0)), new Ponto(vertices.get(1)), new Ponto(vertices.get(2))));
     }
 
     /** {@inheritDoc} */

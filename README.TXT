@@ -14,10 +14,15 @@ Uso
    - ponto: um ponto.
 4. Escolha a cor e informe a espessura antes de criar o primitivo.
 5. Para circulos, escolha entre equacao reduzida, parametrico ou simetria.
-6. Use Redesenhar para reconstruir a cena armazenada em memoria.
-7. Use Salvar projeto para gravar a cena em `projeto-anterior.json`. Ao abrir a
+6. Ao informar o primeiro ponto de uma reta, retangulo ou circulo, mova o mouse
+   para visualizar o elastico antes do segundo clique.
+7. Escolha Selecionar, clique em um primitivo e use Excluir selecionado para
+   remove-lo da cena.
+8. Use Redesenhar para reconstruir a cena armazenada em memoria.
+9. Use Salvar projeto para gravar a cena em `projeto-anterior.json`. Ao abrir a
    aplicacao, Recarregar projeto fica habilitado se esse arquivo existir; ele
-   restaura pontos, formas, coordenadas, cor, espessura e algoritmo do circulo.
+   restaura pontos, formas, coordenadas proporcionais a area de desenho, cor,
+   espessura e algoritmo do circulo no formato JSON da atividade.
 
 Arquitetura
 -----------
