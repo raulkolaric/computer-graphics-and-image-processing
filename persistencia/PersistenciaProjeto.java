@@ -22,18 +22,22 @@ import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
 
-/** Lê e grava a cena no formato JSON proposto para a atividade. */
+/** Grava e carrega cenas no formato JSON proposto para a atividade. */
 public final class PersistenciaProjeto {
     private PersistenciaProjeto() { }
 
-    /** Grava a cena usando coordenadas na escala informada.
+    /** Grava a cena com coordenadas normalizadas pela área de desenho.
+     * As coordenadas {@code x} e {@code y} são divididas, respectivamente, por
+     * {@code largura} e {@code altura} antes da gravação.
      * @param arquivo arquivo de destino
      * @param pontos pontos armazenados
      * @param primitivos formas armazenadas
-     * @param largura largura da área de desenho em pixels
-     * @param altura altura da área de desenho em pixels
+     * @param largura largura positiva da área de desenho em pixels
+     * @param altura altura positiva da área de desenho em pixels
      * @throws IOException se o arquivo não puder ser gravado
-     * @throws IllegalArgumentException se algum argumento for inválido
+     * @throws IllegalArgumentException se uma lista, o arquivo ou um ponto for
+     *         nulo, se houver um primitivo não suportado ou se alguma dimensão
+     *         não for positiva
      */
     public static void salvar(Path arquivo, List<PontoGr> pontos,
                               List<PrimitivoGrafico> primitivos,
@@ -75,12 +79,15 @@ public final class PersistenciaProjeto {
     }
 
     /** Carrega uma cena e converte coordenadas relativas para pixels.
-     * Também aceita o formato absoluto usado pela primeira versão da persistência.
+     * Aceita o formato atual e o formato absoluto usado pela primeira versão
+     * da persistência.
      * @param arquivo arquivo de origem
-     * @param largura largura da área de desenho em pixels
-     * @param altura altura da área de desenho em pixels
-     * @return cena carregada
+     * @param largura largura positiva da área de desenho em pixels
+     * @param altura altura positiva da área de desenho em pixels
+     * @return cena carregada com listas não modificáveis
      * @throws IOException se o arquivo não puder ser lido ou contiver dados inválidos
+     * @throws IllegalArgumentException se o arquivo for nulo ou alguma dimensão
+     *         não for positiva
      */
     public static Cena carregar(Path arquivo, int largura, int altura) throws IOException {
         if (arquivo == null) {
@@ -96,10 +103,11 @@ public final class PersistenciaProjeto {
         return carregarLegado(projeto);
     }
 
-    /** Carrega uma cena sem alterar a escala das coordenadas.
+    /** Carrega uma cena sem alterar a escala das coordenadas absolutas.
      * @param arquivo arquivo de origem
-     * @return cena carregada
+     * @return cena carregada com listas não modificáveis
      * @throws IOException se o arquivo não puder ser lido ou contiver dados inválidos
+     * @throws IllegalArgumentException se o arquivo for nulo
      */
     public static Cena carregar(Path arquivo) throws IOException {
         return carregar(arquivo, 1, 1);
@@ -295,16 +303,24 @@ public final class PersistenciaProjeto {
     private static int componente(Object valor, String nome) throws IOException { int resultado = numero(valor, nome); if (resultado < 0 || resultado > 255) throw new IOException("Componente de cor invalido: " + nome); return resultado; }
     private static Color corLegada(Map<String, Object> dado) throws IOException { String valor = texto(dado.get("cor"), "cor"); try { if (!valor.matches("#[0-9A-Fa-f]{8}")) throw new NumberFormatException(); return new Color((int)Long.parseLong(valor.substring(1), 16), true); } catch (NumberFormatException erro) { throw new IOException("Cor invalida", erro); } }
 
-    /** Cena reconstruída a partir de um arquivo JSON. */
+    /** Cena reconstruída a partir de um arquivo JSON.
+     *
+     * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
+     * @version 2026/08/24
+     */
     public static final class Cena {
         private final List<PontoGr> pontos;
         private final List<PrimitivoGrafico> primitivos;
         private Cena(List<PontoGr> pontos, List<PrimitivoGrafico> primitivos) { this.pontos = Collections.unmodifiableList(pontos); this.primitivos = Collections.unmodifiableList(primitivos); }
         /** Retorna os pontos carregados.
+         * A lista não pode ser alterada, mas seus elementos são as instâncias
+         * carregadas pela cena.
          * @return lista não modificável de pontos
          */
         public List<PontoGr> getPontos() { return pontos; }
         /** Retorna as formas carregadas.
+         * A lista não pode ser alterada, mas seus elementos são as instâncias
+         * carregadas pela cena.
          * @return lista não modificável de formas
          */
         public List<PrimitivoGrafico> getPrimitivos() { return primitivos; }

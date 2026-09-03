@@ -30,7 +30,8 @@ import triangulo.Triangulo;
 import persistencia.PersistenciaProjeto;
 
 /**
- * Painel que recebe pontos pelo mouse, armazena a cena e a redesenha.
+ * Painel que recebe pontos pelo mouse, armazena a cena, exibe prévias e
+ * permite selecionar, excluir e redesenhar os elementos.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
@@ -82,7 +83,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         addMouseMotionListener(this);
     }
 
-    /** Seleciona o tipo de primitivo e limpa pontos pendentes.
+    /** Seleciona o modo e descarta pontos pendentes e a seleção atual.
      * @param tipo novo tipo de primitivo
      * @throws IllegalArgumentException se o tipo for nulo
      */
@@ -133,7 +134,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return tipo == TiposPrimitivos.CIRCULO;
     }
 
-    /** Define a cor usada nos novos primitivos.
+    /** Define a cor usada somente nos novos primitivos.
      * @param corAtual nova cor
      * @throws IllegalArgumentException se a cor for nula
      */
@@ -151,7 +152,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return corAtual;
     }
 
-    /** Define a espessura usada nos novos primitivos.
+    /** Define a espessura usada somente nos novos primitivos.
      * @param espessuraAtual nova espessura em pixels
      * @throws IllegalArgumentException se a espessura for menor que um
      */
@@ -169,7 +170,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return espessuraAtual;
     }
 
-    /** Define o algoritmo usado para novos círculos.
+    /** Define o algoritmo usado somente nos novos círculos.
      * @param algoritmoCirculo novo algoritmo
      * @throws IllegalArgumentException se o algoritmo for nulo
      */
@@ -199,7 +200,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    /** Adiciona um primitivo à cena e solicita uma nova pintura.
+    /** Adiciona um primitivo à cena armazenada e visível e solicita pintura.
      * @param primitivo primitivo a adicionar
      * @throws IllegalArgumentException se o primitivo for nulo
      */
@@ -235,6 +236,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     /** Grava a cena no arquivo JSON usando as dimensões atuais do painel.
+     * As coordenadas são normalizadas pela largura e pela altura do painel.
      * @param arquivo arquivo de destino
      * @throws IOException se o arquivo não puder ser gravado
      * @throws IllegalArgumentException se o arquivo for nulo ou o painel não tiver dimensões válidas
@@ -243,7 +245,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         PersistenciaProjeto.salvar(arquivo, pontos, primitivos, getWidth(), getHeight());
     }
 
-    /** Substitui a cena pelo conteúdo de um arquivo JSON e solicita nova pintura.
+    /** Substitui a cena armazenada e visível pelo conteúdo de um arquivo JSON.
+     * Também descarta pontos pendentes e a seleção atual antes de solicitar
+     * uma nova pintura.
      * @param arquivo arquivo de origem
      * @throws IOException se o arquivo não puder ser lido ou contiver dados inválidos
      * @throws IllegalArgumentException se o arquivo for nulo ou o painel não tiver dimensões válidas
@@ -261,15 +265,17 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         redesenhar();
     }
 
-    /** Informa se existe um ponto ou uma forma selecionada.
+    /** Informa se existe um ponto ou uma forma visível selecionada.
      * @return {@code true} quando há uma seleção ativa
      */
     public boolean temSelecao() {
         return pontoSelecionado != null || primitivoSelecionado != null;
     }
 
-    /** Remove da cena o item selecionado.
-     * @return {@code true} quando um item foi removido
+    /** Remove da cena armazenada e da tela o item selecionado.
+     * A seleção é sempre desfeita e uma nova pintura é solicitada.
+     * @return {@code true} quando um item foi removido; {@code false} se não
+     *         havia item selecionado
      */
     public boolean excluirSelecionado() {
         boolean removeu = false;
@@ -285,7 +291,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return removeu;
     }
 
-    /** Limpa a tela sem remover os primitivos armazenados na estrutura de dados. */
+    /** Limpa a cena visível sem remover pontos ou primitivos armazenados.
+     * Também descarta pontos pendentes, a prévia e a seleção atual.
+     */
     public void limpar() {
         pontosVisiveis.clear();
         primitivosVisiveis.clear();
@@ -295,13 +303,15 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    /** Redesenha todos os primitivos armazenados. */
+    /** Redesenha todos os pontos e primitivos armazenados. */
     public void redesenhar() {
         redesenhar(null);
     }
 
-    /** Redesenha somente os primitivos do tipo informado, ou todos se for nulo.
-     * @param filtro tipo a redesenhar
+    /** Redesenha os elementos do tipo informado, ou todos se for {@code null}.
+     * O filtro {@link TiposPrimitivos#PONTO} exibe os pontos; os demais filtros
+     * exibem apenas os primitivos do tipo correspondente.
+     * @param filtro tipo a redesenhar, ou {@code null} para exibir tudo
      */
     public void redesenhar(TiposPrimitivos filtro) {
         limparSelecao();
@@ -333,6 +343,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         }
     }
 
+    /** {@inheritDoc}
+     * A pintura também inclui uma prévia incompleta e o destaque da seleção.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -346,6 +359,10 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         desenharSelecao(g);
     }
 
+    /** Processa um clique para criar um ponto, concluir uma forma ou selecionar
+     * um elemento, conforme o modo atual.
+     * @param e evento de mouse com as coordenadas do clique em pixels
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         Ponto ponto = new Ponto(e.getX(), e.getY());
@@ -554,6 +571,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         primitivoSelecionado = null;
     }
 
+    /** Atualiza a coordenada da prévia após o primeiro ponto de uma forma.
+     * @param e evento de movimento com a posição atual do mouse em pixels
+     */
     @Override
     public void mouseMoved(MouseEvent e) {
         msg.setText("(" + e.getX() + ", " + e.getY() + ")");
