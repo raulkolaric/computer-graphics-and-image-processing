@@ -29,7 +29,7 @@ import javax.swing.colorchooser.AbstractColorChooserPanel;
 import circulo.AlgoritmoCirculo;
 
 /**
- * Janela de edição dos primitivos gráficos.
+ * Janela de edição, seleção, exclusão e persistência dos primitivos gráficos.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
