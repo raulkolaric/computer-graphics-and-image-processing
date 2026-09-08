@@ -1,10 +1,15 @@
 package ui;
 
 import java.awt.Color;
+import java.awt.BasicStroke;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,15 +27,18 @@ import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
+import persistencia.PersistenciaProjeto;
 
 /**
- * Painel que recebe pontos pelo mouse, armazena a cena e a redesenha.
+ * Painel que recebe pontos pelo mouse, armazena a cena, exibe prévias e
+ * permite selecionar, excluir e redesenhar os elementos.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
  */
 public class PainelDesenho extends JPanel implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;
+    private static final double MARGEM_SELECAO = 5.0;
 
     private final JLabel msg;
     private final List<PontoGr> pontos = new ArrayList<PontoGr>();
@@ -41,8 +49,12 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     private TiposPrimitivos tipo;
     private RenderizadorPrimitivos renderizador;
-    private int espessuraAtual = 1;
+    private Ponto pontoPrevia;
+    private int alcaArrastada = -1;
+    private PontoGr pontoSelecionado;
+    private PrimitivoGrafico primitivoSelecionado;
     private Color corAtual = Color.BLACK;
+    private int espessuraAtual = 1;
     private AlgoritmoCirculo algoritmoCirculo = AlgoritmoCirculo.SIMETRIA_OCTANTES;
 
     /** Cria um painel usando o renderizador manual padrão.
@@ -74,7 +86,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         addMouseMotionListener(this);
     }
 
-    /** Seleciona o tipo de primitivo e limpa pontos pendentes.
+    /** Seleciona o modo e descarta pontos pendentes e a seleção atual.
      * @param tipo novo tipo de primitivo
      * @throws IllegalArgumentException se o tipo for nulo
      */
@@ -84,7 +96,10 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         }
         this.tipo = tipo;
         pontosPendentes.clear();
+        pontoPrevia = null;
+        limparSelecao();
         msg.setText("Modo: " + tipo);
+        repaint();
     }
 
     /** Retorna o tipo de primitivo selecionado.
@@ -122,7 +137,25 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return tipo == TiposPrimitivos.CIRCULO;
     }
 
-    /** Define a espessura usada nos novos primitivos.
+    /** Define a cor usada somente nos novos primitivos.
+     * @param corAtual nova cor
+     * @throws IllegalArgumentException se a cor for nula
+     */
+    public void setCorAtual(Color corAtual) {
+        if (corAtual == null) {
+            throw new IllegalArgumentException("A cor nao pode ser nula");
+        }
+        this.corAtual = corAtual;
+    }
+
+    /** Retorna a cor usada nos novos primitivos.
+     * @return cor atual
+     */
+    public Color getCorAtual() {
+        return corAtual;
+    }
+
+    /** Define a espessura usada somente nos novos primitivos.
      * @param espessuraAtual nova espessura em pixels
      * @throws IllegalArgumentException se a espessura for menor que um
      */
@@ -133,22 +166,6 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.espessuraAtual = espessuraAtual;
     }
 
-    /** Define a cor dos novos desenhos; figuras existentes conservam sua cor.
-     * Para figuras com varios cliques, vale a cor ao completar o ultimo ponto.
-     * @param cor nova cor RGB
-     */
-    public void setCorAtual(Color cor) {
-        if (cor == null) {
-            throw new IllegalArgumentException("A cor nao pode ser nula");
-        }
-        corAtual = cor;
-    }
-
-    /** @return cor selecionada para novos desenhos */
-    public Color getCorAtual() {
-        return corAtual;
-    }
-
     /** Retorna a espessura usada nos novos primitivos.
      * @return espessura atual
      */
@@ -156,7 +173,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return espessuraAtual;
     }
 
-    /** Define o algoritmo usado para novos círculos.
+    /** Define o algoritmo usado somente nos novos círculos.
      * @param algoritmoCirculo novo algoritmo
      * @throws IllegalArgumentException se o algoritmo for nulo
      */
@@ -186,7 +203,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    /** Adiciona um primitivo à cena e solicita uma nova pintura.
+    /** Adiciona um primitivo à cena armazenada e visível e solicita pintura.
      * @param primitivo primitivo a adicionar
      * @throws IllegalArgumentException se o primitivo for nulo
      */
@@ -221,23 +238,86 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return pontos.size();
     }
 
-    /** Limpa a tela sem remover os primitivos armazenados na estrutura de dados. */
+    /** Grava a cena no arquivo JSON usando as dimensões atuais do painel.
+     * As coordenadas são normalizadas pela largura e pela altura do painel.
+     * @param arquivo arquivo de destino
+     * @throws IOException se o arquivo não puder ser gravado
+     * @throws IllegalArgumentException se o arquivo for nulo ou o painel não tiver dimensões válidas
+     */
+    public void salvarProjeto(Path arquivo) throws IOException {
+        PersistenciaProjeto.salvar(arquivo, pontos, primitivos, getWidth(), getHeight());
+    }
+
+    /** Substitui a cena armazenada e visível pelo conteúdo de um arquivo JSON.
+     * Também descarta pontos pendentes e a seleção atual antes de solicitar
+     * uma nova pintura.
+     * @param arquivo arquivo de origem
+     * @throws IOException se o arquivo não puder ser lido ou contiver dados inválidos
+     * @throws IllegalArgumentException se o arquivo for nulo ou o painel não tiver dimensões válidas
+     */
+    public void carregarProjeto(Path arquivo) throws IOException {
+        PersistenciaProjeto.Cena cena = PersistenciaProjeto.carregar(
+            arquivo, getWidth(), getHeight());
+        pontos.clear();
+        pontos.addAll(cena.getPontos());
+        primitivos.clear();
+        primitivos.addAll(cena.getPrimitivos());
+        pontosPendentes.clear();
+        pontoPrevia = null;
+        limparSelecao();
+        redesenhar();
+    }
+
+    /** Informa se existe um ponto ou uma forma visível selecionada.
+     * @return {@code true} quando há uma seleção ativa
+     */
+    public boolean temSelecao() {
+        return pontoSelecionado != null || primitivoSelecionado != null;
+    }
+
+    /** Remove da cena armazenada e da tela o item selecionado.
+     * A seleção é sempre desfeita e uma nova pintura é solicitada.
+     * @return {@code true} quando um item foi removido; {@code false} se não
+     *         havia item selecionado
+     */
+    public boolean excluirSelecionado() {
+        boolean removeu = false;
+        if (pontoSelecionado != null) {
+            removeu = pontos.remove(pontoSelecionado);
+            pontosVisiveis.remove(pontoSelecionado);
+        } else if (primitivoSelecionado != null) {
+            removeu = primitivos.remove(primitivoSelecionado);
+            primitivosVisiveis.remove(primitivoSelecionado);
+        }
+        limparSelecao();
+        repaint();
+        return removeu;
+    }
+
+    /** Limpa a cena visível sem remover pontos ou primitivos armazenados.
+     * Também descarta pontos pendentes, a prévia e a seleção atual.
+     */
     public void limpar() {
         pontosVisiveis.clear();
         primitivosVisiveis.clear();
         pontosPendentes.clear();
+        pontoPrevia = null;
+        limparSelecao();
         repaint();
     }
 
-    /** Redesenha todos os primitivos armazenados. */
+    /** Redesenha todos os pontos e primitivos armazenados. */
     public void redesenhar() {
         redesenhar(null);
     }
 
-    /** Redesenha somente os primitivos do tipo informado, ou todos se for nulo.
-     * @param filtro tipo a redesenhar
+    /** Redesenha os elementos do tipo informado, ou todos se for {@code null}.
+     * O filtro {@link TiposPrimitivos#PONTO} exibe os pontos; os demais filtros
+     * exibem apenas os primitivos do tipo correspondente.
+     * @param filtro tipo a redesenhar, ou {@code null} para exibir tudo
      */
     public void redesenhar(TiposPrimitivos filtro) {
+        limparSelecao();
         primitivosVisiveis.clear();
         pontosVisiveis.clear();
         if (filtro == null) {
@@ -266,6 +346,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         }
     }
 
+    /** {@inheritDoc}
+     * A pintura também inclui uma prévia incompleta e o destaque da seleção.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -275,11 +358,29 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         for (PontoGr ponto : pontosVisiveis) {
             ponto.desenharPonto(g);
         }
+        desenharPrevia(g);
+        desenharSelecao(g);
     }
 
+    /** Processa um clique para criar um ponto, concluir uma forma ou selecionar
+     * um elemento, conforme o modo atual.
+     * @param e evento de mouse com as coordenadas do clique em pixels
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         Ponto ponto = new Ponto(e.getX(), e.getY());
+
+        if (tipo == TiposPrimitivos.SELECAO) {
+            java.util.List<Ponto> alcas = alcasSelecao();
+            for (int i = 0; i < alcas.size(); i++) {
+                if (alcas.get(i).calcularDistancia(ponto) <= 9) {
+                    alcaArrastada = i;
+                    return;
+                }
+            }
+            selecionar(ponto);
+            return;
+        }
 
         if (tipo == TiposPrimitivos.PONTO) {
             int diametro = Math.max(4, espessuraAtual + 2);
@@ -302,8 +403,12 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         if (pontosPendentes.size() == necessarios) {
             criarPrimitivoPendente();
             pontosPendentes.clear();
+            pontoPrevia = null;
             msg.setText(tipo + " criado. Selecione novos pontos.");
         } else {
+            if (pontosPendentes.size() == 1 && aceitaPrevia(tipo)) {
+                pontoPrevia = ponto;
+            }
             msg.setText(tipo + ": ponto " + pontosPendentes.size() + " de " + necessarios);
         }
         repaint();
@@ -314,33 +419,272 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         Ponto p1 = pontosPendentes.get(0);
         Ponto p2 = pontosPendentes.get(1);
 
-        switch (tipo) {
-            case RETA:
-                adicionarPrimitivo(new RetaGrafica(p1, p2, estilo));
-                break;
-            case RETANGULO:
-                adicionarPrimitivo(new Retangulo(p1, p2, estilo));
-                break;
-            case TRIANGULO:
-                adicionarPrimitivo(new Triangulo(p1, p2, pontosPendentes.get(2), estilo));
-                break;
-            case CIRCULO:
-                adicionarPrimitivo(new CirculoGrafico(p1, p2, estilo, algoritmoCirculo));
-                break;
-            default:
-                throw new IllegalStateException("Tipo sem construcao por multiplos pontos: " + tipo);
+        if (tipo == TiposPrimitivos.TRIANGULO) {
+            adicionarPrimitivo(new Triangulo(p1, p2, pontosPendentes.get(2), estilo));
+        } else {
+            adicionarPrimitivo(criarPrimitivoDoisPontos(tipo, p1, p2, estilo));
         }
     }
 
+    private PrimitivoGrafico criarPrimitivoDoisPontos(TiposPrimitivos tipo,
+            Ponto p1, Ponto p2, EstiloReta estilo) {
+        switch (tipo) {
+            case RETA: return new RetaGrafica(p1, p2, estilo);
+            case RETANGULO: return new Retangulo(p1, p2, estilo);
+            case CIRCULO: return new CirculoGrafico(p1, p2, estilo, algoritmoCirculo);
+            default: throw new IllegalStateException(
+                "Tipo sem construcao por dois pontos: " + tipo);
+        }
+    }
+
+    private boolean aceitaPrevia(TiposPrimitivos tipo) {
+        return tipo == TiposPrimitivos.RETA || tipo == TiposPrimitivos.RETANGULO
+            || tipo == TiposPrimitivos.CIRCULO;
+    }
+
+    private void desenharPrevia(Graphics g) {
+        if (pontoPrevia == null || pontosPendentes.size() != 1 || !aceitaPrevia(tipo)) {
+            return;
+        }
+        EstiloReta estilo = new EstiloReta(corAtual, espessuraAtual);
+        criarPrimitivoDoisPontos(tipo, pontosPendentes.get(0), pontoPrevia, estilo)
+            .desenhar(g, renderizador);
+    }
+
+    private void selecionar(Ponto ponto) {
+        limparSelecao();
+        for (int i = pontosVisiveis.size() - 1; i >= 0; i--) {
+            PontoGr candidato = pontosVisiveis.get(i);
+            if (candidato.calcularDistancia(ponto)
+                    <= candidato.getDiametro() / 2.0 + MARGEM_SELECAO) {
+                pontoSelecionado = candidato;
+                break;
+            }
+        }
+        for (int i = primitivosVisiveis.size() - 1;
+                pontoSelecionado == null && primitivoSelecionado == null && i >= 0; i--) {
+            PrimitivoGrafico candidato = primitivosVisiveis.get(i);
+            if (contem(candidato, ponto)) {
+                primitivoSelecionado = candidato;
+            }
+        }
+        msg.setText(temSelecao() ? "Primitivo selecionado" : "Nenhum primitivo encontrado");
+        repaint();
+    }
+
+    private boolean contem(PrimitivoGrafico primitivo, Ponto ponto) {
+        double margem = MARGEM_SELECAO + primitivo.getEspessura() / 2.0;
+        if (primitivo instanceof RetaGrafica) {
+            RetaGrafica reta = (RetaGrafica)primitivo;
+            return distanciaSegmento(ponto, reta.getP1(), reta.getP2()) <= margem;
+        }
+        if (primitivo instanceof CirculoGrafico) {
+            CirculoGrafico circulo = (CirculoGrafico)primitivo;
+            return circulo.getCentro().calcularDistancia(ponto) <= circulo.getRaio() + margem;
+        }
+        if (primitivo instanceof Retangulo) {
+            Retangulo retangulo = (Retangulo)primitivo;
+            Ponto p1 = retangulo.getCanto1();
+            Ponto p2 = retangulo.getCanto2();
+            return ponto.getX() >= Math.min(p1.getX(), p2.getX()) - margem
+                && ponto.getX() <= Math.max(p1.getX(), p2.getX()) + margem
+                && ponto.getY() >= Math.min(p1.getY(), p2.getY()) - margem
+                && ponto.getY() <= Math.max(p1.getY(), p2.getY()) + margem;
+        }
+        if (primitivo instanceof Triangulo) {
+            List<Ponto> vertices = ((Triangulo)primitivo).getVertices();
+            return contemTriangulo(ponto, vertices.get(0), vertices.get(1), vertices.get(2), margem);
+        }
+        return false;
+    }
+
+    private double distanciaSegmento(Ponto ponto, Ponto inicio, Ponto fim) {
+        double dx = fim.getX() - inicio.getX();
+        double dy = fim.getY() - inicio.getY();
+        if (dx == 0 && dy == 0) {
+            return ponto.calcularDistancia(inicio);
+        }
+        double proporcao = ((ponto.getX() - inicio.getX()) * dx
+            + (ponto.getY() - inicio.getY()) * dy) / (dx * dx + dy * dy);
+        proporcao = Math.max(0, Math.min(1, proporcao));
+        return ponto.calcularDistancia(new Ponto(
+            inicio.getX() + proporcao * dx, inicio.getY() + proporcao * dy));
+    }
+
+    private boolean contemTriangulo(Ponto ponto, Ponto p1, Ponto p2, Ponto p3,
+                                     double margem) {
+        double d1 = lado(ponto, p1, p2);
+        double d2 = lado(ponto, p2, p3);
+        double d3 = lado(ponto, p3, p1);
+        boolean degenerado = Math.abs(lado(p1, p2, p3)) < 0.000001;
+        boolean dentro = !degenerado && (!(d1 < 0 || d2 < 0 || d3 < 0)
+            || !(d1 > 0 || d2 > 0 || d3 > 0));
+        return dentro || distanciaSegmento(ponto, p1, p2) <= margem
+            || distanciaSegmento(ponto, p2, p3) <= margem
+            || distanciaSegmento(ponto, p3, p1) <= margem;
+    }
+
+    private double lado(Ponto ponto, Ponto p1, Ponto p2) {
+        return (ponto.getX() - p2.getX()) * (p1.getY() - p2.getY())
+            - (p1.getX() - p2.getX()) * (ponto.getY() - p2.getY());
+    }
+
+    private void desenharSelecao(Graphics g) {
+        if (!temSelecao()) {
+            return;
+        }
+        Graphics2D selecao = (Graphics2D)g.create();
+        selecao.setColor(Color.ORANGE);
+        selecao.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
+            10, new float[] {6, 4}, 0));
+        if (pontoSelecionado != null) {
+            int raio = pontoSelecionado.getDiametro() / 2 + 4;
+            selecao.drawOval(inteiro(pontoSelecionado.getX()) - raio,
+                inteiro(pontoSelecionado.getY()) - raio, raio * 2, raio * 2);
+        } else if (primitivoSelecionado instanceof RetaGrafica) {
+            RetaGrafica reta = (RetaGrafica)primitivoSelecionado;
+            selecao.drawLine(inteiro(reta.getP1().getX()), inteiro(reta.getP1().getY()),
+                inteiro(reta.getP2().getX()), inteiro(reta.getP2().getY()));
+        } else if (primitivoSelecionado instanceof Retangulo) {
+            Retangulo retangulo = (Retangulo)primitivoSelecionado;
+            desenharRetanguloSelecao(selecao, retangulo.getCanto1(), retangulo.getCanto2());
+        } else if (primitivoSelecionado instanceof Triangulo) {
+            List<Ponto> vertices = ((Triangulo)primitivoSelecionado).getVertices();
+            Polygon poligono = new Polygon();
+            for (Ponto vertice : vertices) {
+                poligono.addPoint(inteiro(vertice.getX()), inteiro(vertice.getY()));
+            }
+            selecao.drawPolygon(poligono);
+        } else if (primitivoSelecionado instanceof CirculoGrafico) {
+            CirculoGrafico circulo = (CirculoGrafico)primitivoSelecionado;
+            int raio = inteiro(circulo.getRaio());
+            selecao.drawOval(inteiro(circulo.getCentro().getX()) - raio,
+                inteiro(circulo.getCentro().getY()) - raio, raio * 2, raio * 2);
+        }
+        selecao.setStroke(new BasicStroke(1));
+        for (Ponto alca : alcasSelecao()) {
+            int x = inteiro(alca.getX()), y = inteiro(alca.getY());
+            selecao.setColor(Color.WHITE);
+            selecao.fillRect(x - 4, y - 4, 8, 8);
+            selecao.setColor(new Color(30, 100, 210));
+            selecao.drawRect(x - 4, y - 4, 8, 8);
+        }
+        selecao.dispose();
+    }
+
+    private void desenharRetanguloSelecao(Graphics2D g, Ponto p1, Ponto p2) {
+        int x = inteiro(Math.min(p1.getX(), p2.getX()));
+        int y = inteiro(Math.min(p1.getY(), p2.getY()));
+        int largura = inteiro(Math.abs(p2.getX() - p1.getX()));
+        int altura = inteiro(Math.abs(p2.getY() - p1.getY()));
+        g.drawRect(x, y, largura, altura);
+    }
+
+    private int inteiro(double valor) {
+        return (int)Math.round(valor);
+    }
+
+    private void limparSelecao() {
+        alcaArrastada = -1;
+        pontoSelecionado = null;
+        primitivoSelecionado = null;
+    }
+
+    /** Atualiza a coordenada da prévia após o primeiro ponto de uma forma.
+     * @param e evento de movimento com a posição atual do mouse em pixels
+     */
     @Override
     public void mouseMoved(MouseEvent e) {
         msg.setText("(" + e.getX() + ", " + e.getY() + ")");
+        if (pontosPendentes.size() == 1 && aceitaPrevia(tipo)) {
+            pontoPrevia = new Ponto(e.getX(), e.getY());
+            repaint();
+        }
     }
 
-    @Override public void mouseReleased(MouseEvent e) { }
+    @Override public void mouseReleased(MouseEvent e) { if (alcaArrastada >= 0) redimensionar(e); alcaArrastada = -1; }
     @Override public void mouseClicked(MouseEvent e) { }
     @Override public void mouseEntered(MouseEvent e) { }
     @Override public void mouseExited(MouseEvent e) { }
-    @Override public void mouseDragged(MouseEvent e) { }
+    @Override public void mouseDragged(MouseEvent e) {
+        if (alcaArrastada >= 0) redimensionar(e);
+        else mouseMoved(e);
+    }
+
+    private java.util.List<Ponto> alcasSelecao() {
+        java.util.List<Ponto> alcas = new ArrayList<Ponto>();
+        if (primitivoSelecionado instanceof Retangulo) {
+            Retangulo r = (Retangulo)primitivoSelecionado;
+            Ponto a = r.getCanto1(), b = r.getCanto2();
+            alcas.add(a);
+            alcas.add(new Ponto(b.getX(), a.getY()));
+            alcas.add(b);
+            alcas.add(new Ponto(a.getX(), b.getY()));
+        } else if (primitivoSelecionado instanceof RetaGrafica) {
+            RetaGrafica r = (RetaGrafica)primitivoSelecionado;
+            alcas.add(r.getP1()); alcas.add(r.getP2());
+        } else if (primitivoSelecionado instanceof CirculoGrafico) {
+            CirculoGrafico c = (CirculoGrafico)primitivoSelecionado;
+            alcas.add(c.getPontoRaio());
+        } else if (primitivoSelecionado instanceof Triangulo) {
+            alcas.addAll(((Triangulo)primitivoSelecionado).getVertices());
+        }
+        return alcas;
+    }
+
+    private void redimensionar(MouseEvent e) {
+        if (primitivoSelecionado == null) return;
+        Ponto novo = new Ponto(e.getX(), e.getY());
+        PrimitivoGrafico anterior = primitivoSelecionado;
+        PrimitivoGrafico alterado;
+        java.util.List<Ponto> alcas = alcasSelecao();
+        if (alcaArrastada < 0 || alcaArrastada >= alcas.size()) return;
+        EstiloReta estilo = new EstiloReta(anterior.getCor(), anterior.getEspessura());
+        if (anterior instanceof Retangulo) {
+            Ponto a = ((Retangulo)anterior).getCanto1();
+            Ponto b = ((Retangulo)anterior).getCanto2();
+            switch (alcaArrastada) {
+                case 0: a = novo; break;
+                case 1: a = new Ponto(a.getX(), novo.getY()); b = new Ponto(novo.getX(), b.getY()); break;
+                case 2: b = novo; break;
+                case 3: a = new Ponto(novo.getX(), a.getY()); b = new Ponto(b.getX(), novo.getY()); break;
+                default: return;
+            }
+            alterado = new Retangulo(a, b, estilo);
+        } else if (anterior instanceof RetaGrafica) {
+            alcas.set(alcaArrastada, novo);
+            alterado = new RetaGrafica(alcas.get(0), alcas.get(1), estilo);
+        } else if (anterior instanceof CirculoGrafico) {
+            CirculoGrafico c = (CirculoGrafico)anterior;
+            alterado = new CirculoGrafico(c.getCentro(), novo, estilo, c.getAlgoritmo());
+        } else if (anterior instanceof Triangulo) {
+            alcas.set(alcaArrastada, novo);
+            alterado = new Triangulo(alcas.get(0), alcas.get(1), alcas.get(2), estilo);
+        } else return;
+        primitivos.set(primitivos.indexOf(anterior), alterado);
+        primitivosVisiveis.set(primitivosVisiveis.indexOf(anterior), alterado);
+        primitivoSelecionado = alterado;
+        msg.setText("Forma alterada. Salve o projeto para atualizar o JSON.");
+        repaint();
+    }
+
+    /** Exporta a cena armazenada, sem selecao ou previa, em PNG com fundo branco. */
+    public void exportarPng(Path arquivo) throws IOException {
+        if (getWidth() < 1 || getHeight() < 1) throw new IOException("Area de desenho sem tamanho");
+        java.awt.image.BufferedImage imagem = new java.awt.image.BufferedImage(
+            getWidth(), getHeight(), java.awt.image.BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = imagem.createGraphics();
+        try {
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, getWidth(), getHeight());
+            for (PrimitivoGrafico primitivo : primitivos) primitivo.desenhar(g, renderizador);
+            for (PontoGr ponto : pontos) ponto.desenharPonto(g);
+        } finally {
+            g.dispose();
+        }
+        if (!javax.imageio.ImageIO.write(imagem, "png", arquivo.toFile()))
+            throw new IOException("Exportador PNG indisponivel");
+    }
 }
+
 

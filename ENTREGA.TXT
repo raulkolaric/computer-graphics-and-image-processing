@@ -1,0 +1,46 @@
+ENTREGA DA ATIVIDADE
+===================
+
+Requer Java 11 ou superior. Abra package.bluej no BlueJ, compile e execute App.main.
+
+Requisitos
+1. Elasticos: selecione Reta, Circulo ou Retangulo, clique uma vez e mova o
+   mouse. O segundo clique confirma a figura; a previa nao entra na cena salva.
+2. Selecao/exclusao: escolha Selecionar, clique sobre um ponto ou reta, ou dentro
+   de uma forma, e pressione Excluir selecionado. Funciona nos cinco tipos.
+3. Persistencia: Salvar projeto grava projeto-anterior.json no diretorio de
+   execucao. Recarregar projeto restaura a cena. O formato do projeto usa
+   figura, ponto, reta, triangulo, retangulo e circulo, com coordenadas relativas,
+   cores e espessuras. Os exemplos externos do enunciado nao foram fornecidos
+   para comparacao independente.
+4. Entrega: exemplos/figura-casa.json e exemplos/figura-casa.jpeg (960 x 640).
+   A figura foi criada por eventos do painel do aplicativo, salva e recarregada.
+   O JPEG foi produzido pelo renderizador do proprio aplicativo a partir do JSON.
+   Nao e uma captura da janela.
+
+Como abrir o exemplo na interface
+Com o aplicativo fechado, preserve qualquer projeto-anterior.json existente
+renomeando-o como backup. Copie exemplos/figura-casa.json para o diretorio de
+execucao com o nome projeto-anterior.json. Abra o aplicativo e clique Recarregar
+projeto. A figura se adapta ao tamanho do painel; para reproduzir a imagem exata,
+use o gerador abaixo, que renderiza em 960 x 640.
+
+Reproduzir JSON e JPEG
+Compile o projeto e execute exemplos.CriarFigura.main no BlueJ com args {}.
+Ou, depois de compilar para bin:
+  java -Djava.awt.headless=true -cp bin exemplos.CriarFigura exemplos
+
+Validacao
+  java -ea -Djava.awt.headless=true -cp bin tests.TestaPrimitivos
+Testes aprovados: geometria, RGB, elasticos, selecao/exclusao de todos os tipos,
+limpeza/redesenho e salvar/recarregar JSON.
+
+EDICAO POSTERIOR E PNG
+Selecione uma forma e arraste uma alca azul: quatro cantos do retangulo,
+extremos da reta, raio do circulo ou vertices do triangulo.
+A edicao funciona tambem depois de recarregar um JSON. Salve novamente para
+gravar as novas dimensoes. Cor e espessura da forma sao preservadas.
+Exportar PNG permite escolher o destino e exporta toda a cena armazenada
+(como o JSON), sem alcas ou previas, com fundo branco e no tamanho do painel.
+Para gerar PNG de um JSON salvo, clique Recarregar projeto e depois Exportar PNG.
+Teste adicional: tests.TestaEdicao verifica edicao, recarga e exportacao PNG.
