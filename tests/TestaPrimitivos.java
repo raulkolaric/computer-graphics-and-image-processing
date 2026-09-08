@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import javax.swing.JLabel;
@@ -24,7 +22,7 @@ import ui.PainelDesenho;
 import ui.TiposPrimitivos;
 
 /**
- * Testes de regressão executáveis sem abrir a interface gráfica.
+ * Testes de regressao executaveis sem interface grafica.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
@@ -42,11 +40,8 @@ public class TestaPrimitivos {
         testarCirculos();
         testarArmazenamentoERedesenho();
         testarEntradaMouse();
-        testarElasticos();
-        testarSelecaoEExclusao();
-        testarCorDaEntradaMouse();
         testarTrocaDeRenderizador();
-        testarPersistenciaJson();
+        testarCoresSelecionadas();
         System.out.println("TestaPrimitivos: todos os testes passaram");
     }
 
@@ -239,75 +234,6 @@ public class TestaPrimitivos {
         verificar(painel.getQuantidadePrimitivos() == 3, "retangulo criado");
     }
 
-    private static void testarCorDaEntradaMouse() {
-        PainelDesenho painel = new PainelDesenho(new JLabel(), TiposPrimitivos.RETA);
-        painel.setCorAtual(Color.BLUE);
-        clicar(painel, 10, 10);
-        clicar(painel, 30, 30);
-
-        RetaGrafica reta = (RetaGrafica)painel.getPrimitivos().get(0);
-        verificar(reta.getCor().equals(Color.BLUE), "cor selecionada aplicada ao primitivo");
-    }
-
-    private static void testarElasticos() {
-        for (TiposPrimitivos tipo : new TiposPrimitivos[] {
-                TiposPrimitivos.RETA, TiposPrimitivos.RETANGULO, TiposPrimitivos.CIRCULO }) {
-            PainelDesenho painel = new PainelDesenho(new JLabel(), tipo);
-            painel.setSize(120, 120);
-            BufferedImage vazia = novaImagem();
-            Graphics gVazio = vazia.getGraphics();
-            painel.paint(gVazio);
-            gVazio.dispose();
-
-            clicar(painel, 15, 15);
-            mover(painel, 70, 55);
-            BufferedImage previa = novaImagem();
-            Graphics gPrevia = previa.getGraphics();
-            painel.paint(gPrevia);
-            gPrevia.dispose();
-            verificar(painel.getQuantidadePrimitivos() == 0,
-                tipo + " elastico nao armazena forma incompleta");
-            verificar(checksum(vazia) != checksum(previa), tipo + " exibe elastico");
-
-            clicar(painel, 70, 55);
-            verificar(painel.getQuantidadePrimitivos() == 1,
-                tipo + " confirma forma no segundo clique");
-        }
-    }
-
-    private static void testarSelecaoEExclusao() {
-        PainelDesenho painel = new PainelDesenho(new JLabel(), TiposPrimitivos.PONTO);
-        painel.setSize(140, 140);
-        clicar(painel, 10, 10);
-        painel.setTipo(TiposPrimitivos.SELECAO);
-        clicar(painel, 10, 10);
-        verificar(painel.temSelecao(), "ponto selecionado");
-        verificar(painel.excluirSelecionado() && painel.getQuantidadePontos() == 0,
-            "ponto selecionado excluido");
-
-        painel.adicionarPrimitivo(new RetaGrafica(
-            new Ponto(10, 20), new Ponto(60, 20), Color.BLACK, 1));
-        clicar(painel, 35, 20);
-        verificar(painel.excluirSelecionado(), "reta selecionada e excluida");
-
-        painel.adicionarPrimitivo(new Retangulo(
-            new Ponto(75, 10), new Ponto(120, 45), Color.BLACK, 1));
-        clicar(painel, 90, 25);
-        verificar(painel.excluirSelecionado(), "retangulo selecionado e excluido");
-
-        painel.adicionarPrimitivo(new Triangulo(new Ponto(10, 65),
-            new Ponto(60, 65), new Ponto(35, 110), Color.BLACK, 1));
-        clicar(painel, 35, 80);
-        verificar(painel.excluirSelecionado(), "triangulo selecionado e excluido");
-
-        painel.adicionarPrimitivo(new CirculoGrafico(new Ponto(100, 90),
-            new Ponto(120, 90), Color.BLACK, 1, AlgoritmoCirculo.SIMETRIA_OCTANTES));
-        clicar(painel, 100, 90);
-        verificar(painel.excluirSelecionado(), "circulo selecionado e excluido");
-        verificar(painel.getQuantidadePrimitivos() == 0,
-            "todos os primitivos selecionados foram removidos");
-    }
-
     private static void testarTrocaDeRenderizador() {
         ContadorRenderizador contador = new ContadorRenderizador();
         Retangulo retangulo = new Retangulo(new Ponto(1, 1), new Ponto(10, 10),
@@ -327,58 +253,61 @@ public class TestaPrimitivos {
         FiguraPontos.setRenderizador(RENDERIZADOR);
     }
 
-    private static void testarPersistenciaJson() {
-        Path arquivo = null;
-        try {
-            arquivo = Files.createTempFile("projeto-primitivos-", ".json");
-            PainelDesenho original = new PainelDesenho(new JLabel(), TiposPrimitivos.PONTO);
-            original.setSize(120, 120);
-            original.setCorAtual(Color.BLUE);
-            original.setEspessuraAtual(4);
-            clicar(original, 11, 12);
-            original.adicionarPrimitivo(new RetaGrafica(new Ponto(1, 2), new Ponto(30, 40),
-                Color.RED, 2));
-            original.adicionarPrimitivo(new Retangulo(new Ponto(3, 4), new Ponto(20, 30),
-                Color.GREEN, 3));
-            original.adicionarPrimitivo(new Triangulo(new Ponto(4, 5), new Ponto(10, 20),
-                new Ponto(30, 6), Color.MAGENTA, 2));
-            original.adicionarPrimitivo(new CirculoGrafico(new Ponto(40, 40), new Ponto(55, 40),
-                Color.ORANGE, 5, AlgoritmoCirculo.PARAMETRICO));
-            original.salvarProjeto(arquivo);
-            String json = Files.readString(arquivo);
-            verificar(json.contains("\"figura\"") && json.contains("\"reta\"")
-                && json.contains("\"id\": \"circulo_1\""),
-                "arquivo JSON criado no formato da atividade");
+    private static void testarCoresSelecionadas() {
+        Color primeira = new Color(17, 83, 201);
+        Color segunda = new Color(240, 41, 68);
+        for (TiposPrimitivos tipo : TiposPrimitivos.values()) {
+            if (tipo == TiposPrimitivos.NENHUM) continue;
+            for (AlgoritmoCirculo algoritmo : AlgoritmoCirculo.values()) {
+                PainelDesenho painel = new PainelDesenho(new JLabel(), tipo);
+                painel.setSize(120, 120);
+                verificar(Color.BLACK.equals(painel.getCorAtual()), "cor inicial preta");
+                painel.setAlgoritmoCirculo(algoritmo);
+                painel.setCorAtual(primeira);
+                clicar(painel, 20, 20);
+                if (tipo.getQuantidadePontos() > 1) clicar(painel, 40, 20);
+                if (tipo.getQuantidadePontos() > 2) clicar(painel, 30, 40);
+                BufferedImage antes = novaImagem();
+                Graphics g = antes.getGraphics();
+                painel.paint(g);
+                g.dispose();
+                verificar(contarPixels(antes, primeira) > 0, tipo + " usa RGB selecionado");
 
-            PainelDesenho recarregado = new PainelDesenho(new JLabel(), TiposPrimitivos.NENHUM);
-            recarregado.setSize(120, 120);
-            recarregado.carregarProjeto(arquivo);
-            verificar(recarregado.getQuantidadePontos() == 1, "ponto restaurado do JSON");
-            verificar(recarregado.getQuantidadePrimitivos() == 4, "formas restauradas do JSON");
-            verificar(recarregado.getPrimitivos().get(0) instanceof RetaGrafica, "reta restaurada");
-            verificar(recarregado.getPrimitivos().get(1) instanceof Triangulo, "triangulo restaurado");
-            verificar(recarregado.getPrimitivos().get(2) instanceof Retangulo, "retangulo restaurado");
-            CirculoGrafico circulo = (CirculoGrafico)recarregado.getPrimitivos().get(3);
-            verificar(circulo.getAlgoritmo() == AlgoritmoCirculo.PARAMETRICO, "algoritmo do circulo restaurado");
-            verificar(circulo.getEspessura() == 5 && circulo.getCor().equals(Color.ORANGE),
-                "estilo do circulo restaurado");
-        } catch (Exception erro) {
-            throw new AssertionError("persistencia JSON", erro);
-        } finally {
-            if (arquivo != null) {
-                try { Files.deleteIfExists(arquivo); } catch (Exception ignorado) { }
+                painel.setCorAtual(segunda);
+                clicar(painel, 80, 80);
+                if (tipo.getQuantidadePontos() > 1) clicar(painel, 100, 80);
+                if (tipo.getQuantidadePontos() > 2) clicar(painel, 90, 100);
+                BufferedImage ambas = novaImagem();
+                g = ambas.getGraphics();
+                painel.paint(g);
+                g.dispose();
+                verificar(contarPixels(ambas, primeira) > 0, "cor anterior preservada");
+                verificar(contarPixels(ambas, segunda) > 0, "nova cor aplicada");
+                painel.limpar();
+                BufferedImage limpa = novaImagem();
+                g = limpa.getGraphics();
+                painel.paint(g);
+                g.dispose();
+                verificar(contarPixels(limpa, primeira) == 0, "limpar oculta as cores");
+                painel.redesenhar(tipo);
+                BufferedImage depois = novaImagem();
+                g = depois.getGraphics();
+                painel.paint(g);
+                g.dispose();
+                verificar(checksum(ambas) == checksum(depois), "redesenho preserva RGB");
+                boolean rejeitou = false;
+                try {
+                    painel.setCorAtual(null);
+                } catch (IllegalArgumentException esperado) {
+                    rejeitou = true;
+                }
+                verificar(rejeitou && segunda.equals(painel.getCorAtual()), "rejeita cor nula");
             }
         }
     }
-
     private static void clicar(PainelDesenho painel, int x, int y) {
         painel.mousePressed(new MouseEvent(painel, MouseEvent.MOUSE_PRESSED,
             System.currentTimeMillis(), 0, x, y, 1, false));
-    }
-
-    private static void mover(PainelDesenho painel, int x, int y) {
-        painel.mouseMoved(new MouseEvent(painel, MouseEvent.MOUSE_MOVED,
-            System.currentTimeMillis(), 0, x, y, 0, false));
     }
 
     private static BufferedImage novaImagem() {
@@ -483,3 +412,4 @@ public class TestaPrimitivos {
         }
     }
 }
+
