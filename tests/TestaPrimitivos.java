@@ -362,6 +362,18 @@ public class TestaPrimitivos {
             verificar(circulo.getAlgoritmo() == AlgoritmoCirculo.PARAMETRICO, "algoritmo do circulo restaurado");
             verificar(circulo.getEspessura() == 5 && circulo.getCor().equals(Color.ORANGE),
                 "estilo do circulo restaurado");
+
+            PainelDesenho projetoSalvo = new PainelDesenho(
+                new JLabel(), TiposPrimitivos.NENHUM);
+            projetoSalvo.setSize(900, 472);
+            projetoSalvo.carregarProjeto(Path.of("projeto-anterior.json"));
+            verificar(projetoSalvo.getQuantidadePontos() == 4
+                && projetoSalvo.getQuantidadePrimitivos() == 5,
+                "projeto JSON salvo carregado");
+            BufferedImage imagem = javax.imageio.ImageIO.read(
+                Path.of("projeto-anterior.jpeg").toFile());
+            verificar(imagem != null && imagem.getWidth() == 900 && imagem.getHeight() == 472,
+                "imagem JPEG do projeto salvo valida");
         } catch (Exception erro) {
             throw new AssertionError("persistencia JSON", erro);
         } finally {
