@@ -94,6 +94,11 @@ public class Triangulo implements PrimitivoGrafico {
         }
     }
 
+    /**
+     * Cria cópias das retas para impedir que alterações externas modifiquem
+     * os lados armazenados pelo triângulo.
+     * @return lista não modificável com cópias das três retas
+     */
     private List<RetaGrafica> copiarRetas() {
         RetaGrafica[] copias = new RetaGrafica[retas.size()];
         for (int i = 0; i < retas.size(); i++) {

@@ -16,7 +16,7 @@ import circulo.AlgoritmoCirculo;
 import circulo.CirculoGrafico;
 import ponto.Ponto;
 import ponto.PontoGr;
-import quadrado.Retangulo;
+import retangulo.Retangulo;
 import renderizacao.PrimitivoGrafico;
 import reta.EstiloReta;
 import reta.RetaGrafica;

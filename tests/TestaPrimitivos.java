@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 import circulo.AlgoritmoCirculo;
 import circulo.CirculoGrafico;
 import ponto.Ponto;
-import quadrado.Retangulo;
+import retangulo.Retangulo;
 import renderizacao.FiguraPontos;
 import renderizacao.RenderizadorManual;
 import renderizacao.RenderizadorPrimitivos;

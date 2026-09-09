@@ -1,4 +1,4 @@
-package quadrado;
+package retangulo;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -104,6 +104,11 @@ public class Retangulo implements PrimitivoGrafico {
         }
     }
 
+    /**
+     * Cria cópias das retas para impedir que alterações externas modifiquem
+     * os lados armazenados pelo retângulo.
+     * @return lista não modificável com cópias das quatro retas
+     */
     private List<RetaGrafica> copiarRetas() {
         RetaGrafica[] copias = new RetaGrafica[retas.size()];
         for (int i = 0; i < retas.size(); i++) {
