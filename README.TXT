@@ -28,7 +28,8 @@ Arquitetura
 -----------
 - Reta e Circulo representam a geometria matemática.
 - RetaGrafica e CirculoGrafico acrescentam estilo e renderização.
-- Retangulo e Triangulo são compostos exclusivamente por RetaGrafica.
+- Retangulo, no pacote retangulo, e Triangulo são compostos exclusivamente por
+  RetaGrafica.
 - PainelDesenho armazena uma lista dinâmica de PrimitivoGrafico.
 - PersistenciaProjeto grava e lê a cena no formato JSON, sem dependência externa.
 - RenderizadorPrimitivos isola o mecanismo de desenho. Atualmente a
