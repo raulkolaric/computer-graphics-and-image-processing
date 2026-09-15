@@ -356,8 +356,8 @@ public class TestaPrimitivos {
             verificar(recarregado.getQuantidadePontos() == 1, "ponto restaurado do JSON");
             verificar(recarregado.getQuantidadePrimitivos() == 4, "formas restauradas do JSON");
             verificar(recarregado.getPrimitivos().get(0) instanceof RetaGrafica, "reta restaurada");
-            verificar(recarregado.getPrimitivos().get(1) instanceof Triangulo, "triangulo restaurado");
-            verificar(recarregado.getPrimitivos().get(2) instanceof Retangulo, "retangulo restaurado");
+            verificar(recarregado.getPrimitivos().get(2) instanceof Triangulo, "triangulo restaurado");
+            verificar(recarregado.getPrimitivos().get(1) instanceof Retangulo, "retangulo restaurado");
             CirculoGrafico circulo = (CirculoGrafico)recarregado.getPrimitivos().get(3);
             verificar(circulo.getAlgoritmo() == AlgoritmoCirculo.PARAMETRICO, "algoritmo do circulo restaurado");
             verificar(circulo.getEspessura() == 5 && circulo.getCor().equals(Color.ORANGE),

@@ -133,14 +133,17 @@ public final class PersistenciaProjeto {
         }
 
         List<PrimitivoGrafico> primitivos = new ArrayList<PrimitivoGrafico>();
+        List<Integer> ordens = new ArrayList<Integer>();
         for (Object item : lista(figura.get("reta"), "reta")) {
             Map<String, Object> dado = objeto(item, "Reta invalida");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             EstiloReta estilo = estilo(dado);
             primitivos.add(new RetaGrafica(pontoRelativo(dado.get("p1"), largura, altura),
                 pontoRelativo(dado.get("p2"), largura, altura), estilo));
         }
         for (Object item : lista(figura.get("triangulo"), "triangulo")) {
             Map<String, Object> dado = objeto(item, "Triangulo invalido");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             EstiloReta estilo = estilo(dado);
             primitivos.add(new Triangulo(pontoRelativo(dado.get("p1"), largura, altura),
                 pontoRelativo(dado.get("p2"), largura, altura),
@@ -148,11 +151,13 @@ public final class PersistenciaProjeto {
         }
         for (Object item : lista(figura.get("retangulo"), "retangulo")) {
             Map<String, Object> dado = objeto(item, "Retangulo invalido");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             primitivos.add(new Retangulo(pontoRelativo(dado.get("p1"), largura, altura),
                 pontoRelativo(dado.get("p2"), largura, altura), estilo(dado)));
         }
         for (Object item : lista(figura.get("circulo"), "circulo")) {
             Map<String, Object> dado = objeto(item, "Circulo invalido");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             AlgoritmoCirculo algoritmo = AlgoritmoCirculo.SIMETRIA_OCTANTES;
             if (dado.get("algoritmo") instanceof String) {
                 try {
@@ -164,6 +169,17 @@ public final class PersistenciaProjeto {
             primitivos.add(new CirculoGrafico(
                 pontoRelativo(dado.get("centro"), largura, altura),
                 pontoRelativo(dado.get("raio"), largura, altura), estilo(dado), algoritmo));
+        }
+        if (ordens.stream().anyMatch(ordem -> ordem != null)) {
+            List<PrimitivoGrafico> ordenados = new ArrayList<PrimitivoGrafico>(
+                Collections.nCopies(primitivos.size(), null));
+            for (int i = 0; i < ordens.size(); i++) {
+                Integer ordem = ordens.get(i);
+                if (ordem == null || ordem < 0 || ordem >= ordenados.size() || ordenados.get(ordem) != null)
+                    throw new IOException("Ordem de desenho invalida");
+                ordenados.set(ordem, primitivos.get(i));
+            }
+            primitivos = ordenados;
         }
         return new Cena(pontos, primitivos);
     }
@@ -191,21 +207,22 @@ public final class PersistenciaProjeto {
             List<PrimitivoGrafico> primitivos, int largura, int altura) {
         json.append("    \"").append(nome).append("\": [");
         int indice = 0;
-        for (PrimitivoGrafico primitivo : primitivos) {
+        for (int ordem = 0; ordem < primitivos.size(); ordem++) {
+            PrimitivoGrafico primitivo = primitivos.get(ordem);
             if (!classe.isInstance(primitivo)) {
                 continue;
             }
             if (indice > 0) json.append(',');
             indice++;
             json.append("\n      ").append(primitivoJson(
-                primitivo, nome + "_" + indice, largura, altura));
+                primitivo, nome + "_" + indice, largura, altura, ordem));
         }
         json.append("\n    ]");
     }
 
     private static String primitivoJson(PrimitivoGrafico primitivo, String id,
-            int largura, int altura) {
-        String atributos = ", \"cor\": " + corJson(primitivo.getCor())
+            int largura, int altura, int ordem) {
+        String atributos = ", \"ordem\": " + ordem + ", \"cor\": " + corJson(primitivo.getCor())
             + ", \"esp\": " + primitivo.getEspessura() + ", \"id\": \"" + id + "\"";
         if (primitivo instanceof RetaGrafica) {
             RetaGrafica reta = (RetaGrafica)primitivo;
