@@ -40,6 +40,18 @@ public class TestaImportacao {
                         throw new AssertionError("Cena anterior alterada");
                 }
             }
+            for (String numero : new String[] {"1.62e-1", "1.62E-1", "162e-3", "0.0162e+1"}) {
+                Files.writeString(arquivo, original.replaceFirst("0.162", numero));
+                var cena = persistencia.PersistenciaProjeto.carregar(arquivo, 900, 540);
+                if (cena.getPontos().get(0).getX() != 146) throw new AssertionError("Expoente incorreto");
+            }
+            for (String numero : new String[] {"1e", "1e+", "01", "1.", "1e309"}) {
+                Files.writeString(arquivo, original.replaceFirst("0.162", numero));
+                try {
+                    painel.carregarProjeto(arquivo);
+                    throw new AssertionError("Numero invalido aceito: " + numero);
+                } catch (IOException esperado) { }
+            }
         } finally {
             Files.deleteIfExists(arquivo);
         }

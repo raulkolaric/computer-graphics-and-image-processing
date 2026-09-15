@@ -336,6 +336,8 @@ public final class PersistenciaProjeto {
 
     /** Pequeno parser JSON para o formato do projeto (objetos, listas, numeros e textos). */
     private static final class LeitorJson {
+        private static final java.util.regex.Pattern NUMERO = java.util.regex.Pattern.compile(
+            "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?");
         private final String fonte; private int posicao;
         LeitorJson(String fonte) { this.fonte = fonte; }
         Object ler() throws IOException { Object valor = valor(); espacos(); if (posicao != fonte.length()) throw erro("Conteudo extra"); return valor; }
@@ -343,7 +345,14 @@ public final class PersistenciaProjeto {
         private Map<String, Object> objeto() throws IOException { Map<String, Object> resultado = new LinkedHashMap<String, Object>(); consumir('{'); espacos(); if (proximo('}')) { posicao++; return resultado; } do { espacos(); String chave = texto(); espacos(); consumir(':'); resultado.put(chave, valor()); espacos(); } while (consumirSe(',')); consumir('}'); return resultado; }
         private List<Object> lista() throws IOException { List<Object> resultado = new ArrayList<Object>(); consumir('['); espacos(); if (proximo(']')) { posicao++; return resultado; } do { resultado.add(valor()); espacos(); } while (consumirSe(',')); consumir(']'); return resultado; }
         private String texto() throws IOException { consumir('\"'); StringBuilder resultado = new StringBuilder(); while (posicao < fonte.length()) { char c = fonte.charAt(posicao++); if (c == '\"') return resultado.toString(); if (c == '\\') { if (posicao >= fonte.length()) throw erro("Escape incompleto"); char e = fonte.charAt(posicao++); if (e == 'n') resultado.append('\n'); else if (e == 'r') resultado.append('\r'); else if (e == '\"' || e == '\\' || e == '/') resultado.append(e); else throw erro("Escape invalido"); } else resultado.append(c); } throw erro("Texto nao terminado"); }
-        private Number numero() throws IOException { int inicio = posicao; if (proximo('-')) posicao++; while (posicao < fonte.length() && Character.isDigit(fonte.charAt(posicao))) posicao++; if (proximo('.')) { posicao++; while (posicao < fonte.length() && Character.isDigit(fonte.charAt(posicao))) posicao++; } try { return Double.valueOf(fonte.substring(inicio, posicao)); } catch (NumberFormatException erro) { throw erro("Numero invalido"); } }
+        private Number numero() throws IOException {
+            java.util.regex.Matcher numero = NUMERO.matcher(fonte).region(posicao, fonte.length());
+            if (!numero.lookingAt()) throw erro("Numero invalido");
+            posicao = numero.end();
+            double resultado = Double.parseDouble(numero.group());
+            if (!Double.isFinite(resultado)) throw erro("Numero fora do limite");
+            return resultado;
+        }
         private void espacos() { while (posicao < fonte.length() && Character.isWhitespace(fonte.charAt(posicao))) posicao++; }
         private void consumir(char esperado) throws IOException { espacos(); if (!proximo(esperado)) throw erro("Esperado '" + esperado + "'"); posicao++; }
         private boolean consumirSe(char c) { espacos(); if (!proximo(c)) return false; posicao++; return true; }
