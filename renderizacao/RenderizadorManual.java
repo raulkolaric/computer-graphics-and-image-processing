@@ -5,6 +5,8 @@ import java.awt.Graphics;
 import circulo.CirculoGrafico;
 import reta.Reta;
 import reta.RetaGrafica;
+import retangulo.Retangulo;
+import triangulo.Triangulo;
 
 /**
  * Rasterizador que desenha os primitivos ponto a ponto.
@@ -27,14 +29,13 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
      */
     @Override
     public void desenharReta(Graphics g, RetaGrafica reta) {
+        validar(reta);
         g.setColor(reta.getCor());
 
         int x1 = converterCoordenada(reta.getP1().getX());
         int y1 = converterCoordenada(reta.getP1().getY());
         int x2 = converterCoordenada(reta.getP2().getX());
         int y2 = converterCoordenada(reta.getP2().getY());
-        validarQuantidadePassos(x1, x2);
-        validarQuantidadePassos(y1, y2);
 
         if (x1 == x2) {
             int inicio = Math.min(y1, y2);
@@ -77,15 +78,11 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
      */
     @Override
     public void desenharCirculo(Graphics g, CirculoGrafico circulo) {
+        validar(circulo);
         g.setColor(circulo.getCor());
         int xc = converterCoordenada(circulo.getCentro().getX());
         int yc = converterCoordenada(circulo.getCentro().getY());
-        double raioCalculado = circulo.getRaio();
-        if (!Double.isFinite(raioCalculado) || raioCalculado > MAX_RAIO) {
-            throw new IllegalArgumentException("Raio fora do limite de rasterizacao");
-        }
-        int raio = (int)Math.round(raioCalculado);
-        validarLimitesCirculo(xc, yc, raio);
+        int raio = (int)Math.round(circulo.getRaio());
 
         if (raio == 0) {
             plotar(g, xc, yc, circulo.getEspessura());
@@ -174,7 +171,35 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
         g.fillRect((int)esquerda, (int)topo, espessura, espessura);
     }
 
-    private int converterCoordenada(double coordenada) {
+    /** Valida os limites de rasterização sem desenhar nem percorrer pixels.
+     * @param primitivo forma que será desenhada
+     * @throws IllegalArgumentException se a forma não for suportada ou exceder os limites
+     */
+    public static void validar(PrimitivoGrafico primitivo) {
+        if (primitivo instanceof RetaGrafica) {
+            RetaGrafica reta = (RetaGrafica)primitivo;
+            validarQuantidadePassos(converterCoordenada(reta.getP1().getX()),
+                converterCoordenada(reta.getP2().getX()));
+            validarQuantidadePassos(converterCoordenada(reta.getP1().getY()),
+                converterCoordenada(reta.getP2().getY()));
+        } else if (primitivo instanceof CirculoGrafico) {
+            CirculoGrafico circulo = (CirculoGrafico)primitivo;
+            double raio = circulo.getRaio();
+            if (!Double.isFinite(raio) || raio > MAX_RAIO) {
+                throw new IllegalArgumentException("Raio fora do limite de rasterizacao");
+            }
+            validarLimitesCirculo(converterCoordenada(circulo.getCentro().getX()),
+                converterCoordenada(circulo.getCentro().getY()), (int)Math.round(raio));
+        } else if (primitivo instanceof Retangulo) {
+            for (RetaGrafica reta : ((Retangulo)primitivo).getRetas()) validar(reta);
+        } else if (primitivo instanceof Triangulo) {
+            for (RetaGrafica reta : ((Triangulo)primitivo).getRetas()) validar(reta);
+        } else {
+            throw new IllegalArgumentException("Primitivo nao suportado");
+        }
+    }
+
+    private static int converterCoordenada(double coordenada) {
         if (!Double.isFinite(coordenada)
                 || coordenada < Integer.MIN_VALUE || coordenada > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Coordenada fora do limite de rasterizacao");
@@ -182,13 +207,13 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
         return (int)Math.round(coordenada);
     }
 
-    private void validarQuantidadePassos(int inicio, int fim) {
+    private static void validarQuantidadePassos(int inicio, int fim) {
         if (Math.abs((long)fim - inicio) > MAX_PASSOS_RETA) {
             throw new IllegalArgumentException("Reta excede o limite de rasterizacao");
         }
     }
 
-    private void validarLimitesCirculo(int xc, int yc, int raio) {
+    private static void validarLimitesCirculo(int xc, int yc, int raio) {
         if ((long)xc - raio < Integer.MIN_VALUE || (long)xc + raio > Integer.MAX_VALUE
                 || (long)yc - raio < Integer.MIN_VALUE || (long)yc + raio > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Circulo excede o limite de rasterizacao");

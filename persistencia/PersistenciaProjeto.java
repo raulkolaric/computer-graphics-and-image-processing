@@ -18,6 +18,7 @@ import ponto.Ponto;
 import ponto.PontoGr;
 import retangulo.Retangulo;
 import renderizacao.PrimitivoGrafico;
+import renderizacao.RenderizadorManual;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
@@ -96,11 +97,18 @@ public final class PersistenciaProjeto {
         validarDimensoes(largura, altura);
         Object raiz = new LeitorJson(Files.readString(arquivo, StandardCharsets.UTF_8)).ler();
         Map<String, Object> projeto = objeto(raiz, "O JSON deve conter um objeto raiz");
-        if (projeto.containsKey("figura")) {
-            return carregarFigura(objeto(projeto.get("figura"), "Figura invalida"),
-                largura, altura);
+        try {
+            Cena cena = projeto.containsKey("figura")
+                ? carregarFigura(objeto(projeto.get("figura"), "Figura invalida"), largura, altura)
+                : carregarLegado(projeto);
+            for (PontoGr ponto : cena.getPontos()) {
+                if (ponto.getDiametro() < 1) throw new IllegalArgumentException("Diametro invalido");
+            }
+            for (PrimitivoGrafico primitivo : cena.getPrimitivos()) RenderizadorManual.validar(primitivo);
+            return cena;
+        } catch (IllegalArgumentException erro) {
+            throw new IOException("Projeto invalido: " + erro.getMessage(), erro);
         }
-        return carregarLegado(projeto);
     }
 
     /** Carrega uma cena sem alterar a escala das coordenadas absolutas.
