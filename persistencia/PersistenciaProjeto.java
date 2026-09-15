@@ -30,6 +30,9 @@ public final class PersistenciaProjeto {
     /** Grava a cena com coordenadas normalizadas pela área de desenho.
      * As coordenadas {@code x} e {@code y} são divididas, respectivamente, por
      * {@code largura} e {@code altura} antes da gravação.
+     * Cada forma recebe {@code ordem} para preservar a sobreposição. Círculos
+     * também recebem {@code raioRelativo}, calculado dividindo o raio em pixels
+     * pela menor dimensão da área; o ponto {@code raio} continua sendo gravado.
      * @param arquivo arquivo de destino
      * @param pontos pontos armazenados
      * @param primitivos formas armazenadas
@@ -81,7 +84,16 @@ public final class PersistenciaProjeto {
 
     /** Carrega uma cena e converte coordenadas relativas para pixels.
      * Aceita o formato atual e o formato absoluto usado pela primeira versão
-     * da persistência.
+     * da persistência. Valida os modelos e os limites do renderizador manual
+     * antes de retornar, permitindo ao chamador preservar a cena anterior em
+     * caso de erro.
+     * No formato atual, {@code ordem} deve estar ausente de todas as formas ou
+     * conter em todas elas índices únicos de zero até o total menos um. Sem
+     * esse campo, mantém a ordem de grupos: retas, triângulos, retângulos e
+     * círculos. Os pontos permanecem em uma lista separada.
+     * Quando presente, {@code raioRelativo} define o raio multiplicado pela
+     * menor dimensão atual. Sem ele, o raio é a distância entre os dois pontos
+     * convertidos para pixels; a proporção original da área não está registrada.
      * @param arquivo arquivo de origem
      * @param largura largura positiva da área de desenho em pixels
      * @param altura altura positiva da área de desenho em pixels
@@ -359,7 +371,9 @@ public final class PersistenciaProjeto {
         public List<PrimitivoGrafico> getPrimitivos() { return primitivos; }
     }
 
-    /** Pequeno parser JSON para o formato do projeto (objetos, listas, numeros e textos). */
+    /** Lê objetos, listas, números (incluindo notação científica) e textos do projeto.
+     * Não implementa toda a especificação JSON.
+     */
     private static final class LeitorJson {
         private static final java.util.regex.Pattern NUMERO = java.util.regex.Pattern.compile(
             "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?");

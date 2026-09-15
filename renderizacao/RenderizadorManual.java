@@ -172,6 +172,11 @@ public class RenderizadorManual implements RenderizadorPrimitivos {
     }
 
     /** Valida os limites de rasterização sem desenhar nem percorrer pixels.
+     * Aceita retas, círculos, retângulos e triângulos; nestes dois últimos,
+     * verifica cada aresta. As coordenadas devem caber em um inteiro, a variação
+     * de cada eixo de uma reta não pode superar 2.000.000 pixels e o raio não
+     * pode superar 100.000 pixels. Os extremos do círculo também devem caber
+     * em inteiros. A importação usa a mesma validação antes de substituir a cena.
      * @param primitivo forma que será desenhada
      * @throws IllegalArgumentException se a forma não for suportada ou exceder os limites
      */
