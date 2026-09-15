@@ -166,9 +166,16 @@ public final class PersistenciaProjeto {
                     throw new IOException("Algoritmo de circulo invalido", erro);
                 }
             }
-            primitivos.add(new CirculoGrafico(
-                pontoRelativo(dado.get("centro"), largura, altura),
-                pontoRelativo(dado.get("raio"), largura, altura), estilo(dado), algoritmo));
+            Ponto centro = pontoRelativo(dado.get("centro"), largura, altura);
+            Ponto pontoRaio = pontoRelativo(dado.get("raio"), largura, altura);
+            if (dado.containsKey("raioRelativo")) {
+                Object valor = dado.get("raioRelativo");
+                if (!(valor instanceof Number)) throw new IOException("Raio relativo invalido");
+                double raio = ((Number)valor).doubleValue() * Math.min(largura, altura);
+                if (!Double.isFinite(raio) || raio < 0) throw new IOException("Raio relativo invalido");
+                pontoRaio = new Ponto(centro.getX() + raio, centro.getY());
+            }
+            primitivos.add(new CirculoGrafico(centro, pontoRaio, estilo(dado), algoritmo));
         }
         if (ordens.stream().anyMatch(ordem -> ordem != null)) {
             List<PrimitivoGrafico> ordenados = new ArrayList<PrimitivoGrafico>(
@@ -247,6 +254,7 @@ public final class PersistenciaProjeto {
             CirculoGrafico circulo = (CirculoGrafico)primitivo;
             return "{" + pontoNomeadoJson("centro", circulo.getCentro(), largura, altura)
                 + ", " + pontoNomeadoJson("raio", circulo.getPontoRaio(), largura, altura)
+                + ", \"raioRelativo\": " + (circulo.getRaio() / Math.min(largura, altura))
                 + atributos + ", \"algoritmo\": \"" + circulo.getAlgoritmo().name() + "\"}";
         }
         throw new IllegalArgumentException("Primitivo nao suportado: " + primitivo.getClass().getName());
