@@ -16,6 +16,8 @@ import javax.swing.JComboBox;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -49,7 +51,7 @@ public class Gui extends JFrame {
     private final JButton jbLimpar = new JButton("Limpar");
     private final JButton jbExcluir = new JButton("Excluir selecionado");
     private final JButton jbSalvar = new JButton("Salvar projeto");
-    private final JButton jbRecarregar = new JButton("Recarregar projeto");
+    private final JButton jbRecarregar = new JButton("Abrir projeto");
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
     private final JComboBox<AlgoritmoCirculo> jcAlgoritmo =
         new JComboBox<AlgoritmoCirculo>(AlgoritmoCirculo.values());
@@ -61,7 +63,7 @@ public class Gui extends JFrame {
     private final JToolBar barraCena = new JToolBar();
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
-    private final Path arquivoProjeto = Path.of("projeto-anterior.json").toAbsolutePath();
+    private Path arquivoProjeto;
 
     /**
      * Cria e exibe a janela da aplicação.
@@ -149,7 +151,6 @@ public class Gui extends JFrame {
         jtPonto.setSelected(true);
         areaDesenho.setTipo(TiposPrimitivos.PONTO);
         jbCor.setBackground(Color.BLACK);
-        atualizarDisponibilidadeRecarga();
         setSize(larg, alt);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -195,26 +196,43 @@ public class Gui extends JFrame {
                 msg.setText(areaDesenho.excluirSelecionado()
                     ? "Primitivo excluido" : "Selecione um primitivo para excluir");
             } else if (origem == jbSalvar) {
+                Path destino = selecionarArquivo(true);
+                if (destino == null) return;
                 try {
-                    areaDesenho.salvarProjeto(arquivoProjeto);
-                    atualizarDisponibilidadeRecarga();
+                    areaDesenho.salvarProjeto(destino);
+                    arquivoProjeto = destino;
                     msg.setText("Projeto salvo em " + arquivoProjeto.getFileName());
                 } catch (IOException erro) {
                     mostrarErro("Nao foi possivel salvar o projeto", erro);
                 }
             } else if (origem == jbRecarregar) {
+                Path origemProjeto = selecionarArquivo(false);
+                if (origemProjeto == null) return;
                 try {
-                    areaDesenho.carregarProjeto(arquivoProjeto);
-                    msg.setText("Projeto anterior recarregado");
+                    areaDesenho.carregarProjeto(origemProjeto);
+                    arquivoProjeto = origemProjeto;
+                    msg.setText("Projeto aberto: " + arquivoProjeto.getFileName());
                 } catch (IOException erro) {
-                    mostrarErro("Nao foi possivel recarregar o projeto", erro);
+                    mostrarErro("Nao foi possivel abrir o projeto", erro);
                 }
             }
         }
     }
 
-    private void atualizarDisponibilidadeRecarga() {
-        jbRecarregar.setEnabled(Files.isRegularFile(arquivoProjeto));
+    private Path selecionarArquivo(boolean salvar) {
+        JFileChooser seletor = new JFileChooser(Path.of("").toAbsolutePath().toFile());
+        seletor.setFileFilter(new FileNameExtensionFilter("Projetos JSON (*.json)", "json"));
+        if (arquivoProjeto != null) seletor.setSelectedFile(arquivoProjeto.toFile());
+        int resultado = salvar ? seletor.showSaveDialog(this) : seletor.showOpenDialog(this);
+        if (resultado != JFileChooser.APPROVE_OPTION) return null;
+        Path arquivo = seletor.getSelectedFile().toPath().toAbsolutePath();
+        if (salvar && !arquivo.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
+            arquivo = arquivo.resolveSibling(arquivo.getFileName() + ".json");
+        }
+        if (salvar && Files.exists(arquivo) && JOptionPane.showConfirmDialog(this,
+                "Substituir " + arquivo.getFileName() + "?", "Salvar projeto",
+                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return null;
+        return arquivo;
     }
 
     private void mostrarErro(String titulo, IOException erro) {
