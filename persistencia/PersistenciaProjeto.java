@@ -18,6 +18,7 @@ import ponto.Ponto;
 import ponto.PontoGr;
 import retangulo.Retangulo;
 import renderizacao.PrimitivoGrafico;
+import renderizacao.RenderizadorManual;
 import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
@@ -29,6 +30,9 @@ public final class PersistenciaProjeto {
     /** Grava a cena com coordenadas normalizadas pela área de desenho.
      * As coordenadas {@code x} e {@code y} são divididas, respectivamente, por
      * {@code largura} e {@code altura} antes da gravação.
+     * Cada forma recebe {@code ordem} para preservar a sobreposição. Círculos
+     * também recebem {@code raioRelativo}, calculado dividindo o raio em pixels
+     * pela menor dimensão da área; o ponto {@code raio} continua sendo gravado.
      * @param arquivo arquivo de destino
      * @param pontos pontos armazenados
      * @param primitivos formas armazenadas
@@ -80,7 +84,16 @@ public final class PersistenciaProjeto {
 
     /** Carrega uma cena e converte coordenadas relativas para pixels.
      * Aceita o formato atual e o formato absoluto usado pela primeira versão
-     * da persistência.
+     * da persistência. Valida os modelos e os limites do renderizador manual
+     * antes de retornar, permitindo ao chamador preservar a cena anterior em
+     * caso de erro.
+     * No formato atual, {@code ordem} deve estar ausente de todas as formas ou
+     * conter em todas elas índices únicos de zero até o total menos um. Sem
+     * esse campo, mantém a ordem de grupos: retas, triângulos, retângulos e
+     * círculos. Os pontos permanecem em uma lista separada.
+     * Quando presente, {@code raioRelativo} define o raio multiplicado pela
+     * menor dimensão atual. Sem ele, o raio é a distância entre os dois pontos
+     * convertidos para pixels; a proporção original da área não está registrada.
      * @param arquivo arquivo de origem
      * @param largura largura positiva da área de desenho em pixels
      * @param altura altura positiva da área de desenho em pixels
@@ -96,11 +109,18 @@ public final class PersistenciaProjeto {
         validarDimensoes(largura, altura);
         Object raiz = new LeitorJson(Files.readString(arquivo, StandardCharsets.UTF_8)).ler();
         Map<String, Object> projeto = objeto(raiz, "O JSON deve conter um objeto raiz");
-        if (projeto.containsKey("figura")) {
-            return carregarFigura(objeto(projeto.get("figura"), "Figura invalida"),
-                largura, altura);
+        try {
+            Cena cena = projeto.containsKey("figura")
+                ? carregarFigura(objeto(projeto.get("figura"), "Figura invalida"), largura, altura)
+                : carregarLegado(projeto);
+            for (PontoGr ponto : cena.getPontos()) {
+                if (ponto.getDiametro() < 1) throw new IllegalArgumentException("Diametro invalido");
+            }
+            for (PrimitivoGrafico primitivo : cena.getPrimitivos()) RenderizadorManual.validar(primitivo);
+            return cena;
+        } catch (IllegalArgumentException erro) {
+            throw new IOException("Projeto invalido: " + erro.getMessage(), erro);
         }
-        return carregarLegado(projeto);
     }
 
     /** Carrega uma cena sem alterar a escala das coordenadas absolutas.
@@ -125,14 +145,17 @@ public final class PersistenciaProjeto {
         }
 
         List<PrimitivoGrafico> primitivos = new ArrayList<PrimitivoGrafico>();
+        List<Integer> ordens = new ArrayList<Integer>();
         for (Object item : lista(figura.get("reta"), "reta")) {
             Map<String, Object> dado = objeto(item, "Reta invalida");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             EstiloReta estilo = estilo(dado);
             primitivos.add(new RetaGrafica(pontoRelativo(dado.get("p1"), largura, altura),
                 pontoRelativo(dado.get("p2"), largura, altura), estilo));
         }
         for (Object item : lista(figura.get("triangulo"), "triangulo")) {
             Map<String, Object> dado = objeto(item, "Triangulo invalido");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             EstiloReta estilo = estilo(dado);
             primitivos.add(new Triangulo(pontoRelativo(dado.get("p1"), largura, altura),
                 pontoRelativo(dado.get("p2"), largura, altura),
@@ -140,11 +163,13 @@ public final class PersistenciaProjeto {
         }
         for (Object item : lista(figura.get("retangulo"), "retangulo")) {
             Map<String, Object> dado = objeto(item, "Retangulo invalido");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             primitivos.add(new Retangulo(pontoRelativo(dado.get("p1"), largura, altura),
                 pontoRelativo(dado.get("p2"), largura, altura), estilo(dado)));
         }
         for (Object item : lista(figura.get("circulo"), "circulo")) {
             Map<String, Object> dado = objeto(item, "Circulo invalido");
+            ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
             AlgoritmoCirculo algoritmo = AlgoritmoCirculo.SIMETRIA_OCTANTES;
             if (dado.get("algoritmo") instanceof String) {
                 try {
@@ -153,9 +178,27 @@ public final class PersistenciaProjeto {
                     throw new IOException("Algoritmo de circulo invalido", erro);
                 }
             }
-            primitivos.add(new CirculoGrafico(
-                pontoRelativo(dado.get("centro"), largura, altura),
-                pontoRelativo(dado.get("raio"), largura, altura), estilo(dado), algoritmo));
+            Ponto centro = pontoRelativo(dado.get("centro"), largura, altura);
+            Ponto pontoRaio = pontoRelativo(dado.get("raio"), largura, altura);
+            if (dado.containsKey("raioRelativo")) {
+                Object valor = dado.get("raioRelativo");
+                if (!(valor instanceof Number)) throw new IOException("Raio relativo invalido");
+                double raio = ((Number)valor).doubleValue() * Math.min(largura, altura);
+                if (!Double.isFinite(raio) || raio < 0) throw new IOException("Raio relativo invalido");
+                pontoRaio = new Ponto(centro.getX() + raio, centro.getY());
+            }
+            primitivos.add(new CirculoGrafico(centro, pontoRaio, estilo(dado), algoritmo));
+        }
+        if (ordens.stream().anyMatch(ordem -> ordem != null)) {
+            List<PrimitivoGrafico> ordenados = new ArrayList<PrimitivoGrafico>(
+                Collections.nCopies(primitivos.size(), null));
+            for (int i = 0; i < ordens.size(); i++) {
+                Integer ordem = ordens.get(i);
+                if (ordem == null || ordem < 0 || ordem >= ordenados.size() || ordenados.get(ordem) != null)
+                    throw new IOException("Ordem de desenho invalida");
+                ordenados.set(ordem, primitivos.get(i));
+            }
+            primitivos = ordenados;
         }
         return new Cena(pontos, primitivos);
     }
@@ -183,21 +226,22 @@ public final class PersistenciaProjeto {
             List<PrimitivoGrafico> primitivos, int largura, int altura) {
         json.append("    \"").append(nome).append("\": [");
         int indice = 0;
-        for (PrimitivoGrafico primitivo : primitivos) {
+        for (int ordem = 0; ordem < primitivos.size(); ordem++) {
+            PrimitivoGrafico primitivo = primitivos.get(ordem);
             if (!classe.isInstance(primitivo)) {
                 continue;
             }
             if (indice > 0) json.append(',');
             indice++;
             json.append("\n      ").append(primitivoJson(
-                primitivo, nome + "_" + indice, largura, altura));
+                primitivo, nome + "_" + indice, largura, altura, ordem));
         }
         json.append("\n    ]");
     }
 
     private static String primitivoJson(PrimitivoGrafico primitivo, String id,
-            int largura, int altura) {
-        String atributos = ", \"cor\": " + corJson(primitivo.getCor())
+            int largura, int altura, int ordem) {
+        String atributos = ", \"ordem\": " + ordem + ", \"cor\": " + corJson(primitivo.getCor())
             + ", \"esp\": " + primitivo.getEspessura() + ", \"id\": \"" + id + "\"";
         if (primitivo instanceof RetaGrafica) {
             RetaGrafica reta = (RetaGrafica)primitivo;
@@ -222,6 +266,7 @@ public final class PersistenciaProjeto {
             CirculoGrafico circulo = (CirculoGrafico)primitivo;
             return "{" + pontoNomeadoJson("centro", circulo.getCentro(), largura, altura)
                 + ", " + pontoNomeadoJson("raio", circulo.getPontoRaio(), largura, altura)
+                + ", \"raioRelativo\": " + (circulo.getRaio() / Math.min(largura, altura))
                 + atributos + ", \"algoritmo\": \"" + circulo.getAlgoritmo().name() + "\"}";
         }
         throw new IllegalArgumentException("Primitivo nao suportado: " + primitivo.getClass().getName());
@@ -326,8 +371,12 @@ public final class PersistenciaProjeto {
         public List<PrimitivoGrafico> getPrimitivos() { return primitivos; }
     }
 
-    /** Pequeno parser JSON para o formato do projeto (objetos, listas, numeros e textos). */
+    /** Lê objetos, listas, números (incluindo notação científica) e textos do projeto.
+     * Não implementa toda a especificação JSON.
+     */
     private static final class LeitorJson {
+        private static final java.util.regex.Pattern NUMERO = java.util.regex.Pattern.compile(
+            "-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?");
         private final String fonte; private int posicao;
         LeitorJson(String fonte) { this.fonte = fonte; }
         Object ler() throws IOException { Object valor = valor(); espacos(); if (posicao != fonte.length()) throw erro("Conteudo extra"); return valor; }
@@ -335,7 +384,14 @@ public final class PersistenciaProjeto {
         private Map<String, Object> objeto() throws IOException { Map<String, Object> resultado = new LinkedHashMap<String, Object>(); consumir('{'); espacos(); if (proximo('}')) { posicao++; return resultado; } do { espacos(); String chave = texto(); espacos(); consumir(':'); resultado.put(chave, valor()); espacos(); } while (consumirSe(',')); consumir('}'); return resultado; }
         private List<Object> lista() throws IOException { List<Object> resultado = new ArrayList<Object>(); consumir('['); espacos(); if (proximo(']')) { posicao++; return resultado; } do { resultado.add(valor()); espacos(); } while (consumirSe(',')); consumir(']'); return resultado; }
         private String texto() throws IOException { consumir('\"'); StringBuilder resultado = new StringBuilder(); while (posicao < fonte.length()) { char c = fonte.charAt(posicao++); if (c == '\"') return resultado.toString(); if (c == '\\') { if (posicao >= fonte.length()) throw erro("Escape incompleto"); char e = fonte.charAt(posicao++); if (e == 'n') resultado.append('\n'); else if (e == 'r') resultado.append('\r'); else if (e == '\"' || e == '\\' || e == '/') resultado.append(e); else throw erro("Escape invalido"); } else resultado.append(c); } throw erro("Texto nao terminado"); }
-        private Number numero() throws IOException { int inicio = posicao; if (proximo('-')) posicao++; while (posicao < fonte.length() && Character.isDigit(fonte.charAt(posicao))) posicao++; if (proximo('.')) { posicao++; while (posicao < fonte.length() && Character.isDigit(fonte.charAt(posicao))) posicao++; } try { return Double.valueOf(fonte.substring(inicio, posicao)); } catch (NumberFormatException erro) { throw erro("Numero invalido"); } }
+        private Number numero() throws IOException {
+            java.util.regex.Matcher numero = NUMERO.matcher(fonte).region(posicao, fonte.length());
+            if (!numero.lookingAt()) throw erro("Numero invalido");
+            posicao = numero.end();
+            double resultado = Double.parseDouble(numero.group());
+            if (!Double.isFinite(resultado)) throw erro("Numero fora do limite");
+            return resultado;
+        }
         private void espacos() { while (posicao < fonte.length() && Character.isWhitespace(fonte.charAt(posicao))) posicao++; }
         private void consumir(char esperado) throws IOException { espacos(); if (!proximo(esperado)) throw erro("Esperado '" + esperado + "'"); posicao++; }
         private boolean consumirSe(char c) { espacos(); if (!proximo(c)) return false; posicao++; return true; }

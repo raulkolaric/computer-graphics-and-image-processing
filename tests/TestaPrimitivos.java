@@ -356,24 +356,78 @@ public class TestaPrimitivos {
             verificar(recarregado.getQuantidadePontos() == 1, "ponto restaurado do JSON");
             verificar(recarregado.getQuantidadePrimitivos() == 4, "formas restauradas do JSON");
             verificar(recarregado.getPrimitivos().get(0) instanceof RetaGrafica, "reta restaurada");
-            verificar(recarregado.getPrimitivos().get(1) instanceof Triangulo, "triangulo restaurado");
-            verificar(recarregado.getPrimitivos().get(2) instanceof Retangulo, "retangulo restaurado");
+            verificar(recarregado.getPrimitivos().get(2) instanceof Triangulo, "triangulo restaurado");
+            verificar(recarregado.getPrimitivos().get(1) instanceof Retangulo, "retangulo restaurado");
             CirculoGrafico circulo = (CirculoGrafico)recarregado.getPrimitivos().get(3);
             verificar(circulo.getAlgoritmo() == AlgoritmoCirculo.PARAMETRICO, "algoritmo do circulo restaurado");
             verificar(circulo.getEspessura() == 5 && circulo.getCor().equals(Color.ORANGE),
                 "estilo do circulo restaurado");
 
-            PainelDesenho projetoSalvo = new PainelDesenho(
-                new JLabel(), TiposPrimitivos.NENHUM);
+            PainelDesenho projetoSalvo = new PainelDesenho(new JLabel(), TiposPrimitivos.NENHUM);
             projetoSalvo.setSize(900, 472);
-            projetoSalvo.carregarProjeto(Path.of("projeto-anterior.json"));
+            projetoSalvo.carregarProjeto(Path.of("tests/fixtures/projeto-anterior.json"));
             verificar(projetoSalvo.getQuantidadePontos() == 4
-                && projetoSalvo.getQuantidadePrimitivos() == 5,
-                "projeto JSON salvo carregado");
-            BufferedImage imagem = javax.imageio.ImageIO.read(
-                Path.of("projeto-anterior.jpeg").toFile());
-            verificar(imagem != null && imagem.getWidth() == 900 && imagem.getHeight() == 472,
-                "imagem JPEG do projeto salvo valida");
+                && projetoSalvo.getQuantidadePrimitivos() == 5, "projeto anterior carregado");
+
+            // O exemplo externo não inclui nomes de pontos nem algoritmo de círculo.
+            PainelDesenho exemplo = new PainelDesenho(new JLabel(), TiposPrimitivos.NENHUM);
+            exemplo.setSize(900, 540);
+            exemplo.carregarProjeto(Path.of("tests/fixtures/exemplo.json"));
+            verificar(exemplo.getQuantidadePontos() == 3
+                && exemplo.getQuantidadePrimitivos() == 8, "exemplo do professor carregado");
+            CirculoGrafico externo = (CirculoGrafico)exemplo.getPrimitivos().get(5);
+            verificar(Math.abs(externo.getRaio() - Math.hypot(0.397 * 900, 0.180 * 540)) < 0.001,
+                "raio calculado entre centro e ponto da circunferencia");
+            BufferedImage imagem = new BufferedImage(900, 540, BufferedImage.TYPE_INT_RGB);
+            java.awt.Graphics2D g = imagem.createGraphics();
+            exemplo.paint(g);
+            g.dispose();
+            verificar(contarPixels(imagem, externo.getCor()) > 0, "circulo importado renderizado");
+
+            // Reconstrução explícita da referência; o arquivo original acima continua intacto.
+            for (int[] tamanho : new int[][] {{1165, 694}, {900, 540}, {900, 472}}) {
+                exemplo.setSize(tamanho[0], tamanho[1]);
+                exemplo.carregarProjeto(Path.of("exemplo.json"));
+                CirculoGrafico anterior = null;
+                Retangulo base = (Retangulo)exemplo.getPrimitivos().get(4);
+                int[] raiosReferencia = {179, 152, 128};
+                BufferedImage desenho = new BufferedImage(tamanho[0], tamanho[1], BufferedImage.TYPE_INT_RGB);
+                Graphics grafico = desenho.getGraphics();
+                exemplo.paint(grafico);
+                grafico.dispose();
+                for (int i = 0; i < 3; i++) {
+                    CirculoGrafico atual = (CirculoGrafico)exemplo.getPrimitivos().get(5 + i);
+                    verificar(Math.abs(atual.getRaio() - raiosReferencia[i] * tamanho[1] / 694.0) < 0.01,
+                        "raio reconstruido da referencia");
+                    verificar(atual.getCentro().getY() + atual.getRaio() + atual.getEspessura() / 2.0
+                        < base.getCanto1().getY() - base.getEspessura() / 2.0,
+                        "circulo acima da base sem sobreposicao");
+                    if (anterior != null) {
+                        verificar(atual.getCentro().calcularDistancia(anterior.getCentro()) + atual.getRaio()
+                            < anterior.getRaio(), "circulos aninhados como na referencia");
+                    }
+                    verificarCor(desenho, (int)Math.round(atual.getCentro().getX()),
+                        (int)Math.round(atual.getCentro().getY()) - (int)Math.round(atual.getRaio()),
+                        atual.getCor(), "topo do circulo reconstruido visivel");
+                    anterior = atual;
+                }
+                exemplo.salvarProjeto(arquivo);
+                exemplo.carregarProjeto(arquivo);
+                CirculoGrafico interno = (CirculoGrafico)exemplo.getPrimitivos().get(7);
+                verificar(Math.abs(interno.getCentro().getX() - 0.243 * tamanho[0]) < 0.01,
+                    "centro corrigido preservado ao salvar e abrir");
+            }
+
+            Files.writeString(arquivo, json + json);
+            boolean rejeitou = false;
+            try {
+                exemplo.carregarProjeto(arquivo);
+            } catch (java.io.IOException esperado) {
+                rejeitou = true;
+            }
+            verificar(rejeitou && exemplo.getQuantidadePrimitivos() == 8
+                && exemplo.getQuantidadePontos() == 3,
+                "documentos concatenados rejeitados sem apagar a cena");
         } catch (Exception erro) {
             throw new AssertionError("persistencia JSON", erro);
         } finally {
