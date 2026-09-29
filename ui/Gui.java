@@ -87,7 +87,6 @@ public class Gui extends JFrame {
         modos.add(jtTriangulo);
         modos.add(jtCirculo);
         modos.add(jtSelecao);
-        modos.add(jtEspelhar);
 
         barraComandos.add(jtPonto);
         barraComandos.add(Box.createHorizontalStrut(4));
@@ -178,7 +177,7 @@ public class Gui extends JFrame {
             } else if (origem == jtSelecao) {
                 areaDesenho.setTipo(TiposPrimitivos.SELECAO);
             } else if (origem == jtEspelhar) {
-                areaDesenho.setTipo(TiposPrimitivos.ESPELHAMENTO);
+                areaDesenho.setEspelhamento(jtEspelhar.isSelected());
             } else if (origem == jbCor) {
                 JColorChooser seletor = new JColorChooser(areaDesenho.getCorAtual());
                 AbstractColorChooserPanel[] paineis = seletor.getChooserPanels();

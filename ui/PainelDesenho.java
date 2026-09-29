@@ -48,6 +48,8 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     private final List<PrimitivoGrafico> primitivosVisiveis = new ArrayList<PrimitivoGrafico>();
     private final List<Ponto> pontosPendentes = new ArrayList<Ponto>();
 
+    private boolean espelhamentoAtivo;
+    private Ponto eixoP1, eixoP2, previaEixo;
     private TiposPrimitivos tipo;
     private RenderizadorPrimitivos renderizador;
     private Ponto pontoPrevia;
@@ -96,9 +98,25 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         pontosPendentes.clear();
         pontoPrevia = null;
         limparSelecao();
-        msg.setText(tipo == TiposPrimitivos.ESPELHAMENTO
-            ? "Espelhar: selecione um primitivo, depois clique em p1 e p2 da reta"
+        msg.setText(espelhamentoAtivo && eixoP2 == null
+            ? "Espelhar: clique em p1 e p2 da reta, depois desenhe normalmente"
             : "Modo: " + tipo);
+        repaint();
+    }
+
+    /** Ativa a cópia automática e solicita dois cliques para definir uma nova reta.
+     * O tipo de primitivo escolhido permanece ativo. Desativar cancela a entrada
+     * pendente e preserva as cópias já armazenadas.
+     * @param ativo indica se novas formas devem ser espelhadas
+     */
+    public void setEspelhamento(boolean ativo) {
+        espelhamentoAtivo = ativo;
+        eixoP1 = eixoP2 = previaEixo = null;
+        pontosPendentes.clear();
+        pontoPrevia = null;
+        limparSelecao();
+        msg.setText(ativo ? "Espelhar: clique em p1 e p2 da reta, depois desenhe normalmente"
+            : "Espelhamento desativado");
         repaint();
     }
 
@@ -203,16 +221,26 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    /** Adiciona um primitivo à cena armazenada e visível e solicita pintura.
+    /** Adiciona um primitivo à cena e sua cópia quando o espelhamento está ativo
+     * com eixo definido. Valida a cópia antes de alterar a cena.
      * @param primitivo primitivo a adicionar
-     * @throws IllegalArgumentException se o primitivo for nulo
+     * @throws IllegalArgumentException se o primitivo for nulo ou a cópia exceder os limites
      */
     public void adicionarPrimitivo(PrimitivoGrafico primitivo) {
         if (primitivo == null) {
             throw new IllegalArgumentException("O primitivo nao pode ser nulo");
         }
+        PrimitivoGrafico copia = null;
+        if (espelhamentoAtivo && eixoP2 != null) {
+            copia = Espelhamento.refletir(primitivo, eixoP1, eixoP2);
+            RenderizadorManual.validar(copia);
+        }
         primitivos.add(primitivo);
         primitivosVisiveis.add(primitivo);
+        if (copia != null) {
+            primitivos.add(copia);
+            primitivosVisiveis.add(copia);
+        }
         repaint();
     }
 
@@ -358,6 +386,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         for (PontoGr ponto : pontosVisiveis) {
             ponto.desenharPonto(g);
         }
+        desenharEixo(g);
         desenharPrevia(g);
         desenharSelecao(g);
     }
@@ -370,28 +399,17 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     public void mousePressed(MouseEvent e) {
         Ponto ponto = new Ponto(e.getX(), e.getY());
 
-        if (tipo == TiposPrimitivos.SELECAO) {
-            selecionar(ponto);
-            return;
-        }
-
-        if (tipo == TiposPrimitivos.ESPELHAMENTO) {
-            if (!temSelecao()) {
-                selecionar(ponto);
-                if (temSelecao()) msg.setText("Espelhar: clique em p1 e p2 da reta");
-                return;
-            }
-            if (pontosPendentes.isEmpty()) {
-                pontosPendentes.add(ponto);
-                pontoPrevia = ponto;
+        if (espelhamentoAtivo && eixoP2 == null) {
+            if (eixoP1 == null) {
+                eixoP1 = ponto;
+                previaEixo = ponto;
                 msg.setText("Espelhar: clique em p2 da reta");
             } else {
                 try {
-                    espelharSelecionado(pontosPendentes.get(0), ponto);
-                    pontosPendentes.clear();
-                    pontoPrevia = null;
-                    limparSelecao();
-                    msg.setText("Copia espelhada criada. Selecione outro primitivo.");
+                    Espelhamento.refletir(ponto, eixoP1, ponto);
+                    eixoP2 = ponto;
+                    previaEixo = null;
+                    msg.setText("Eixo definido. Desenhe " + tipo + " normalmente.");
                 } catch (IllegalArgumentException erro) {
                     msg.setText(erro.getMessage() + "; escolha outro p2");
                 }
@@ -400,12 +418,28 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
             return;
         }
 
+        if (tipo == TiposPrimitivos.SELECAO) {
+            selecionar(ponto);
+            return;
+        }
+
         if (tipo == TiposPrimitivos.PONTO) {
             int diametro = Math.max(4, espessuraAtual + 2);
             PontoGr pontoGr = new PontoGr(e.getX(), e.getY(), corAtual,
                        "p" + pontos.size(), diametro);
+            PontoGr copia;
+            try {
+                copia = espelhamentoAtivo ? espelharPonto(pontoGr) : null;
+            } catch (IllegalArgumentException erro) {
+                msg.setText(erro.getMessage());
+                return;
+            }
             pontos.add(pontoGr);
             pontosVisiveis.add(pontoGr);
+            if (copia != null) {
+                pontos.add(copia);
+                pontosVisiveis.add(copia);
+            }
             msg.setText("Ponto criado em (" + e.getX() + ", " + e.getY() + ")");
             repaint();
             return;
@@ -419,10 +453,14 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         pontosPendentes.add(ponto);
         int necessarios = tipo.getQuantidadePontos();
         if (pontosPendentes.size() == necessarios) {
-            criarPrimitivoPendente();
+            try {
+                criarPrimitivoPendente();
+                msg.setText(tipo + " criado. Selecione novos pontos.");
+            } catch (IllegalArgumentException erro) {
+                msg.setText(erro.getMessage());
+            }
             pontosPendentes.clear();
             pontoPrevia = null;
-            msg.setText(tipo + " criado. Selecione novos pontos.");
         } else {
             if (pontosPendentes.size() == 1 && aceitaPrevia(tipo)) {
                 pontoPrevia = ponto;
@@ -432,25 +470,40 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    private void espelharSelecionado(Ponto p1, Ponto p2) {
-        if (pontoSelecionado != null) {
-            Ponto refletido = Espelhamento.refletir(pontoSelecionado, p1, p2);
-            if (refletido.getX() < Integer.MIN_VALUE || refletido.getX() > Integer.MAX_VALUE
-                    || refletido.getY() < Integer.MIN_VALUE || refletido.getY() > Integer.MAX_VALUE) {
-                throw new IllegalArgumentException("Coordenada fora do limite de rasterizacao");
-            }
-            PontoGr copia = new PontoGr(0, 0, pontoSelecionado.getCorPto(),
-                pontoSelecionado.getNomePto(), pontoSelecionado.getDiametro());
-            copia.setX(refletido.getX());
-            copia.setY(refletido.getY());
-            copia.setCorNomePto(pontoSelecionado.getCorNomePto());
-            pontos.add(copia);
-            pontosVisiveis.add(copia);
-        } else {
-            PrimitivoGrafico copia = Espelhamento.refletir(primitivoSelecionado, p1, p2);
-            RenderizadorManual.validar(copia);
-            adicionarPrimitivo(copia);
+    private PontoGr espelharPonto(PontoGr original) {
+        Ponto refletido = Espelhamento.refletir(original, eixoP1, eixoP2);
+        if (refletido.getX() < Integer.MIN_VALUE || refletido.getX() > Integer.MAX_VALUE
+                || refletido.getY() < Integer.MIN_VALUE || refletido.getY() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Coordenada fora do limite de rasterizacao");
         }
+        PontoGr copia = new PontoGr(0, 0, original.getCorPto(),
+            original.getNomePto(), original.getDiametro());
+        copia.setX(refletido.getX());
+        copia.setY(refletido.getY());
+        copia.setCorNomePto(original.getCorNomePto());
+        return copia;
+    }
+
+    private void desenharEixo(Graphics g) {
+        Ponto fim = eixoP2 != null ? eixoP2 : previaEixo;
+        if (!espelhamentoAtivo || eixoP1 == null || fim == null) return;
+        Graphics2D eixo = (Graphics2D)g.create();
+        eixo.setColor(Color.GRAY);
+        eixo.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
+            10, new float[] {6, 4}, 0));
+        double dx = fim.getX() - eixoP1.getX(), dy = fim.getY() - eixoP1.getY();
+        double comprimento = Math.hypot(dx, dy);
+        if (eixoP2 != null && comprimento > 0) {
+            double alcance = getWidth() + getHeight();
+            dx *= alcance / comprimento;
+            dy *= alcance / comprimento;
+            eixo.drawLine(inteiro(eixoP1.getX() - dx), inteiro(eixoP1.getY() - dy),
+                inteiro(eixoP1.getX() + dx), inteiro(eixoP1.getY() + dy));
+        } else {
+            eixo.drawLine(inteiro(eixoP1.getX()), inteiro(eixoP1.getY()),
+                inteiro(fim.getX()), inteiro(fim.getY()));
+        }
+        eixo.dispose();
     }
 
     private void criarPrimitivoPendente() {
@@ -477,8 +530,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     private boolean aceitaPrevia(TiposPrimitivos tipo) {
-        return tipo == TiposPrimitivos.ESPELHAMENTO
-            || tipo == TiposPrimitivos.RETA || tipo == TiposPrimitivos.RETANGULO
+        return tipo == TiposPrimitivos.RETA || tipo == TiposPrimitivos.RETANGULO
             || tipo == TiposPrimitivos.CIRCULO;
     }
 
@@ -487,8 +539,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
             return;
         }
         EstiloReta estilo = new EstiloReta(corAtual, espessuraAtual);
-        criarPrimitivoDoisPontos(tipo == TiposPrimitivos.ESPELHAMENTO
-            ? TiposPrimitivos.RETA : tipo, pontosPendentes.get(0), pontoPrevia, estilo)
+        criarPrimitivoDoisPontos(tipo, pontosPendentes.get(0), pontoPrevia, estilo)
             .desenhar(g, renderizador);
     }
 
@@ -611,10 +662,6 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     private void limparSelecao() {
-        if (tipo == TiposPrimitivos.ESPELHAMENTO) {
-            pontosPendentes.clear();
-            pontoPrevia = null;
-        }
         pontoSelecionado = null;
         primitivoSelecionado = null;
     }
@@ -624,6 +671,13 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
      */
     @Override
     public void mouseMoved(MouseEvent e) {
+        if (espelhamentoAtivo && eixoP2 == null) {
+            msg.setText(eixoP1 == null ? "Espelhar: clique em p1 da reta"
+                : "Espelhar: clique em p2 da reta");
+            previaEixo = new Ponto(e.getX(), e.getY());
+            repaint();
+            return;
+        }
         msg.setText("(" + e.getX() + ", " + e.getY() + ")");
         if (pontosPendentes.size() == 1 && aceitaPrevia(tipo)) {
             pontoPrevia = new Ponto(e.getX(), e.getY());

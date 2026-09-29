@@ -58,19 +58,31 @@ public class TestaEspelhamento {
         try {
             for (PrimitivoGrafico original : formas) {
                 JLabel msg = new JLabel();
-                PainelDesenho painel = new PainelDesenho(msg, TiposPrimitivos.ESPELHAMENTO);
+                TiposPrimitivos tipo = original instanceof RetaGrafica ? TiposPrimitivos.RETA
+                    : original instanceof Triangulo ? TiposPrimitivos.TRIANGULO
+                    : original instanceof Retangulo ? TiposPrimitivos.RETANGULO : TiposPrimitivos.CIRCULO;
+                PainelDesenho painel = new PainelDesenho(msg, tipo);
                 painel.setSize(160, 160);
-                painel.adicionarPrimitivo(original);
-                clicar(painel, 30, original instanceof RetaGrafica ? 20 : 30);
-                assert painel.temSelecao();
+                painel.setCorAtual(Color.BLUE);
+                painel.setEspessuraAtual(3);
+                painel.setAlgoritmoCirculo(AlgoritmoCirculo.PARAMETRICO);
+                painel.setEspelhamento(true);
+                assert painel.getTipo() == tipo : "toggle preserva ferramenta";
                 clicar(painel, 70, 30);
                 clicar(painel, 70, 30);
-                assert painel.getQuantidadePrimitivos() == 1 : "reta degenerada nao cria copia";
-                assert painel.temSelecao();
+                assert painel.getQuantidadePrimitivos() == 0 : "eixo degenerado nao cria forma";
                 clicar(painel, 100, 90);
-                assert painel.getQuantidadePrimitivos() == 2;
-                assert painel.getPrimitivos().get(0) == original;
-                assert !painel.temSelecao();
+                assert painel.getQuantidadePrimitivos() == 0 : "eixo nao entra na cena";
+                if (tipo == TiposPrimitivos.CIRCULO) {
+                    clicar(painel, 30, 30);
+                    clicar(painel, 40, 30);
+                } else {
+                    clicar(painel, 20, 20);
+                    clicar(painel, 40, tipo == TiposPrimitivos.RETANGULO ? 40 : 20);
+                    if (tipo == TiposPrimitivos.TRIANGULO) clicar(painel, 30, 40);
+                }
+                assert painel.getQuantidadePrimitivos() == 2 : "criacao automatica";
+                assert painel.getTipo() == tipo;
                 PrimitivoGrafico copia = painel.getPrimitivos().get(1);
                 assert copia.getClass() == original.getClass();
                 assert copia.getCor().equals(Color.BLUE) && copia.getEspessura() == 3;
@@ -110,27 +122,40 @@ public class TestaEspelhamento {
             painel.setSize(160, 160);
             painel.setCorAtual(Color.RED);
             clicar(painel, 20, 30);
-            painel.setTipo(TiposPrimitivos.ESPELHAMENTO);
-            clicar(painel, 20, 30);
+            painel.setEspelhamento(true);
             clicar(painel, 70, 0);
-            painel.setTipo(TiposPrimitivos.RETA);
-            assert painel.getQuantidadePontos() == 1 : "cancelamento";
-            painel.setTipo(TiposPrimitivos.ESPELHAMENTO);
-            clicar(painel, 20, 30);
-            clicar(painel, 70, 0);
+            painel.setTipo(TiposPrimitivos.PONTO);
             clicar(painel, 70, 100);
-            assert painel.getQuantidadePontos() == 2;
+            assert painel.getQuantidadePontos() == 1 : "ativar nao espelha pontos antigos";
             clicar(painel, 20, 30);
-            clicar(painel, 70, 0);
-            painel.redesenhar();
-            clicar(painel, 20, 30);
-            clicar(painel, 70, 0);
-            assert painel.getQuantidadePontos() == 2 : "redesenhar cancela a reta pendente";
-            painel.setTipo(TiposPrimitivos.NENHUM);
+            assert painel.getQuantidadePontos() == 3;
+            clicar(painel, 25, 50);
+            assert painel.getQuantidadePontos() == 5 : "eixo reutilizado";
             assert pintar(painel).getRGB(120, 30) == Color.RED.getRGB();
             painel.salvarProjeto(arquivo);
             painel.carregarProjeto(arquivo);
-            assert painel.getQuantidadePontos() == 2;
+            assert painel.getQuantidadePontos() == 5 : "abrir nao duplica novamente";
+            painel.setEspelhamento(false);
+            clicar(painel, 30, 60);
+            assert painel.getQuantidadePontos() == 6 : "desativado cria so original";
+            painel.setTipo(TiposPrimitivos.RETA);
+            clicar(painel, 10, 10);
+            painel.setEspelhamento(true);
+            clicar(painel, 70, 0);
+            painel.setEspelhamento(false);
+            clicar(painel, 20, 20);
+            assert painel.getQuantidadePrimitivos() == 0 : "toggle cancela forma e eixo incompletos";
+            clicar(painel, 40, 20);
+            assert painel.getQuantidadePrimitivos() == 1;
+            painel.setEspelhamento(true);
+            clicar(painel, 0, 70);
+            clicar(painel, 100, 70);
+            clicar(painel, 10, 10);
+            clicar(painel, 20, 10);
+            assert painel.getQuantidadePrimitivos() == 3 : "novo eixo reutilizado";
+            RetaGrafica ultima = (RetaGrafica)painel.getPrimitivos().get(2);
+            igual(ultima.getP1(), 10, 130);
+            igual(ultima.getP2(), 20, 130);
         } finally { Files.deleteIfExists(arquivo); }
     }
 

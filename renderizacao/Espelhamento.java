@@ -8,7 +8,7 @@ import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
 
-/** Reflexão pela projeção ortogonal sobre uma reta infinita. */
+/** Copia primitivos usando a transformação composta do exemplo do professor. */
 public final class Espelhamento {
     private Espelhamento() { }
 
@@ -23,22 +23,9 @@ public final class Espelhamento {
         if (ponto == null || p1 == null || p2 == null) {
             throw new IllegalArgumentException("Pontos sao obrigatorios");
         }
-        double dx = p2.getX() - p1.getX();
-        double dy = p2.getY() - p1.getY();
-        double comprimento = Math.hypot(dx, dy);
-        if (!Double.isFinite(comprimento) || comprimento == 0) {
-            throw new IllegalArgumentException("Defina a reta com dois pontos distintos");
-        }
-        dx /= comprimento;
-        dy /= comprimento;
-        double projecao = (ponto.getX() - p1.getX()) * dx
-            + (ponto.getY() - p1.getY()) * dy;
-        double x = 2 * (p1.getX() + projecao * dx) - ponto.getX();
-        double y = 2 * (p1.getY() + projecao * dy) - ponto.getY();
-        if (!Double.isFinite(x) || !Double.isFinite(y)) {
-            throw new IllegalArgumentException("As coordenadas devem ser finitas");
-        }
-        return new Ponto(x, y);
+        double[] resultado = TransfGeometricaComposta.espelhamentoRetaQquer(
+            ponto.getX(), ponto.getY(), p1, p2);
+        return new Ponto(resultado[0], resultado[1]);
     }
 
     /** Copia a geometria e o estilo de uma forma refletida.

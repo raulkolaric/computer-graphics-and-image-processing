@@ -18,9 +18,12 @@ Uso
    para visualizar o elástico antes do segundo clique.
 7. Escolha Selecionar, clique em um ponto ou primitivo e use Excluir selecionado
    para removê-lo da cena.
-8. Use Espelhar, selecione um ponto ou forma e clique em dois pontos distintos
-   da reta de reflexão. A cópia mantém o estilo e é incluída na cena; o original
-   permanece. Trocar de modo cancela os cliques pendentes.
+8. Ative Espelhar e clique em dois pontos distintos para definir a reta de
+   reflexão. Depois crie pontos e formas normalmente: cada criação inclui
+   automaticamente uma cópia espelhada com o mesmo estilo na cena.
+   O tipo escolhido continua ativo e o eixo aparece tracejado. Desative Espelhar
+   para voltar a desenhar sem cópias; ativá-lo novamente permite definir outro
+   eixo. Alternar o botão cancela formas incompletas, preservando a cena.
 9. Use Redesenhar para reconstruir a cena armazenada em memória.
 10. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
    O explorador começa no diretório de trabalho e, após abrir ou salvar,
@@ -73,6 +76,9 @@ pixels visíveis e persistência do centro corrigido após salvar e abrir.
 
 Arquitetura
 -----------
+- TransfGeometricaComposta e Matrizes adaptam o exemplo do professor: translação,
+  rotação, reflexão no eixo X e transformações inversas. atan2 permite retas
+  verticais; pontos coincidentes são rejeitados.
 - Reta e Circulo representam a geometria matemática.
 - RetaGrafica e CirculoGrafico acrescentam estilo e renderização.
 - Retangulo, no pacote retangulo, e Triangulo são compostos exclusivamente por
