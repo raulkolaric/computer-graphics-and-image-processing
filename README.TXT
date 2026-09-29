@@ -18,8 +18,11 @@ Uso
    para visualizar o elástico antes do segundo clique.
 7. Escolha Selecionar, clique em um ponto ou primitivo e use Excluir selecionado
    para removê-lo da cena.
-8. Use Redesenhar para reconstruir a cena armazenada em memória.
-9. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
+8. Use Espelhar, selecione um ponto ou forma e clique em dois pontos distintos
+   da reta de reflexão. A cópia mantém o estilo e é incluída na cena; o original
+   permanece. Trocar de modo cancela os cliques pendentes.
+9. Use Redesenhar para reconstruir a cena armazenada em memória.
+10. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
    O explorador começa no diretório de trabalho e, após abrir ou salvar,
    seleciona o último arquivo usado com sucesso.
    Use Salvar projeto para escolher o destino; confirme antes de substituir um
@@ -35,6 +38,9 @@ Persistência e compatibilidade
 A escala é aplicada ao abrir o arquivo; redimensionar uma janela já aberta não
 altera a escala da cena atual.
 
+- Retângulos incluem p3 e p4 (cantos adjacentes a p1) para preservar orientação
+  após espelhamento. p1 e p2 continuam sendo cantos opostos; arquivos antigos
+  com apenas esses dois pontos permanecem compatíveis.
 - Novas gravações incluem ordem em cada forma para preservar a sobreposição.
   Se presente em uma forma, esse campo deve existir em todas, com valores inteiros
   únicos de 0 até o total de formas menos 1. Sem o campo, a ordem histórica é
@@ -82,6 +88,7 @@ Compilação e testes
 Requer JDK 11 ou superior (a persistência usa Files.readString e a GUI usa Path.of).
 
   javac -d bin *.java */*.java
+  java -ea -Djava.awt.headless=true -cp bin tests.TestaEspelhamento
   java -ea -Djava.awt.headless=true -cp bin tests.TestaPrimitivos
   java -ea -Djava.awt.headless=true -cp bin tests.TestaImportacao
   java -ea -Djava.awt.headless=true -cp bin tests.TestaOrdem

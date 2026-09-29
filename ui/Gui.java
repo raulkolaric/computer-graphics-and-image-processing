@@ -46,6 +46,7 @@ public class Gui extends JFrame {
     private final JToggleButton jtTriangulo = new JToggleButton("Triangulo");
     private final JToggleButton jtCirculo = new JToggleButton("Circulo");
     private final JToggleButton jtSelecao = new JToggleButton("Selecionar");
+    private final JToggleButton jtEspelhar = new JToggleButton("Espelhar");
     private final JButton jbCor = new JButton("Cor");
     private final JButton jbRedesenhar = new JButton("Redesenhar");
     private final JButton jbLimpar = new JButton("Limpar");
@@ -86,6 +87,7 @@ public class Gui extends JFrame {
         modos.add(jtTriangulo);
         modos.add(jtCirculo);
         modos.add(jtSelecao);
+        modos.add(jtEspelhar);
 
         barraComandos.add(jtPonto);
         barraComandos.add(Box.createHorizontalStrut(4));
@@ -98,8 +100,10 @@ public class Gui extends JFrame {
         barraComandos.add(jtCirculo);
         barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtSelecao);
+        barraComandos.add(Box.createHorizontalStrut(4));
+        barraComandos.add(jtEspelhar);
         for (JToggleButton botao : new JToggleButton[] {
-                jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo, jtSelecao }) {
+                jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo, jtSelecao, jtEspelhar }) {
             botao.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
             botao.setBorderPainted(true);
             botao.addItemListener(event -> botao.setBorder(BorderFactory.createLineBorder(
@@ -136,6 +140,7 @@ public class Gui extends JFrame {
         jtTriangulo.addActionListener(eventos);
         jtCirculo.addActionListener(eventos);
         jtSelecao.addActionListener(eventos);
+        jtEspelhar.addActionListener(eventos);
         jbCor.addActionListener(eventos);
         jbRedesenhar.addActionListener(eventos);
         jbLimpar.addActionListener(eventos);
@@ -172,6 +177,8 @@ public class Gui extends JFrame {
                 areaDesenho.setTipo(TiposPrimitivos.CIRCULO);
             } else if (origem == jtSelecao) {
                 areaDesenho.setTipo(TiposPrimitivos.SELECAO);
+            } else if (origem == jtEspelhar) {
+                areaDesenho.setTipo(TiposPrimitivos.ESPELHAMENTO);
             } else if (origem == jbCor) {
                 JColorChooser seletor = new JColorChooser(areaDesenho.getCorAtual());
                 AbstractColorChooserPanel[] paineis = seletor.getChooserPanels();

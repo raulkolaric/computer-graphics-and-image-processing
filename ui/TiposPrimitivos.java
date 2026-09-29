@@ -19,6 +19,8 @@ public enum TiposPrimitivos {
     CIRCULO(2),
     /** Seleção de um primitivo existente. */
     SELECAO(1),
+    /** Seleciona uma forma e define a reta de reflexão com dois cliques. */
+    ESPELHAMENTO(2),
     /** Nenhum primitivo selecionado. */
     NENHUM(0);
 

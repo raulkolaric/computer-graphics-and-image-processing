@@ -22,6 +22,7 @@ import ponto.Ponto;
 import ponto.PontoGr;
 import retangulo.Retangulo;
 import renderizacao.PrimitivoGrafico;
+import renderizacao.Espelhamento;
 import renderizacao.RenderizadorManual;
 import renderizacao.RenderizadorPrimitivos;
 import reta.EstiloReta;
@@ -95,7 +96,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         pontosPendentes.clear();
         pontoPrevia = null;
         limparSelecao();
-        msg.setText("Modo: " + tipo);
+        msg.setText(tipo == TiposPrimitivos.ESPELHAMENTO
+            ? "Espelhar: selecione um primitivo, depois clique em p1 e p2 da reta"
+            : "Modo: " + tipo);
         repaint();
     }
 
@@ -372,6 +375,31 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
             return;
         }
 
+        if (tipo == TiposPrimitivos.ESPELHAMENTO) {
+            if (!temSelecao()) {
+                selecionar(ponto);
+                if (temSelecao()) msg.setText("Espelhar: clique em p1 e p2 da reta");
+                return;
+            }
+            if (pontosPendentes.isEmpty()) {
+                pontosPendentes.add(ponto);
+                pontoPrevia = ponto;
+                msg.setText("Espelhar: clique em p2 da reta");
+            } else {
+                try {
+                    espelharSelecionado(pontosPendentes.get(0), ponto);
+                    pontosPendentes.clear();
+                    pontoPrevia = null;
+                    limparSelecao();
+                    msg.setText("Copia espelhada criada. Selecione outro primitivo.");
+                } catch (IllegalArgumentException erro) {
+                    msg.setText(erro.getMessage() + "; escolha outro p2");
+                }
+            }
+            repaint();
+            return;
+        }
+
         if (tipo == TiposPrimitivos.PONTO) {
             int diametro = Math.max(4, espessuraAtual + 2);
             PontoGr pontoGr = new PontoGr(e.getX(), e.getY(), corAtual,
@@ -404,6 +432,27 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
+    private void espelharSelecionado(Ponto p1, Ponto p2) {
+        if (pontoSelecionado != null) {
+            Ponto refletido = Espelhamento.refletir(pontoSelecionado, p1, p2);
+            if (refletido.getX() < Integer.MIN_VALUE || refletido.getX() > Integer.MAX_VALUE
+                    || refletido.getY() < Integer.MIN_VALUE || refletido.getY() > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("Coordenada fora do limite de rasterizacao");
+            }
+            PontoGr copia = new PontoGr(0, 0, pontoSelecionado.getCorPto(),
+                pontoSelecionado.getNomePto(), pontoSelecionado.getDiametro());
+            copia.setX(refletido.getX());
+            copia.setY(refletido.getY());
+            copia.setCorNomePto(pontoSelecionado.getCorNomePto());
+            pontos.add(copia);
+            pontosVisiveis.add(copia);
+        } else {
+            PrimitivoGrafico copia = Espelhamento.refletir(primitivoSelecionado, p1, p2);
+            RenderizadorManual.validar(copia);
+            adicionarPrimitivo(copia);
+        }
+    }
+
     private void criarPrimitivoPendente() {
         EstiloReta estilo = new EstiloReta(corAtual, espessuraAtual);
         Ponto p1 = pontosPendentes.get(0);
@@ -428,7 +477,8 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     private boolean aceitaPrevia(TiposPrimitivos tipo) {
-        return tipo == TiposPrimitivos.RETA || tipo == TiposPrimitivos.RETANGULO
+        return tipo == TiposPrimitivos.ESPELHAMENTO
+            || tipo == TiposPrimitivos.RETA || tipo == TiposPrimitivos.RETANGULO
             || tipo == TiposPrimitivos.CIRCULO;
     }
 
@@ -437,7 +487,8 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
             return;
         }
         EstiloReta estilo = new EstiloReta(corAtual, espessuraAtual);
-        criarPrimitivoDoisPontos(tipo, pontosPendentes.get(0), pontoPrevia, estilo)
+        criarPrimitivoDoisPontos(tipo == TiposPrimitivos.ESPELHAMENTO
+            ? TiposPrimitivos.RETA : tipo, pontosPendentes.get(0), pontoPrevia, estilo)
             .desenhar(g, renderizador);
     }
 
@@ -474,12 +525,9 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         }
         if (primitivo instanceof Retangulo) {
             Retangulo retangulo = (Retangulo)primitivo;
-            Ponto p1 = retangulo.getCanto1();
-            Ponto p2 = retangulo.getCanto2();
-            return ponto.getX() >= Math.min(p1.getX(), p2.getX()) - margem
-                && ponto.getX() <= Math.max(p1.getX(), p2.getX()) + margem
-                && ponto.getY() >= Math.min(p1.getY(), p2.getY()) - margem
-                && ponto.getY() <= Math.max(p1.getY(), p2.getY()) + margem;
+            List<Ponto> v = retangulo.getVertices();
+            return contemTriangulo(ponto, v.get(0), v.get(1), v.get(2), margem)
+                || contemTriangulo(ponto, v.get(0), v.get(2), v.get(3), margem);
         }
         if (primitivo instanceof Triangulo) {
             List<Ponto> vertices = ((Triangulo)primitivo).getVertices();
@@ -537,7 +585,11 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
                 inteiro(reta.getP2().getX()), inteiro(reta.getP2().getY()));
         } else if (primitivoSelecionado instanceof Retangulo) {
             Retangulo retangulo = (Retangulo)primitivoSelecionado;
-            desenharRetanguloSelecao(selecao, retangulo.getCanto1(), retangulo.getCanto2());
+            Polygon poligono = new Polygon();
+            for (Ponto vertice : retangulo.getVertices()) {
+                poligono.addPoint(inteiro(vertice.getX()), inteiro(vertice.getY()));
+            }
+            selecao.drawPolygon(poligono);
         } else if (primitivoSelecionado instanceof Triangulo) {
             List<Ponto> vertices = ((Triangulo)primitivoSelecionado).getVertices();
             Polygon poligono = new Polygon();
@@ -554,19 +606,15 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         selecao.dispose();
     }
 
-    private void desenharRetanguloSelecao(Graphics2D g, Ponto p1, Ponto p2) {
-        int x = inteiro(Math.min(p1.getX(), p2.getX()));
-        int y = inteiro(Math.min(p1.getY(), p2.getY()));
-        int largura = inteiro(Math.abs(p2.getX() - p1.getX()));
-        int altura = inteiro(Math.abs(p2.getY() - p1.getY()));
-        g.drawRect(x, y, largura, altura);
-    }
-
     private int inteiro(double valor) {
         return (int)Math.round(valor);
     }
 
     private void limparSelecao() {
+        if (tipo == TiposPrimitivos.ESPELHAMENTO) {
+            pontosPendentes.clear();
+            pontoPrevia = null;
+        }
         pontoSelecionado = null;
         primitivoSelecionado = null;
     }
