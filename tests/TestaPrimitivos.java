@@ -204,15 +204,15 @@ public class TestaPrimitivos {
         Graphics g3 = limpa.getGraphics();
         painel.paint(g3);
         g3.dispose();
-        verificar(painel.getQuantidadePrimitivos() == 120,
-            "limpar nao remove primitivos da estrutura de dados");
+        verificar(painel.getQuantidadePrimitivos() == 0,
+            "limpar remove primitivos da estrutura de dados");
         painel.redesenhar();
         BufferedImage restaurada = novaImagem();
         Graphics g4 = restaurada.getGraphics();
         painel.paint(g4);
         g4.dispose();
-        verificar(checksum(primeira) == checksum(restaurada),
-            "redesenhar restaura a cena armazenada");
+        verificar(checksum(limpa) == checksum(restaurada),
+            "redesenhar nao recupera primitivos removidos");
     }
 
     private static void testarEntradaMouse() {

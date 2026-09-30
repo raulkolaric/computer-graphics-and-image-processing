@@ -322,10 +322,12 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return removeu;
     }
 
-    /** Limpa a cena visível sem remover pontos ou primitivos armazenados.
+    /** Limpa a cena armazenada e visível para iniciar um projeto vazio.
      * Também descarta pontos pendentes, a prévia e a seleção atual.
      */
     public void limpar() {
+        pontos.clear();
+        primitivos.clear();
         pontosVisiveis.clear();
         primitivosVisiveis.clear();
         pontosPendentes.clear();

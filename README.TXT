@@ -24,7 +24,8 @@ Uso
    O tipo escolhido continua ativo e o eixo aparece tracejado. Desative Espelhar
    para voltar a desenhar sem cópias; ativá-lo novamente permite definir outro
    eixo. Alternar o botão cancela formas incompletas, preservando a cena.
-9. Use Redesenhar para reconstruir a cena armazenada em memória.
+9. Use Limpar para iniciar uma cena vazia antes de salvar outro projeto.
+   Use Redesenhar para reconstruir a cena armazenada em memória.
 10. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
    O explorador começa no diretório de trabalho e, após abrir ou salvar,
    seleciona o último arquivo usado com sucesso.
@@ -94,6 +95,7 @@ Compilação e testes
 Requer JDK 11 ou superior (a persistência usa Files.readString e a GUI usa Path.of).
 
   javac -d bin *.java */*.java
+  java -ea -Djava.awt.headless=true -cp bin tests.TestaProjetos
   java -ea -Djava.awt.headless=true -cp bin tests.TestaEspelhamento
   java -ea -Djava.awt.headless=true -cp bin tests.TestaPrimitivos
   java -ea -Djava.awt.headless=true -cp bin tests.TestaImportacao

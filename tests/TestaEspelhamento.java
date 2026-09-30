@@ -100,7 +100,6 @@ public class TestaEspelhamento {
                     assert Math.abs(((CirculoGrafico)copia).getRaio() - 10) < 1e-8;
                 }
                 BufferedImage antes = pintar(painel);
-                painel.limpar();
                 painel.redesenhar();
                 assert Arrays.equals(pixels(antes), pixels(pintar(painel))) : "copia armazenada e redesenhada";
                 painel.salvarProjeto(arquivo);
