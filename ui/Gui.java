@@ -226,7 +226,7 @@ public class Gui extends JFrame {
     }
 
     private Path selecionarArquivo(boolean salvar) {
-        JFileChooser seletor = new JFileChooser(Path.of("").toAbsolutePath().toFile());
+        JFileChooser seletor = new JFileChooser(Path.of("saves").toAbsolutePath().toFile());
         seletor.setFileFilter(new FileNameExtensionFilter("Projetos JSON (*.json)", "json"));
         if (arquivoProjeto != null) seletor.setSelectedFile(arquivoProjeto.toFile());
         int resultado = salvar ? seletor.showSaveDialog(this) : seletor.showOpenDialog(this);

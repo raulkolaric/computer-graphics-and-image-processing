@@ -24,10 +24,17 @@ Uso
    O tipo escolhido continua ativo e o eixo aparece tracejado. Desative Espelhar
    para voltar a desenhar sem cópias; ativá-lo novamente permite definir outro
    eixo. Alternar o botão cancela formas incompletas, preservando a cena.
-9. Use Limpar para iniciar uma cena vazia antes de salvar outro projeto.
-   Use Redesenhar para reconstruir a cena armazenada em memória.
+9. Cada novo nome em Salvar projeto guarda somente os pontos e formas criados
+   desde a última gravação, mesmo sem Limpar. Gravar novamente no mesmo arquivo
+   atualiza esse projeto com os novos objetos. Ao abrir um projeto, a primeira
+   gravação em outro nome faz uma cópia completa; as gravações seguintes em novos
+   nomes voltam a guardar apenas os objetos novos.
+   Use Limpar para iniciar uma cena vazia. Redesenhar restaura a cena armazenada.
+   `saves/teste1.json`, `saves/teste2.json` e `saves/teste3.json` são os arquivos
+   originais recebidos: teste2 e teste3 já contêm formas dos arquivos anteriores.
+   A nova regra vale para gravações futuras; abrir esses arquivos mantém seu conteúdo.
 10. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
-   O explorador começa no diretório de trabalho e, após abrir ou salvar,
+   O explorador começa em `saves/` e, após abrir ou salvar,
    seleciona o último arquivo usado com sucesso.
    Use Salvar projeto para escolher o destino; confirme antes de substituir um
    arquivo existente. Cancelar preserva a cena e o arquivo atual.
@@ -61,7 +68,7 @@ altera a escala da cena atual.
 
 Exemplo do professor
 -------------------
-`exemplo.json` e `projeto-anterior.json` contêm uma reconstrução dos círculos
+`saves/exemplo.json` e `tests/fixtures/projeto-anterior.json` contêm uma reconstrução dos círculos
 medida a partir da imagem de referência. O original está preservado em
 `tests/fixtures/exemplo.json`; os outros primitivos não foram alterados.
 Os dois primeiros círculos originais compartilham um ponto de raio distante;

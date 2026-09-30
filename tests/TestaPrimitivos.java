@@ -387,7 +387,7 @@ public class TestaPrimitivos {
             // Reconstrução explícita da referência; o arquivo original acima continua intacto.
             for (int[] tamanho : new int[][] {{1165, 694}, {900, 540}, {900, 472}}) {
                 exemplo.setSize(tamanho[0], tamanho[1]);
-                exemplo.carregarProjeto(Path.of("exemplo.json"));
+                exemplo.carregarProjeto(Path.of("saves/exemplo.json"));
                 CirculoGrafico anterior = null;
                 Retangulo base = (Retangulo)exemplo.getPrimitivos().get(4);
                 int[] raiosReferencia = {179, 152, 128};
