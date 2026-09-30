@@ -13,7 +13,7 @@ import reta.EstiloReta;
 import reta.RetaGrafica;
 
 /**
- * Retângulo definido por dois cantos opostos e composto por quatro retas.
+ * Retângulo composto por quatro retas, alinhado aos eixos ou orientado.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
@@ -58,6 +58,34 @@ public class Retangulo implements PrimitivoGrafico {
             new RetaGrafica(inferiorDireito, inferiorEsquerdo, estilo),
             new RetaGrafica(inferiorEsquerdo, superiorEsquerdo, estilo)
         ));
+    }
+
+    /** Cria um retângulo orientado pelos quatro vértices em ordem de contorno.
+     * @param p1 primeiro vértice
+     * @param p2 segundo vértice
+     * @param p3 vértice oposto ao primeiro
+     * @param p4 quarto vértice
+     * @param estilo estilo das arestas
+     * @throws IllegalArgumentException se algum argumento for nulo
+     */
+    public Retangulo(Ponto p1, Ponto p2, Ponto p3, Ponto p4, EstiloReta estilo) {
+        if (p1 == null || p2 == null || p3 == null || p4 == null || estilo == null) {
+            throw new IllegalArgumentException("Pontos e estilo nao podem ser nulos");
+        }
+        this.canto1 = new Ponto(p1);
+        this.canto2 = new Ponto(p3);
+        this.estilo = estilo;
+        this.retas = Collections.unmodifiableList(Arrays.asList(
+            new RetaGrafica(p1, p2, estilo), new RetaGrafica(p2, p3, estilo),
+            new RetaGrafica(p3, p4, estilo), new RetaGrafica(p4, p1, estilo)));
+    }
+
+    /** Retorna cópias dos quatro vértices em ordem de contorno.
+     * @return vértices do retângulo
+     */
+    public List<Ponto> getVertices() {
+        return Collections.unmodifiableList(Arrays.asList(retas.get(0).getP1(),
+            retas.get(1).getP1(), retas.get(2).getP1(), retas.get(3).getP1()));
     }
 
     /** Retorna uma visão não modificável com cópias defensivas das quatro retas.

@@ -164,8 +164,14 @@ public final class PersistenciaProjeto {
         for (Object item : lista(figura.get("retangulo"), "retangulo")) {
             Map<String, Object> dado = objeto(item, "Retangulo invalido");
             ordens.add(dado.containsKey("ordem") ? numero(dado.get("ordem"), "ordem") : null);
-            primitivos.add(new Retangulo(pontoRelativo(dado.get("p1"), largura, altura),
-                pontoRelativo(dado.get("p2"), largura, altura), estilo(dado)));
+            Ponto p1 = pontoRelativo(dado.get("p1"), largura, altura);
+            Ponto p2 = pontoRelativo(dado.get("p2"), largura, altura);
+            if (dado.containsKey("p3") || dado.containsKey("p4")) {
+                primitivos.add(new Retangulo(p1, pontoRelativo(dado.get("p3"), largura, altura),
+                    p2, pontoRelativo(dado.get("p4"), largura, altura), estilo(dado)));
+            } else {
+                primitivos.add(new Retangulo(p1, p2, estilo(dado)));
+            }
         }
         for (Object item : lista(figura.get("circulo"), "circulo")) {
             Map<String, Object> dado = objeto(item, "Circulo invalido");
@@ -253,6 +259,8 @@ public final class PersistenciaProjeto {
             Retangulo retangulo = (Retangulo)primitivo;
             return "{" + pontoNomeadoJson("p1", retangulo.getCanto1(), largura, altura)
                 + ", " + pontoNomeadoJson("p2", retangulo.getCanto2(), largura, altura)
+                + ", " + pontoNomeadoJson("p3", retangulo.getVertices().get(1), largura, altura)
+                + ", " + pontoNomeadoJson("p4", retangulo.getVertices().get(3), largura, altura)
                 + atributos + "}";
         }
         if (primitivo instanceof Triangulo) {

@@ -204,15 +204,15 @@ public class TestaPrimitivos {
         Graphics g3 = limpa.getGraphics();
         painel.paint(g3);
         g3.dispose();
-        verificar(painel.getQuantidadePrimitivos() == 120,
-            "limpar nao remove primitivos da estrutura de dados");
+        verificar(painel.getQuantidadePrimitivos() == 0,
+            "limpar remove primitivos da estrutura de dados");
         painel.redesenhar();
         BufferedImage restaurada = novaImagem();
         Graphics g4 = restaurada.getGraphics();
         painel.paint(g4);
         g4.dispose();
-        verificar(checksum(primeira) == checksum(restaurada),
-            "redesenhar restaura a cena armazenada");
+        verificar(checksum(limpa) == checksum(restaurada),
+            "redesenhar nao recupera primitivos removidos");
     }
 
     private static void testarEntradaMouse() {
@@ -387,7 +387,7 @@ public class TestaPrimitivos {
             // Reconstrução explícita da referência; o arquivo original acima continua intacto.
             for (int[] tamanho : new int[][] {{1165, 694}, {900, 540}, {900, 472}}) {
                 exemplo.setSize(tamanho[0], tamanho[1]);
-                exemplo.carregarProjeto(Path.of("exemplo.json"));
+                exemplo.carregarProjeto(Path.of("saves/exemplo.json"));
                 CirculoGrafico anterior = null;
                 Retangulo base = (Retangulo)exemplo.getPrimitivos().get(4);
                 int[] raiosReferencia = {179, 152, 128};

@@ -18,9 +18,23 @@ Uso
    para visualizar o elástico antes do segundo clique.
 7. Escolha Selecionar, clique em um ponto ou primitivo e use Excluir selecionado
    para removê-lo da cena.
-8. Use Redesenhar para reconstruir a cena armazenada em memória.
-9. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
-   O explorador começa no diretório de trabalho e, após abrir ou salvar,
+8. Ative Espelhar e clique em dois pontos distintos para definir a reta de
+   reflexão. Depois crie pontos e formas normalmente: cada criação inclui
+   automaticamente uma cópia espelhada com o mesmo estilo na cena.
+   O tipo escolhido continua ativo e o eixo aparece tracejado. Desative Espelhar
+   para voltar a desenhar sem cópias; ativá-lo novamente permite definir outro
+   eixo. Alternar o botão cancela formas incompletas, preservando a cena.
+9. Cada novo nome em Salvar projeto guarda somente os pontos e formas criados
+   desde a última gravação, mesmo sem Limpar. Gravar novamente no mesmo arquivo
+   atualiza esse projeto com os novos objetos. Ao abrir um projeto, a primeira
+   gravação em outro nome faz uma cópia completa; as gravações seguintes em novos
+   nomes voltam a guardar apenas os objetos novos.
+   Use Limpar para iniciar uma cena vazia. Redesenhar restaura a cena armazenada.
+   `saves/teste1.json`, `saves/teste2.json` e `saves/teste3.json` são os arquivos
+   originais recebidos: teste2 e teste3 já contêm formas dos arquivos anteriores.
+   A nova regra vale para gravações futuras; abrir esses arquivos mantém seu conteúdo.
+10. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
+   O explorador começa em `saves/` e, após abrir ou salvar,
    seleciona o último arquivo usado com sucesso.
    Use Salvar projeto para escolher o destino; confirme antes de substituir um
    arquivo existente. Cancelar preserva a cena e o arquivo atual.
@@ -35,6 +49,9 @@ Persistência e compatibilidade
 A escala é aplicada ao abrir o arquivo; redimensionar uma janela já aberta não
 altera a escala da cena atual.
 
+- Retângulos incluem p3 e p4 (cantos adjacentes a p1) para preservar orientação
+  após espelhamento. p1 e p2 continuam sendo cantos opostos; arquivos antigos
+  com apenas esses dois pontos permanecem compatíveis.
 - Novas gravações incluem ordem em cada forma para preservar a sobreposição.
   Se presente em uma forma, esse campo deve existir em todas, com valores inteiros
   únicos de 0 até o total de formas menos 1. Sem o campo, a ordem histórica é
@@ -51,7 +68,7 @@ altera a escala da cena atual.
 
 Exemplo do professor
 -------------------
-`exemplo.json` e `projeto-anterior.json` contêm uma reconstrução dos círculos
+`saves/exemplo.json` e `tests/fixtures/projeto-anterior.json` contêm uma reconstrução dos círculos
 medida a partir da imagem de referência. O original está preservado em
 `tests/fixtures/exemplo.json`; os outros primitivos não foram alterados.
 Os dois primeiros círculos originais compartilham um ponto de raio distante;
@@ -67,6 +84,9 @@ pixels visíveis e persistência do centro corrigido após salvar e abrir.
 
 Arquitetura
 -----------
+- TransfGeometricaComposta e Matrizes adaptam o exemplo do professor: translação,
+  rotação, reflexão no eixo X e transformações inversas. atan2 permite retas
+  verticais; pontos coincidentes são rejeitados.
 - Reta e Circulo representam a geometria matemática.
 - RetaGrafica e CirculoGrafico acrescentam estilo e renderização.
 - Retangulo, no pacote retangulo, e Triangulo são compostos exclusivamente por
@@ -82,6 +102,8 @@ Compilação e testes
 Requer JDK 11 ou superior (a persistência usa Files.readString e a GUI usa Path.of).
 
   javac -d bin *.java */*.java
+  java -ea -Djava.awt.headless=true -cp bin tests.TestaProjetos
+  java -ea -Djava.awt.headless=true -cp bin tests.TestaEspelhamento
   java -ea -Djava.awt.headless=true -cp bin tests.TestaPrimitivos
   java -ea -Djava.awt.headless=true -cp bin tests.TestaImportacao
   java -ea -Djava.awt.headless=true -cp bin tests.TestaOrdem
