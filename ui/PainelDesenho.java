@@ -12,7 +12,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -47,6 +51,8 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     private final List<PrimitivoGrafico> primitivos = new ArrayList<PrimitivoGrafico>();
     private final List<PrimitivoGrafico> primitivosVisiveis = new ArrayList<PrimitivoGrafico>();
     private final List<Ponto> pontosPendentes = new ArrayList<Ponto>();
+    private final Set<Object> salvos = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+    private final Map<Path, Set<Object>> arquivosSalvos = new HashMap<Path, Set<Object>>();
 
     private boolean espelhamentoAtivo;
     private Ponto eixoP1, eixoP2, previaEixo;
@@ -267,13 +273,38 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     }
 
     /** Grava a cena no arquivo JSON usando as dimensões atuais do painel.
+     * Um novo arquivo recebe os objetos criados desde a última gravação; gravar
+     * novamente em um arquivo já salvo atualiza seus objetos e os novos.
+     * Após abrir um projeto, a primeira gravação em outro arquivo copia a cena.
      * As coordenadas são normalizadas pela largura e pela altura do painel.
      * @param arquivo arquivo de destino
      * @throws IOException se o arquivo não puder ser gravado
      * @throws IllegalArgumentException se o arquivo for nulo ou o painel não tiver dimensões válidas
      */
     public void salvarProjeto(Path arquivo) throws IOException {
-        PersistenciaProjeto.salvar(arquivo, pontos, primitivos, getWidth(), getHeight());
+        if (arquivo == null) throw new IllegalArgumentException("O arquivo e obrigatorio");
+        Path destino = arquivo.toAbsolutePath().normalize();
+        Set<Object> objetosDoArquivo = arquivosSalvos.get(destino);
+        List<PontoGr> pontosArquivo = new ArrayList<PontoGr>();
+        List<PrimitivoGrafico> primitivosArquivo = new ArrayList<PrimitivoGrafico>();
+        for (PontoGr ponto : pontos) {
+            if (!salvos.contains(ponto) || objetosDoArquivo != null && objetosDoArquivo.contains(ponto)) {
+                pontosArquivo.add(ponto);
+            }
+        }
+        for (PrimitivoGrafico primitivo : primitivos) {
+            if (!salvos.contains(primitivo) || objetosDoArquivo != null && objetosDoArquivo.contains(primitivo)) {
+                primitivosArquivo.add(primitivo);
+            }
+        }
+        PersistenciaProjeto.salvar(arquivo, pontosArquivo, primitivosArquivo, getWidth(), getHeight());
+        salvos.clear();
+        salvos.addAll(pontos);
+        salvos.addAll(primitivos);
+        Set<Object> gravados = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+        gravados.addAll(pontosArquivo);
+        gravados.addAll(primitivosArquivo);
+        arquivosSalvos.put(destino, gravados);
     }
 
     /** Substitui a cena armazenada e visível pelo conteúdo de um arquivo JSON.
@@ -290,6 +321,12 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         pontos.addAll(cena.getPontos());
         primitivos.clear();
         primitivos.addAll(cena.getPrimitivos());
+        salvos.clear();
+        arquivosSalvos.clear();
+        Set<Object> abertos = Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>());
+        abertos.addAll(pontos);
+        abertos.addAll(primitivos);
+        arquivosSalvos.put(arquivo.toAbsolutePath().normalize(), abertos);
         pontosPendentes.clear();
         pontoPrevia = null;
         limparSelecao();
@@ -328,6 +365,8 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     public void limpar() {
         pontos.clear();
         primitivos.clear();
+        salvos.clear();
+        arquivosSalvos.clear();
         pontosVisiveis.clear();
         primitivosVisiveis.clear();
         pontosPendentes.clear();
