@@ -65,9 +65,10 @@ altera a escala da cena atual.
 
 Exemplo do professor
 -------------------
-`saves/exemplo.json` e `tests/fixtures/projeto-anterior.json` contêm uma reconstrução dos círculos
+`saves/exemplo.json` contém uma reconstrução aproximada dos círculos
 medida a partir da imagem de referência. O original está preservado em
 `tests/fixtures/exemplo.json`; os outros primitivos não foram alterados.
+`tests/fixtures/projeto-anterior.json` preserva um projeto anterior para regressão.
 Os dois primeiros círculos originais compartilham um ponto de raio distante;
 o centro esperado do terceiro corresponde ao seu campo raio. A hipótese é
 que a exportação contém pontos desatualizados ou trocados. O código recebido
