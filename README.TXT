@@ -126,3 +126,10 @@ o último destino bem-sucedido. A numeração considera JSON, JPEG e JPG existen
 sem preencher lacunas. A sugestão é editável e recalculada ao trocar de pasta.
 Cancelar preserva o destino anterior e não cria a pasta saves/. A confirmação
 de substituição relaciona o JSON e a imagem .jpeg existentes.
+
+Cada gravação atualiza o JSON e uma imagem .jpeg de mesmo nome, com fundo branco,
+dimensões da área de desenho e qualidade 0.95. A imagem inclui somente objetos
+completos exibidos; não inclui seleção, eixos nem prévias. Se o JPEG falhar após
+o JSON, o projeto permanece salvo e seu destino é lembrado; a interface avisa
+que uma imagem anterior pode estar desatualizada. Os dois arquivos não formam
+uma substituição atômica.

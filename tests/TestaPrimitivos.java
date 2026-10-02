@@ -433,7 +433,7 @@ public class TestaPrimitivos {
             throw new AssertionError("persistencia JSON", erro);
         } finally {
             if (arquivo != null) {
-                try { Files.deleteIfExists(arquivo); } catch (Exception ignorado) { }
+                try { Files.deleteIfExists(arquivo); Files.deleteIfExists(persistencia.NomesProjeto.jpeg(arquivo)); } catch (Exception ignorado) { }
             }
         }
     }

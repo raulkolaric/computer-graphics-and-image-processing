@@ -28,6 +28,7 @@ public class TestaProjetos {
 
     private static void testar() throws Exception {
         testarNomes();
+        testarJPEG();
         Path pasta = Files.createTempDirectory("projetos-");
         Path a = pasta.resolve("A.json"), b = pasta.resolve("B.json");
         try {
@@ -118,6 +119,104 @@ public class TestaProjetos {
         }
     }
 
+    private static void testarJPEG() throws Exception {
+        Path pasta = Files.createTempDirectory("exportacao-");
+        Path json = pasta.resolve("Projeto 1.json");
+        Path jpeg = persistencia.NomesProjeto.jpeg(json);
+        try {
+            PainelDesenho p = painel();
+            p.adicionarPrimitivo(new RetaGrafica(new Ponto(-20, 40), new Ponto(160, 40), Color.RED, 7));
+            p.adicionarPrimitivo(new CirculoGrafico(new Ponto(100, 100), new Ponto(120, 100),
+                Color.BLUE, 5, AlgoritmoCirculo.PARAMETRICO));
+            p.setTipo(TiposPrimitivos.PONTO);
+            p.setCorAtual(Color.GREEN);
+            clicar(p, 160, 160);
+            salvarImagem(p, json);
+            java.awt.image.BufferedImage imagem = javax.imageio.ImageIO.read(jpeg.toFile());
+            assert imagem != null && imagem.getWidth() == 200 && imagem.getHeight() == 200;
+            corProxima(imagem, 10, 10, Color.WHITE);
+            corProxima(imagem, 60, 40, Color.RED);
+            corProxima(imagem, 120, 100, Color.BLUE);
+            corProxima(imagem, 160, 160, Color.GREEN);
+            RetaGrafica reta = (RetaGrafica)PersistenciaProjeto.carregar(json, 200, 200).getPrimitivos().get(0);
+            assert reta.getP1().getX() == -20 : "JSON conserva geometria fora da tela";
+            byte[] semSobreposicoes = Files.readAllBytes(jpeg);
+            p.setEspelhamento(true);
+            clicar(p, 70, 0);
+            clicar(p, 70, 200);
+            p.setTipo(TiposPrimitivos.SELECAO);
+            clicar(p, 60, 40);
+            salvarImagem(p, json);
+            assert java.util.Arrays.equals(semSobreposicoes, Files.readAllBytes(jpeg)) : "sem guia e selecao";
+            assert p.espelharSelecionado();
+            clicar(p, 10, 10);
+            p.mouseMoved(new MouseEvent(p, MouseEvent.MOUSE_MOVED, 0, 0, 150, 150, 0, false));
+            salvarImagem(p, json);
+            assert java.util.Arrays.equals(semSobreposicoes, Files.readAllBytes(jpeg)) : "sem eixo temporario";
+            p.setEspelhamento(false);
+            p.setTipo(TiposPrimitivos.RETA);
+            clicar(p, 10, 10);
+            p.mouseMoved(new MouseEvent(p, MouseEvent.MOUSE_MOVED, 0, 0, 190, 190, 0, false));
+            salvarImagem(p, json);
+            assert java.util.Arrays.equals(semSobreposicoes, Files.readAllBytes(jpeg)) : "sem elastico";
+            clicar(p, 190, 190);
+            assert p.getQuantidadePrimitivos() == 3 : "exportar preservou construcao";
+            p.redesenhar(TiposPrimitivos.CIRCULO);
+            salvarImagem(p, json);
+            imagem = javax.imageio.ImageIO.read(jpeg.toFile());
+            corProxima(imagem, 60, 40, Color.WHITE);
+            corProxima(imagem, 160, 160, Color.WHITE);
+            corProxima(imagem, 120, 100, Color.BLUE);
+            assert PersistenciaProjeto.carregar(json, 200, 200).getPrimitivos().size() == 1;
+            p.limpar();
+            salvarImagem(p, json);
+            imagem = javax.imageio.ImageIO.read(jpeg.toFile());
+            for (int y = 0; y < 200; y += 5)
+                for (int x = 0; x < 200; x += 5) corProxima(imagem, x, y, Color.WHITE);
+            assert PersistenciaProjeto.carregar(json, 200, 200).getPrimitivos().isEmpty();
+            byte[] imagemAnterior = Files.readAllBytes(jpeg);
+            p.redesenhar();
+            p.setRenderizador(new renderizacao.RenderizadorManual() {
+                @Override public void desenharReta(java.awt.Graphics g, RetaGrafica r) {
+                    throw new IllegalArgumentException("falha de renderizacao simulada");
+                }
+            });
+            PainelDesenho.ResultadoSalvamento parcial = p.salvarProjeto(json);
+            assert parcial.getErroImagem() != null : "falha JPEG distinta de falha JSON";
+            assert PersistenciaProjeto.carregar(json, 200, 200).getPrimitivos().size() == 3;
+            assert java.util.Arrays.equals(imagemAnterior, Files.readAllBytes(jpeg)) : "imagem antiga preservada";
+            assert p.getQuantidadePrimitivos() == 3;
+            p.setRenderizador(new renderizacao.RenderizadorManual());
+            Files.delete(jpeg);
+            Files.createDirectory(jpeg);
+            Files.writeString(jpeg.resolve("bloqueio"), "");
+            assert p.salvarProjeto(json).getErroImagem() != null : "erro de IO JPEG parcial";
+            Files.delete(jpeg.resolve("bloqueio"));
+            Files.delete(jpeg);
+            p.setSize(0, 200);
+            byte[] antes = Files.readAllBytes(json);
+            try { p.salvarProjeto(json); throw new AssertionError("dimensao invalida"); }
+            catch (IllegalArgumentException esperado) { }
+            assert java.util.Arrays.equals(antes, Files.readAllBytes(json));
+        } finally {
+            try (java.util.stream.Stream<Path> arquivos = Files.list(pasta)) {
+                for (Path arquivo : (Iterable<Path>)arquivos::iterator) Files.delete(arquivo);
+            }
+            Files.delete(pasta);
+        }
+    }
+
+    private static void salvarImagem(PainelDesenho p, Path arquivo) throws Exception {
+        PainelDesenho.ResultadoSalvamento resultado = p.salvarProjeto(arquivo);
+        if (resultado.getErroImagem() != null) throw resultado.getErroImagem();
+    }
+
+    private static void corProxima(java.awt.image.BufferedImage imagem, int x, int y, Color esperado) {
+        Color pixel = new Color(imagem.getRGB(x, y));
+        assert Math.abs(pixel.getRed() - esperado.getRed()) < 65
+            && Math.abs(pixel.getGreen() - esperado.getGreen()) < 65
+            && Math.abs(pixel.getBlue() - esperado.getBlue()) < 65 : "pixel " + x + "," + y + ": " + pixel;
+    }
     private static void testarNomes() throws Exception {
         Path pasta = Files.createTempDirectory("nomes-projeto-");
         try {

@@ -5,6 +5,7 @@ import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -29,6 +30,8 @@ import reta.EstiloReta;
 import reta.RetaGrafica;
 import triangulo.Triangulo;
 import persistencia.PersistenciaProjeto;
+import persistencia.ExportacaoJPEG;
+import persistencia.NomesProjeto;
 
 /**
  * Painel que recebe pontos pelo mouse, armazena a cena, exibe prévias e
@@ -85,6 +88,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         this.tipo = tipo;
         this.msg = msg;
         this.renderizador = renderizador;
+        setBackground(Color.WHITE);
         addMouseListener(this);
         addMouseMotionListener(this);
         registerKeyboardAction(event -> cancelarInteracao(),
@@ -333,19 +337,51 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
         return pontos.size();
     }
 
-    /** Grava somente os objetos completos exibidos, na ordem atual.
+    /** Grava JSON e JPEG dos mesmos objetos completos exibidos, na ordem atual.
      * Preserva a memória retida e qualquer construção incompleta.
      * As coordenadas são normalizadas pela largura e pela altura do painel.
      * @param arquivo arquivo de destino
-     * @throws IOException se o arquivo não puder ser gravado
+     * @return resultado do JPEG; retornar confirma que o JSON foi salvo
+     * @throws IOException se o JSON não puder ser gravado
      * @throws IllegalArgumentException se o arquivo for nulo ou o painel não tiver dimensões válidas
      */
-    public void salvarProjeto(Path arquivo) throws IOException {
+    public ResultadoSalvamento salvarProjeto(Path arquivo) throws IOException {
         if (arquivo == null) throw new IllegalArgumentException("O arquivo e obrigatorio");
         List<PontoGr> pontosArquivo = new ArrayList<PontoGr>(pontosVisiveis);
         List<PrimitivoGrafico> primitivosArquivo = new ArrayList<PrimitivoGrafico>(primitivosVisiveis);
         int largura = getWidth(), altura = getHeight();
+        RenderizadorPrimitivos renderizadorArquivo = renderizador;
         PersistenciaProjeto.salvar(arquivo, pontosArquivo, primitivosArquivo, largura, altura);
+        BufferedImage imagem = null;
+        try {
+            imagem = new BufferedImage(largura, altura, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = imagem.createGraphics();
+            try {
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, largura, altura);
+                desenharCena(g, pontosArquivo, primitivosArquivo, renderizadorArquivo);
+            } finally {
+                g.dispose();
+            }
+            ExportacaoJPEG.salvar(NomesProjeto.jpeg(arquivo), imagem);
+            return new ResultadoSalvamento(null);
+        } catch (IOException | RuntimeException erro) {
+            return new ResultadoSalvamento(new IOException("Falha na imagem JPEG: " + erro.getMessage(), erro));
+        } finally {
+            if (imagem != null) imagem.flush();
+        }
+    }
+
+    /** Resultado de um JSON gravado; a imagem pode ter falhado separadamente. */
+    public static final class ResultadoSalvamento {
+        private final IOException erroImagem;
+
+        private ResultadoSalvamento(IOException erroImagem) { this.erroImagem = erroImagem; }
+
+        /** Informa falha da imagem sem invalidar o JSON salvo.
+         * @return erro da imagem, ou null se ambos os arquivos foram gravados
+         */
+        public IOException getErroImagem() { return erroImagem; }
     }
 
     /** Substitui a cena armazenada e visível pelo conteúdo de um arquivo JSON.
@@ -465,15 +501,16 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (PrimitivoGrafico primitivo : primitivosVisiveis) {
-            primitivo.desenhar(g, renderizador);
-        }
-        for (PontoGr ponto : pontosVisiveis) {
-            ponto.desenharPonto(g);
-        }
+        desenharCena(g, pontosVisiveis, primitivosVisiveis, renderizador);
         desenharEixo(g);
         desenharPrevia(g);
         desenharSelecao(g);
+    }
+
+    private static void desenharCena(Graphics g, List<PontoGr> pontosCena,
+            List<PrimitivoGrafico> formasCena, RenderizadorPrimitivos mecanismo) {
+        for (PrimitivoGrafico primitivo : formasCena) primitivo.desenhar(g, mecanismo);
+        for (PontoGr ponto : pontosCena) ponto.desenharPonto(g);
     }
 
     /** Processa um clique para criar um ponto, concluir uma forma ou selecionar

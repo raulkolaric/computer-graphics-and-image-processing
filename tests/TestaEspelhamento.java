@@ -156,7 +156,7 @@ public class TestaEspelhamento {
             RetaGrafica ultima = (RetaGrafica)painel.getPrimitivos().get(2);
             igual(ultima.getP1(), 10, 130);
             igual(ultima.getP2(), 20, 130);
-        } finally { Files.deleteIfExists(arquivo); }
+        } finally { Files.deleteIfExists(arquivo); Files.deleteIfExists(persistencia.NomesProjeto.jpeg(arquivo)); }
     }
 
     private static void testarSelecao() throws Exception {
@@ -249,7 +249,7 @@ public class TestaEspelhamento {
             clicar(p, 20, 30);
             assert p.getQuantidadePontos() == 2 : "eixo incompleto reinicia em p1";
             assert pintar(p).getRGB(120, 30) == Color.BLACK.getRGB();
-        } finally { Files.deleteIfExists(arquivo); }
+        } finally { Files.deleteIfExists(arquivo); Files.deleteIfExists(persistencia.NomesProjeto.jpeg(arquivo)); }
     }
     private static void igual(Ponto p, double x, double y) {
         assert Math.abs(p.getX() - x) < 1e-8 && Math.abs(p.getY() - y) < 1e-8 : p;

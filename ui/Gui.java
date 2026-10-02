@@ -218,10 +218,15 @@ public class Gui extends JFrame {
                 if (destino == null) return;
                 try {
                     Files.createDirectories(destino.getParent());
-                    areaDesenho.salvarProjeto(destino);
+                    PainelDesenho.ResultadoSalvamento resultado = areaDesenho.salvarProjeto(destino);
                     arquivoProjeto = destino;
-                    msg.setText("Projeto salvo em " + arquivoProjeto.getFileName());
-                } catch (IOException erro) {
+                    if (resultado.getErroImagem() == null) {
+                        msg.setText("JSON e JPEG salvos: " + arquivoProjeto.getFileName());
+                    } else {
+                        mostrarErro("JSON salvo; JPEG falhou. Uma imagem anterior pode estar desatualizada",
+                            resultado.getErroImagem());
+                    }
+                } catch (IOException | IllegalArgumentException erro) {
                     mostrarErro("Nao foi possivel salvar o projeto", erro);
                 }
             } else if (origem == jbRecarregar) {
@@ -231,7 +236,7 @@ public class Gui extends JFrame {
                     areaDesenho.carregarProjeto(origemProjeto);
                     arquivoProjeto = origemProjeto;
                     msg.setText("Projeto aberto: " + arquivoProjeto.getFileName());
-                } catch (IOException erro) {
+                } catch (IOException | IllegalArgumentException erro) {
                     mostrarErro("Nao foi possivel abrir o projeto", erro);
                 }
             }
@@ -274,7 +279,7 @@ public class Gui extends JFrame {
         }
     }
 
-    private void mostrarErro(String titulo, IOException erro) {
+    private void mostrarErro(String titulo, Exception erro) {
         msg.setText(titulo + ": " + erro.getMessage());
         JOptionPane.showMessageDialog(this, erro.getMessage(), titulo, JOptionPane.ERROR_MESSAGE);
     }
