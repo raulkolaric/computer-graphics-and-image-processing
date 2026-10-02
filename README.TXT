@@ -115,3 +115,8 @@ Autores
 - Liam Lopes
 - Rafael Infantini
 - Guilherme Coutinho
+
+Espelhar selecionado: use Selecionar, clique no objeto e pressione Espelhar
+selecionado. Clique em p1 e p2 distintos para criar uma única cópia. A operação
+preserva o eixo automático. Esc, troca de ferramenta, Limpar, Abrir com sucesso
+ou exclusão da fonte cancelam a entrada. Um p2 coincidente pode ser corrigido.

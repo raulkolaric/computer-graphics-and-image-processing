@@ -47,6 +47,7 @@ public class Gui extends JFrame {
     private final JToggleButton jtCirculo = new JToggleButton("Circulo");
     private final JToggleButton jtSelecao = new JToggleButton("Selecionar");
     private final JToggleButton jtEspelhar = new JToggleButton("Espelhar");
+    private final JButton jbEspelharSelecionado = new JButton("Espelhar selecionado");
     private final JButton jbCor = new JButton("Cor");
     private final JButton jbRedesenhar = new JButton("Redesenhar");
     private final JButton jbLimpar = new JButton("Limpar");
@@ -101,6 +102,7 @@ public class Gui extends JFrame {
         barraComandos.add(jtSelecao);
         barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtEspelhar);
+        barraComandos.add(jbEspelharSelecionado);
         for (JToggleButton botao : new JToggleButton[] {
                 jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo, jtSelecao, jtEspelhar }) {
             botao.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
@@ -140,6 +142,7 @@ public class Gui extends JFrame {
         jtCirculo.addActionListener(eventos);
         jtSelecao.addActionListener(eventos);
         jtEspelhar.addActionListener(eventos);
+        jbEspelharSelecionado.addActionListener(eventos);
         jbCor.addActionListener(eventos);
         jbRedesenhar.addActionListener(eventos);
         jbLimpar.addActionListener(eventos);
@@ -178,6 +181,8 @@ public class Gui extends JFrame {
                 areaDesenho.setTipo(TiposPrimitivos.SELECAO);
             } else if (origem == jtEspelhar) {
                 areaDesenho.setEspelhamento(jtEspelhar.isSelected());
+            } else if (origem == jbEspelharSelecionado) {
+                areaDesenho.espelharSelecionado();
             } else if (origem == jbCor) {
                 JColorChooser seletor = new JColorChooser(areaDesenho.getCorAtual());
                 AbstractColorChooserPanel[] paineis = seletor.getChooserPanels();

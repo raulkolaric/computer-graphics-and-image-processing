@@ -31,6 +31,7 @@ public class TestaEspelhamento {
     }
 
     private static void testar() throws Exception {
+        testarSelecao();
         Ponto ponto = new Ponto(20, 30);
         igual(Espelhamento.refletir(ponto, new Ponto(0, 10), new Ponto(50, 10)), 20, -10);
         igual(Espelhamento.refletir(ponto, new Ponto(10, 0), new Ponto(10, 50)), 0, 30);
@@ -158,6 +159,98 @@ public class TestaEspelhamento {
         } finally { Files.deleteIfExists(arquivo); }
     }
 
+    private static void testarSelecao() throws Exception {
+        Path arquivo = Files.createTempFile("selecao-reflexao-", ".json");
+        try {
+            for (TiposPrimitivos tipo : Arrays.asList(TiposPrimitivos.PONTO, TiposPrimitivos.RETA,
+                    TiposPrimitivos.RETANGULO, TiposPrimitivos.TRIANGULO, TiposPrimitivos.CIRCULO)) {
+                PainelDesenho p = new PainelDesenho(new JLabel(), tipo);
+                p.setSize(160, 160);
+                p.setCorAtual(Color.BLUE);
+                p.setEspessuraAtual(3);
+                p.setAlgoritmoCirculo(AlgoritmoCirculo.PARAMETRICO);
+                assert !p.espelharSelecionado() : "sem selecao nao entra no modo";
+                clicar(p, 20, 20);
+                if (tipo != TiposPrimitivos.PONTO) clicar(p, 40, 20);
+                if (tipo == TiposPrimitivos.TRIANGULO) clicar(p, 30, 40);
+                p.salvarProjeto(arquivo);
+                p.carregarProjeto(arquivo); // A operação também funciona com objetos importados.
+                p.setEspelhamento(true);
+                clicar(p, 70, 0);
+                clicar(p, 70, 100);
+                p.setTipo(TiposPrimitivos.SELECAO);
+                clicar(p, 20, 20);
+                assert p.espelharSelecionado();
+                clicar(p, 0, 60);
+                clicar(p, 0, 60);
+                assert p.getQuantidadePontos() + p.getQuantidadePrimitivos() == 1;
+                clicar(p, 100, 60);
+                assert p.getQuantidadePontos() + p.getQuantidadePrimitivos() == 2 : "uma unica copia";
+                p.salvarProjeto(arquivo);
+                persistencia.PersistenciaProjeto.Cena cena =
+                    persistencia.PersistenciaProjeto.carregar(arquivo, 160, 160);
+                if (tipo == TiposPrimitivos.PONTO) {
+                    igual(cena.getPontos().get(1), 20, 100);
+                    assert cena.getPontos().get(0).getNomePto().equals(cena.getPontos().get(1).getNomePto());
+                    assert cena.getPontos().get(1).getDiametro() == 5;
+                } else {
+                    PrimitivoGrafico copia = p.getPrimitivos().get(1);
+                    assert copia.getCor().equals(Color.BLUE) && copia.getEspessura() == 3;
+                    if (copia instanceof CirculoGrafico)
+                        assert ((CirculoGrafico)copia).getAlgoritmo() == AlgoritmoCirculo.PARAMETRICO;
+                }
+                p.limpar();
+                BufferedImage vazia = pintar(p);
+                assert vazia.getRGB(70, 80) == p.getBackground().getRGB() : "limpar oculta guia";
+                p.redesenhar();
+                p.redesenhar();
+                assert p.getQuantidadePontos() + p.getQuantidadePrimitivos() == 2;
+                clicar(p, 20, 100);
+                assert p.espelharSelecionado() : "copia pode ser fonte";
+                clicar(p, 0, 0);
+                assert p.excluirSelecionado();
+                clicar(p, 100, 100);
+                assert p.getQuantidadePontos() + p.getQuantidadePrimitivos() == 1 : "deletar fonte cancela";
+                p.redesenhar();
+                p.setTipo(TiposPrimitivos.PONTO);
+                clicar(p, 30, 120);
+                assert p.getQuantidadePontos() + p.getQuantidadePrimitivos() == 3 : "automatico independente";
+                p.salvarProjeto(arquivo);
+                assert persistencia.PersistenciaProjeto.carregar(arquivo, 160, 160).getPontos()
+                    .stream().anyMatch(pt -> Math.abs(pt.getX() - 110) < 1e-8 && Math.abs(pt.getY() - 120) < 1e-8);
+            }
+            for (String cancelamento : Arrays.asList("escape", "ferramenta", "limpar", "abrir")) {
+                PainelDesenho p = new PainelDesenho(new JLabel(), TiposPrimitivos.PONTO);
+                p.setSize(160, 160);
+                clicar(p, 20, 20);
+                p.salvarProjeto(arquivo);
+                p.setTipo(TiposPrimitivos.SELECAO);
+                clicar(p, 20, 20);
+                assert p.espelharSelecionado();
+                clicar(p, 50, 0);
+                switch (cancelamento) {
+                    case "escape": p.getActionForKeyStroke(javax.swing.KeyStroke.getKeyStroke("ESCAPE"))
+                        .actionPerformed(new java.awt.event.ActionEvent(p, 0, "escape")); break;
+                    case "ferramenta": p.setTipo(TiposPrimitivos.SELECAO); break;
+                    case "limpar": p.limpar(); break;
+                    case "abrir": p.carregarProjeto(arquivo); break;
+                    default: throw new AssertionError(cancelamento);
+                }
+                clicar(p, 50, 100);
+                assert p.getQuantidadePontos() == 1 : cancelamento;
+            }
+            PainelDesenho p = new PainelDesenho(new JLabel(), TiposPrimitivos.PONTO);
+            p.setSize(160, 160);
+            p.setEspelhamento(true);
+            clicar(p, 10, 0);
+            p.limpar();
+            clicar(p, 70, 0);
+            clicar(p, 70, 100);
+            clicar(p, 20, 30);
+            assert p.getQuantidadePontos() == 2 : "eixo incompleto reinicia em p1";
+            assert pintar(p).getRGB(120, 30) == Color.BLACK.getRGB();
+        } finally { Files.deleteIfExists(arquivo); }
+    }
     private static void igual(Ponto p, double x, double y) {
         assert Math.abs(p.getX() - x) < 1e-8 && Math.abs(p.getY() - y) < 1e-8 : p;
     }
