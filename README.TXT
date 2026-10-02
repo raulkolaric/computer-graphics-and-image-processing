@@ -120,3 +120,9 @@ Espelhar selecionado: use Selecionar, clique no objeto e pressione Espelhar
 selecionado. Clique em p1 e p2 distintos para criar uma única cópia. A operação
 preserva o eixo automático. Esc, troca de ferramenta, Limpar, Abrir com sucesso
 ou exclusão da fonte cancelam a entrada. Um p2 coincidente pode ser corrigido.
+
+Salvar como sugere Projeto i.json na pasta escolhida; Salvar projeto propõe
+o último destino bem-sucedido. A numeração considera JSON, JPEG e JPG existentes,
+sem preencher lacunas. A sugestão é editável e recalculada ao trocar de pasta.
+Cancelar preserva o destino anterior e não cria a pasta saves/. A confirmação
+de substituição relaciona o JSON e a imagem .jpeg existentes.

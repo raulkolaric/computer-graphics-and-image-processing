@@ -29,6 +29,7 @@ import javax.swing.BoxLayout;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
 
 import circulo.AlgoritmoCirculo;
+import persistencia.NomesProjeto;
 
 /**
  * Janela de edição, seleção, exclusão e persistência dos primitivos gráficos.
@@ -53,6 +54,7 @@ public class Gui extends JFrame {
     private final JButton jbLimpar = new JButton("Limpar");
     private final JButton jbExcluir = new JButton("Excluir selecionado");
     private final JButton jbSalvar = new JButton("Salvar projeto");
+    private final JButton jbSalvarComo = new JButton("Salvar como");
     private final JButton jbRecarregar = new JButton("Abrir projeto");
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
     private final JComboBox<AlgoritmoCirculo> jcAlgoritmo =
@@ -63,6 +65,7 @@ public class Gui extends JFrame {
     private final JToolBar barraComandos = new JToolBar();
     private final JToolBar barraEstilo = new JToolBar();
     private final JToolBar barraCena = new JToolBar();
+    private final JToolBar barraArquivo = new JToolBar();
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);
     private Path arquivoProjeto;
@@ -80,6 +83,7 @@ public class Gui extends JFrame {
         barraComandos.setFloatable(false);
         barraEstilo.setFloatable(false);
         barraCena.setFloatable(false);
+        barraArquivo.setFloatable(false);
 
         ButtonGroup modos = new ButtonGroup();
         modos.add(jtPonto);
@@ -122,14 +126,16 @@ public class Gui extends JFrame {
         barraCena.add(jbRedesenhar);
         barraCena.add(jbLimpar);
         barraCena.add(jbExcluir);
-        barraCena.add(jbSalvar);
-        barraCena.add(jbRecarregar);
+        barraArquivo.add(jbSalvar);
+        barraArquivo.add(jbSalvarComo);
+        barraArquivo.add(jbRecarregar);
 
         JPanel menu = new JPanel();
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
         menu.add(barraComandos);
         menu.add(barraEstilo);
         menu.add(barraCena);
+        menu.add(barraArquivo);
         add(menu, BorderLayout.NORTH);
         add(areaDesenho, BorderLayout.CENTER);
         add(msg, BorderLayout.SOUTH);
@@ -148,6 +154,7 @@ public class Gui extends JFrame {
         jbLimpar.addActionListener(eventos);
         jbExcluir.addActionListener(eventos);
         jbSalvar.addActionListener(eventos);
+        jbSalvarComo.addActionListener(eventos);
         jbRecarregar.addActionListener(eventos);
         jsEspessura.addChangeListener(event ->
             areaDesenho.setEspessuraAtual((Integer)jsEspessura.getValue()));
@@ -206,10 +213,11 @@ public class Gui extends JFrame {
             } else if (origem == jbExcluir) {
                 msg.setText(areaDesenho.excluirSelecionado()
                     ? "Primitivo excluido" : "Selecione um primitivo para excluir");
-            } else if (origem == jbSalvar) {
-                Path destino = selecionarArquivo(true);
+            } else if (origem == jbSalvar || origem == jbSalvarComo) {
+                Path destino = selecionarArquivo(true, origem == jbSalvarComo);
                 if (destino == null) return;
                 try {
+                    Files.createDirectories(destino.getParent());
                     areaDesenho.salvarProjeto(destino);
                     arquivoProjeto = destino;
                     msg.setText("Projeto salvo em " + arquivoProjeto.getFileName());
@@ -217,7 +225,7 @@ public class Gui extends JFrame {
                     mostrarErro("Nao foi possivel salvar o projeto", erro);
                 }
             } else if (origem == jbRecarregar) {
-                Path origemProjeto = selecionarArquivo(false);
+                Path origemProjeto = selecionarArquivo(false, false);
                 if (origemProjeto == null) return;
                 try {
                     areaDesenho.carregarProjeto(origemProjeto);
@@ -230,20 +238,40 @@ public class Gui extends JFrame {
         }
     }
 
-    private Path selecionarArquivo(boolean salvar) {
-        JFileChooser seletor = new JFileChooser(Path.of("saves").toAbsolutePath().toFile());
+    private Path selecionarArquivo(boolean salvar, boolean como) {
+        Path pasta = arquivoProjeto == null ? Path.of("saves").toAbsolutePath() : arquivoProjeto.getParent();
+        JFileChooser seletor = new JFileChooser(pasta.toFile());
         seletor.setFileFilter(new FileNameExtensionFilter("Projetos JSON (*.json)", "json"));
-        if (arquivoProjeto != null) seletor.setSelectedFile(arquivoProjeto.toFile());
+        if (salvar && (como || arquivoProjeto == null)) {
+            sugerirNome(seletor, pasta);
+            seletor.addPropertyChangeListener(JFileChooser.DIRECTORY_CHANGED_PROPERTY, event -> {
+                if (seletor.getCurrentDirectory() != null)
+                    sugerirNome(seletor, seletor.getCurrentDirectory().toPath());
+            });
+        } else if (arquivoProjeto != null) {
+            seletor.setSelectedFile(arquivoProjeto.toFile());
+        }
         int resultado = salvar ? seletor.showSaveDialog(this) : seletor.showOpenDialog(this);
         if (resultado != JFileChooser.APPROVE_OPTION) return null;
         Path arquivo = seletor.getSelectedFile().toPath().toAbsolutePath();
-        if (salvar && !arquivo.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".json")) {
-            arquivo = arquivo.resolveSibling(arquivo.getFileName() + ".json");
+        if (salvar) {
+            arquivo = NomesProjeto.json(arquivo);
+            java.util.List<Path> conflitos = NomesProjeto.conflitos(arquivo);
+            if (!conflitos.isEmpty() && JOptionPane.showConfirmDialog(this,
+                    "Substituir os seguintes destinos?\n" + conflitos.stream()
+                        .map(Path::toString).collect(java.util.stream.Collectors.joining("\n")),
+                    "Salvar projeto", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return null;
         }
-        if (salvar && Files.exists(arquivo) && JOptionPane.showConfirmDialog(this,
-                "Substituir " + arquivo.getFileName() + "?", "Salvar projeto",
-                JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) return null;
         return arquivo;
+    }
+
+    private void sugerirNome(JFileChooser seletor, Path pasta) {
+        try {
+            seletor.setSelectedFile(NomesProjeto.proximo(pasta).toFile());
+        } catch (IOException erro) {
+            msg.setText("Nao foi possivel sugerir um numero: " + erro.getMessage() + "; digite um nome");
+            seletor.setSelectedFile(null);
+        }
     }
 
     private void mostrarErro(String titulo, IOException erro) {

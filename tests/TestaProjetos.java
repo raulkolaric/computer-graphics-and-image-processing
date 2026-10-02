@@ -27,6 +27,7 @@ public class TestaProjetos {
     }
 
     private static void testar() throws Exception {
+        testarNomes();
         Path pasta = Files.createTempDirectory("projetos-");
         Path a = pasta.resolve("A.json"), b = pasta.resolve("B.json");
         try {
@@ -117,6 +118,37 @@ public class TestaProjetos {
         }
     }
 
+    private static void testarNomes() throws Exception {
+        Path pasta = Files.createTempDirectory("nomes-projeto-");
+        try {
+            Path ausente = pasta.resolve("ausente");
+            assert persistencia.NomesProjeto.proximo(ausente).getFileName().toString().equals("Projeto 1.json");
+            assert !Files.exists(ausente) : "sugerir nao cria diretorio";
+            assert persistencia.NomesProjeto.proximo(pasta).getFileName().toString().equals("Projeto 1.json");
+            for (String nome : new String[] {"Projeto 1.json", "pRoJeTo 4.JPEG", "Projeto 7.JPG",
+                    "Outro 90.json", "Projeto -9.json", "Projeto 8x.json", "Projeto 0.json", "Projeto 09.txt"})
+                Files.writeString(pasta.resolve(nome), "");
+            Path sugestao = persistencia.NomesProjeto.proximo(pasta);
+            assert sugestao.getFileName().toString().equals("Projeto 8.json") : sugestao;
+            assert sugestao.equals(persistencia.NomesProjeto.proximo(pasta)) : "sem contador de sessao";
+            assert persistencia.NomesProjeto.conflitos(sugestao).isEmpty();
+            Files.writeString(persistencia.NomesProjeto.jpeg(sugestao), "imagem orfa");
+            assert persistencia.NomesProjeto.conflitos(sugestao).size() == 1 : "reconsulta colisao tardia";
+            Files.writeString(sugestao, "");
+            assert persistencia.NomesProjeto.conflitos(sugestao).size() == 2;
+            assert persistencia.NomesProjeto.proximo(pasta).getFileName().toString().equals("Projeto 9.json");
+            for (String nome : new String[] {"copia.JSON", "copia.jpeg", "copia.JPG", "copia"})
+                assert persistencia.NomesProjeto.json(pasta.resolve(nome)).equals(pasta.resolve("copia.json"));
+            Files.writeString(pasta.resolve("Projeto 9223372036854775807.json"), "");
+            assert persistencia.NomesProjeto.proximo(pasta).getFileName().toString()
+                .equals("Projeto 9223372036854775808.json") : "sem overflow de long";
+        } finally {
+            try (java.util.stream.Stream<Path> arquivos = Files.list(pasta)) {
+                for (Path arquivo : (Iterable<Path>)arquivos::iterator) Files.delete(arquivo);
+            }
+            Files.delete(pasta);
+        }
+    }
     private static PainelDesenho painel() {
         PainelDesenho p = new PainelDesenho(new JLabel(), TiposPrimitivos.NENHUM);
         p.setSize(200, 200);
