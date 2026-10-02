@@ -24,15 +24,12 @@ Uso
    O tipo escolhido continua ativo e o eixo aparece tracejado. Desative Espelhar
    para voltar a desenhar sem cópias; ativá-lo novamente permite definir outro
    eixo. Alternar o botão cancela formas incompletas, preservando a cena.
-9. Cada novo nome em Salvar projeto guarda somente os pontos e formas criados
-   desde a última gravação, mesmo sem Limpar. Gravar novamente no mesmo arquivo
-   atualiza esse projeto com os novos objetos. Ao abrir um projeto, a primeira
-   gravação em outro nome faz uma cópia completa; as gravações seguintes em novos
-   nomes voltam a guardar apenas os objetos novos.
-   Use Limpar para iniciar uma cena vazia. Redesenhar restaura a cena armazenada.
-   `saves/teste1.json`, `saves/teste2.json` e `saves/teste3.json` são os arquivos
-   originais recebidos: teste2 e teste3 já contêm formas dos arquivos anteriores.
-   A nova regra vale para gravações futuras; abrir esses arquivos mantém seu conteúdo.
+9. Salvar projeto grava todos os pontos e formas completos exibidos, inclusive
+   ao atualizar ou trocar o nome do arquivo. Limpar oculta a cena sem apagar
+   os objetos da memória; Redesenhar restaura todos ou apenas o tipo escolhido.
+   A -> Limpar -> B -> salvar grava B; Redesenhar Todos recupera A+B.
+   Excluir selecionado remove definitivamente o objeto, sem recuperação.
+   Salvar uma tela vazia produz um projeto vazio. Abrir substitui a memória.
 10. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
    O explorador começa em `saves/` e, após abrir ou salvar,
    seleciona o último arquivo usado com sucesso.
