@@ -48,12 +48,14 @@ public class Gui extends JFrame {
     private final JToggleButton jtCirculo = new JToggleButton("Circulo");
     private final JToggleButton jtSelecao = new JToggleButton("Selecionar");
     private final JToggleButton jtEspelhar = new JToggleButton("Espelhar");
+    /** Inicia a reflexão independente do objeto selecionado. */
     private final JButton jbEspelharSelecionado = new JButton("Espelhar selecionado");
     private final JButton jbCor = new JButton("Cor");
     private final JButton jbRedesenhar = new JButton("Redesenhar");
     private final JButton jbLimpar = new JButton("Limpar");
     private final JButton jbExcluir = new JButton("Excluir selecionado");
     private final JButton jbSalvar = new JButton("Salvar projeto");
+    /** Solicita um destino com a próxima sugestão numerada. */
     private final JButton jbSalvarComo = new JButton("Salvar como");
     private final JButton jbRecarregar = new JButton("Abrir projeto");
     private final JSpinner jsEspessura = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1));
@@ -65,6 +67,7 @@ public class Gui extends JFrame {
     private final JToolBar barraComandos = new JToolBar();
     private final JToolBar barraEstilo = new JToolBar();
     private final JToolBar barraCena = new JToolBar();
+    /** Mantém as ações de arquivo acessíveis na largura padrão da janela. */
     private final JToolBar barraArquivo = new JToolBar();
     private final PainelDesenho areaDesenho =
         new PainelDesenho(msg, TiposPrimitivos.NENHUM);

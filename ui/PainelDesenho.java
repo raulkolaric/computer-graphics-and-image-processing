@@ -35,7 +35,9 @@ import persistencia.NomesProjeto;
 
 /**
  * Painel que recebe pontos pelo mouse, armazena a cena, exibe prévias e
- * permite selecionar, excluir e redesenhar os elementos.
+ * permite selecionar, excluir e redesenhar os elementos. As listas exibidas
+ * referenciam objetos retidos; Limpar apenas os oculta. Salvar usa uma cópia
+ * ordenada dessas listas, sem considerar o histórico de nomes de arquivo.
  *
  * @author Raul Kolaric, Liam Lopes, Rafael Infantini, Guilherme Coutinho
  * @version 2026/08/24
@@ -52,6 +54,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     private final List<Ponto> pontosPendentes = new ArrayList<Ponto>();
 
     private boolean espelhamentoAtivo;
+    /** Controla a exibição do guia sem perder um eixo automático completo. */
     private boolean mostrarEixo;
     private transient Object fonteReflexao;
     private transient Ponto reflexaoP1, reflexaoPrevia;
@@ -339,6 +342,10 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     /** Grava JSON e JPEG dos mesmos objetos completos exibidos, na ordem atual.
      * Preserva a memória retida e qualquer construção incompleta.
+     * A imagem RGB tem fundo branco, qualidade 0.95 e não inclui sobreposições
+     * da interface. O JSON conserva geometria fora da área; o JPEG a recorta.
+     * As duas gravações são independentes. Em falha do JPEG, o resultado informa
+     * o erro e o JSON permanece salvo; uma imagem anterior pode estar desatualizada.
      * As coordenadas são normalizadas pela largura e pela altura do painel.
      * @param arquivo arquivo de destino
      * @return resultado do JPEG; retornar confirma que o JSON foi salvo
@@ -435,6 +442,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
 
     /** Oculta a cena, preservando objetos completos para Redesenhar.
      * Também descarta pontos pendentes, a prévia e a seleção atual.
+     * Oculta o guia automático, mantém um eixo completo e cancela um incompleto.
      */
     public void limpar() {
         cancelarReflexaoSelecionada();
@@ -457,6 +465,7 @@ public class PainelDesenho extends JPanel implements MouseListener, MouseMotionL
     /** Redesenha os elementos do tipo informado, ou todos se for {@code null}.
      * O filtro {@link TiposPrimitivos#PONTO} exibe os pontos; os demais filtros
      * exibem apenas os primitivos do tipo correspondente.
+     * Cancela construções pendentes e só restaura o guia automático completo.
      * @param filtro tipo a redesenhar, ou {@code null} para exibir tudo
      */
     public void redesenhar(TiposPrimitivos filtro) {

@@ -6,40 +6,105 @@ triângulos e círculos a partir de cliques do mouse.
 
 Uso
 ---
-1. Execute App.
-2. Escolha o primitivo na barra.
-3. Informe os pontos pelo mouse:
-   - reta, retângulo e círculo: dois pontos;
-   - triângulo: três pontos;
-   - ponto: um ponto.
-4. Escolha a cor e informe a espessura antes de criar o primitivo.
-5. Para círculos, escolha entre equação reduzida, paramétrico ou simetria.
-6. Ao informar o primeiro ponto de uma reta, retângulo ou círculo, mova o mouse
-   para visualizar o elástico antes do segundo clique.
-7. Escolha Selecionar, clique em um ponto ou primitivo e use Excluir selecionado
-   para removê-lo da cena.
-8. Ative Espelhar e clique em dois pontos distintos para definir a reta de
-   reflexão. Depois crie pontos e formas normalmente: cada criação inclui
-   automaticamente uma cópia espelhada com o mesmo estilo na cena.
-   O tipo escolhido continua ativo e o eixo aparece tracejado. Desative Espelhar
-   para voltar a desenhar sem cópias; ativá-lo novamente permite definir outro
-   eixo. Alternar o botão cancela formas incompletas, preservando a cena.
-9. Salvar projeto grava todos os pontos e formas completos exibidos, inclusive
-   ao atualizar ou trocar o nome do arquivo. Limpar oculta a cena sem apagar
-   os objetos da memória; Redesenhar restaura todos ou apenas o tipo escolhido.
-   A -> Limpar -> B -> salvar grava B; Redesenhar Todos recupera A+B.
-   Excluir selecionado remove definitivamente o objeto, sem recuperação.
-   Salvar uma tela vazia produz um projeto vazio. Abrir substitui a memória.
-10. Use Abrir projeto para escolher um arquivo JSON no explorador de arquivos.
-   O explorador começa em `saves/` e, após abrir ou salvar,
-   seleciona o último arquivo usado com sucesso.
-   Use Salvar projeto para escolher o destino; confirme antes de substituir um
-   arquivo existente. Cancelar preserva a cena e o arquivo atual.
-   As coordenadas são proporcionais à área de desenho. Nos círculos, centro
-   é o ponto central e raio é um ponto da circunferência (não um vetor).
-   Um arquivo deve conter somente um objeto JSON raiz.
-   A importação valida os dados e os limites de rasterização antes de substituir
-   a cena. Um projeto inválido exibe uma mensagem de erro e preserva a cena atual.
+1. Execute App. A janela padrão tem 900 x 600 pixels, com ações de arquivo
+   em uma barra própria.
+2. Escolha Ponto, Reta, Retangulo, Triangulo ou Circulo. Informe um ponto para
+   Ponto, três para Triangulo e dois para as demais formas.
+3. Escolha a cor, espessura e algoritmo do círculo antes de desenhar.
+   Após o primeiro clique de uma reta, retângulo ou círculo, mova o mouse
+   para ver a prévia. Apenas formas concluídas entram no projeto salvo.
+4. Use Selecionar e clique no objeto. Excluir selecionado remove esse objeto
+   tanto da tela quanto da memória; Redesenhar não o recupera. Original e
+   cópia espelhada podem ser excluídos independentemente.
+
+Limpar e Redesenhar
+------------------
+Limpar oculta os objetos completos e o eixo de reflexão, preservando a geometria
+em memória. Cancela formas incompletas, prévias, seleção e reflexão da seleção.
+Mantém ferramenta, cor, espessura, algoritmo e estado do botão Espelhar.
+Um eixo automático completo permanece definido; um incompleto é cancelado,
+reiniciando em p1. A tela fica inicialmente vazia, inclusive sem guias.
+
+Redesenhar reconstrói a tela a partir da memória, com Todos ou o filtro escolhido,
+sem duplicar objetos e preservando a ordem. Cancela construções incompletas.
+O guia só reaparece se Espelhar estiver ativo com um eixo completo (também pode
+reaparecer na próxima interação de desenho). Redesenhar não lê arquivos JSON.
+
+Abrir projeto com sucesso substitui a memória e a tela. Fechar a aplicação
+perde os objetos retidos apenas em memória; somente o conteúdo salvo permanece.
+Não há desfazer nem aviso novo ao fechar.
+
+Espelhamento
+------------
+- Espelhar: ative o botão, clique em dois pontos distintos p1/p2 para definir
+  a reta e desenhe normalmente. Cada objeto novo inclui uma cópia refletida.
+  A ferramenta continua ativa; o eixo serve para criações posteriores e trocas
+  de ferramenta. Desativar cancela a entrada pendente; reativar solicita novo eixo.
+- Espelhar selecionado: selecione um objeto visível e pressione a ação. Clique
+  em p1/p2 para criar exatamente uma cópia, preservando o original. Serve para
+  pontos, todas as formas, objetos importados e cópias anteriores. Não altera
+  o eixo automático nem reflete a cópia automaticamente outra vez.
+  Um p2 coincidente ou inválido não insere nada: escolha outro p2 ou cancele.
+  Esc, troca de ferramenta, Limpar, Redesenhar, abertura bem-sucedida, alternância
+  do botão Espelhar ou exclusão da fonte cancelam a operação.
+Ambos preservam estilo, rótulos de pontos, espessura e algoritmo do círculo.
+Os eixos podem ser verticais, horizontais ou diagonais.
+
+Salvar, Salvar como e Abrir projeto
+----------------------------------
+Salvar projeto abre o seletor com o último destino bem-sucedido para atualização.
+Na primeira gravação, sugere Projeto i.json. Salvar como abre o mesmo seletor
+com o próximo nome numerado, editável, sem apagar o arquivo anterior ou a memória.
+Após gravar o JSON, inclusive em Salvar como, o destino escolhido passa a ser
+lembrado. Cancelar ou falhar antes de gravar o JSON preserva o destino anterior.
+
+O seletor começa em saves/. A sugestão usa 1 em uma pasta vazia e, depois, um
+número acima do maior Projeto i.json/.jpeg/.jpg existente, ignorando diferenças
+de maiúsculas e sem preencher lacunas. É recalculada na pasta escolhida, inclusive
+após reiniciar a aplicação. Nomes não relacionados e sufixos malformados são
+ignorados; números grandes não sofrem overflow. A extensão final é .json.
+Abrir/cancelar o seletor não cria saves/: a pasta só é criada ao gravar.
+
+A sugestão não reserva o caminho. Antes de gravar, uma confirmação relaciona
+todos os destinos existentes que seriam substituídos: JSON e seu .jpeg.
+Uma imagem existente exige confirmação mesmo sem JSON. Atualizar o mesmo projeto
+não gera um novo número automaticamente.
+
+Toda gravação substitui o JSON pela coleção de objetos completos exibidos naquele
+momento. O nome e as gravações anteriores não mudam esse conteúdo. Salvar não
+apaga objetos retidos, não muda o filtro e não conclui nem cancela formas pendentes.
+Um objeto parcialmente fora da área ou coberto por outro conserva sua geometria
+inteira no JSON. Uma tela vazia produz um projeto vazio válido.
+
+Exemplos:
+  A -> Limpar -> B -> salvar                       grava B; A continua na memória
+  A -> salvar -> B -> salvar novamente             grava A+B
+  A -> Limpar -> Redesenhar Todos -> salvar        grava A
+  A+B -> excluir A -> Redesenhar -> salvar         grava B
+  Redesenhar Circulo -> salvar                     grava apenas círculos exibidos
+  Limpar -> salvar                                grava projeto vazio
+  Salvar A.json -> Salvar como B.json              grava o mesmo desenho em ambos
+  Abrir A.json -> salvar A.json -> salvar B.json   grava o mesmo desenho em B
+Após o primeiro exemplo, Redesenhar Todos recupera A+B. Abrir o arquivo salvo
+com B substitui a memória por B.
+
+Cada gravação também atualiza uma imagem .jpeg de mesmo nome ao lado do JSON,
+por exemplo saves/Projeto 1.json e saves/Projeto 1.jpeg. Usa a mesma cena completa,
+ordem e dimensões da área de desenho, fundo branco RGB e qualidade JPEG 0.95.
+A imagem é recortada às suas dimensões; não contém prévias, seleção nem guias.
+O código reutiliza o renderizador manual e desenha pontos depois das formas.
+
+JSON e JPEG são gravações independentes, sem substituição atômica conjunta.
+Se o JSON for salvo e o JPEG falhar, o JSON permanece salvo e seu destino é
+lembrado. A interface informa a falha da imagem: um JPEG anterior pode estar
+desatualizado. Verifique a mensagem antes de usar a imagem exportada.
+
+Abrir projeto permite escolher um JSON existente. Valida o arquivo completo e
+os limites de rasterização antes de substituir a cena e cancelar a interação
+pendente. Não espelha novamente os objetos importados. Arquivo inválido ou diálogo
+cancelado preserva a cena e o destino lembrado. Um arquivo deve conter somente
+um objeto JSON raiz. Nos círculos, centro é o ponto central e raio é um ponto
+da circunferência (não um vetor).
 
 Persistência e compatibilidade
 ------------------------------
@@ -60,6 +125,7 @@ altera a escala da cena atual.
 - Sem raioRelativo, o raio continua sendo calculado pela distância entre centro
   e raio após converter suas coordenadas para pixels. Arquivos antigos não
   registram a proporção original da área; ela não pode ser recuperada ao abrir.
+- Arquivos legados de versão 1 com coordenadas absolutas continuam legíveis.
 - O leitor aceita números em notação científica, como 1.62e-1, dentro do formato
   de projeto suportado; não implementa toda a especificação JSON.
 
@@ -89,7 +155,8 @@ Arquitetura
 - RetaGrafica e CirculoGrafico acrescentam estilo e renderização.
 - Retangulo, no pacote retangulo, e Triangulo são compostos exclusivamente por
   RetaGrafica.
-- PainelDesenho armazena uma lista dinâmica de PrimitivoGrafico.
+- PainelDesenho retém objetos completos e mantém referências aos objetos exibidos.
+- NomesProjeto examina nomes e conflitos; ExportacaoJPEG codifica a imagem companheira.
 - PersistenciaProjeto grava e lê a cena no formato JSON, sem dependência externa.
 - RenderizadorPrimitivos isola o mecanismo de desenho. Atualmente a
   implementação manual usa a equação reduzida da reta e algoritmos manuais
@@ -99,16 +166,22 @@ Compilação e testes
 -------------------
 Requer JDK 11 ou superior (a persistência usa Files.readString e a GUI usa Path.of).
 
-  javac -d bin *.java */*.java
-  java -ea -Djava.awt.headless=true -cp bin tests.TestaProjetos
-  java -ea -Djava.awt.headless=true -cp bin tests.TestaEspelhamento
-  java -ea -Djava.awt.headless=true -cp bin tests.TestaPrimitivos
-  java -ea -Djava.awt.headless=true -cp bin tests.TestaImportacao
-  java -ea -Djava.awt.headless=true -cp bin tests.TestaOrdem
-  java -ea -Djava.awt.headless=true -cp bin tests.TestaEscalaCirculo
+  javac --release 11 -Xlint:all -d .docs/bin *.java */*.java
+  java -ea -Djava.awt.headless=true -cp .docs/bin tests.TestaProjetos
+  java -ea -Djava.awt.headless=true -cp .docs/bin tests.TestaEspelhamento
+  java -ea -Djava.awt.headless=true -cp .docs/bin tests.TestaPrimitivos
+  java -ea -Djava.awt.headless=true -cp .docs/bin tests.TestaImportacao
+  java -ea -Djava.awt.headless=true -cp .docs/bin tests.TestaOrdem
+  java -ea -Djava.awt.headless=true -cp .docs/bin tests.TestaEscalaCirculo
+
+Os seis programas acima são regressões com assertions. TestaProjetos também
+verifica nomes numerados, imagens JPEG e falhas parciais. TestaPonto e TestaReta
+são demonstrações adicionais. Compilar com --release 11 verifica APIs/bytecode;
+o runtime usado depende do JDK instalado. No BlueJ, abra o projeto, compile
+as classes e execute App.main; não são necessárias dependências externas.
 
 Para abrir a interface:
-  java -cp bin App
+  java -cp .docs/bin App
 
 Autores
 -------
@@ -116,21 +189,3 @@ Autores
 - Liam Lopes
 - Rafael Infantini
 - Guilherme Coutinho
-
-Espelhar selecionado: use Selecionar, clique no objeto e pressione Espelhar
-selecionado. Clique em p1 e p2 distintos para criar uma única cópia. A operação
-preserva o eixo automático. Esc, troca de ferramenta, Limpar, Abrir com sucesso
-ou exclusão da fonte cancelam a entrada. Um p2 coincidente pode ser corrigido.
-
-Salvar como sugere Projeto i.json na pasta escolhida; Salvar projeto propõe
-o último destino bem-sucedido. A numeração considera JSON, JPEG e JPG existentes,
-sem preencher lacunas. A sugestão é editável e recalculada ao trocar de pasta.
-Cancelar preserva o destino anterior e não cria a pasta saves/. A confirmação
-de substituição relaciona o JSON e a imagem .jpeg existentes.
-
-Cada gravação atualiza o JSON e uma imagem .jpeg de mesmo nome, com fundo branco,
-dimensões da área de desenho e qualidade 0.95. A imagem inclui somente objetos
-completos exibidos; não inclui seleção, eixos nem prévias. Se o JPEG falhar após
-o JSON, o projeto permanece salvo e seu destino é lembrado; a interface avisa
-que uma imagem anterior pode estar desatualizada. Os dois arquivos não formam
-uma substituição atômica.
