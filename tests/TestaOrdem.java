@@ -39,7 +39,7 @@ public class TestaOrdem {
                     throw new AssertionError("Ordem invalida aceita");
                 } catch (java.io.IOException esperado) { }
             }
-        } finally { Files.deleteIfExists(arquivo); }
+        } finally { Files.deleteIfExists(arquivo); Files.deleteIfExists(persistencia.NomesProjeto.jpeg(arquivo)); }
         System.out.println("TestaOrdem: todos os testes passaram");
     }
 

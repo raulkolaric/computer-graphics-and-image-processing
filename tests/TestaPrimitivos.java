@@ -204,15 +204,16 @@ public class TestaPrimitivos {
         Graphics g3 = limpa.getGraphics();
         painel.paint(g3);
         g3.dispose();
-        verificar(painel.getQuantidadePrimitivos() == 0,
-            "limpar remove primitivos da estrutura de dados");
+        verificar(painel.getQuantidadePrimitivos() == 120,
+            "limpar preserva primitivos na estrutura de dados");
         painel.redesenhar();
         BufferedImage restaurada = novaImagem();
         Graphics g4 = restaurada.getGraphics();
         painel.paint(g4);
         g4.dispose();
-        verificar(checksum(limpa) == checksum(restaurada),
-            "redesenhar nao recupera primitivos removidos");
+        verificar(checksum(limpa) != checksum(restaurada), "limpar oculta a cena");
+        verificar(checksum(primeira) == checksum(restaurada),
+            "redesenhar recupera primitivos retidos");
     }
 
     private static void testarEntradaMouse() {
@@ -432,7 +433,7 @@ public class TestaPrimitivos {
             throw new AssertionError("persistencia JSON", erro);
         } finally {
             if (arquivo != null) {
-                try { Files.deleteIfExists(arquivo); } catch (Exception ignorado) { }
+                try { Files.deleteIfExists(arquivo); Files.deleteIfExists(persistencia.NomesProjeto.jpeg(arquivo)); } catch (Exception ignorado) { }
             }
         }
     }
