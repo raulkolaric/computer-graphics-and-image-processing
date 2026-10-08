@@ -2,6 +2,7 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -87,6 +88,11 @@ public class Gui extends JFrame {
         barraEstilo.setFloatable(false);
         barraCena.setFloatable(false);
         barraArquivo.setFloatable(false);
+        for (JToolBar barra : new JToolBar[] {
+                barraComandos, barraEstilo, barraCena, barraArquivo }) {
+            barra.setRollover(true);
+            barra.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
+        }
 
         ButtonGroup modos = new ButtonGroup();
         modos.add(jtPonto);
@@ -105,8 +111,10 @@ public class Gui extends JFrame {
         barraComandos.add(jtTriangulo);
         barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtCirculo);
+        barraComandos.addSeparator();
         barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtSelecao);
+        barraComandos.addSeparator();
         barraComandos.add(Box.createHorizontalStrut(4));
         barraComandos.add(jtEspelhar);
         barraComandos.add(jbEspelharSelecionado);
@@ -121,12 +129,14 @@ public class Gui extends JFrame {
         barraEstilo.add(jbCor);
         barraEstilo.add(new JLabel(" Espessura: "));
         barraEstilo.add(jsEspessura);
+        barraEstilo.addSeparator();
         barraEstilo.add(new JLabel(" Circulo: "));
         barraEstilo.add(jcAlgoritmo);
 
         barraCena.add(new JLabel(" Redesenhar: "));
         barraCena.add(jcFiltroRedesenho);
         barraCena.add(jbRedesenhar);
+        barraCena.addSeparator();
         barraCena.add(jbLimpar);
         barraCena.add(jbExcluir);
         barraArquivo.add(jbSalvar);
@@ -135,12 +145,17 @@ public class Gui extends JFrame {
 
         JPanel menu = new JPanel();
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS));
+        menu.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         menu.add(barraComandos);
         menu.add(barraEstilo);
         menu.add(barraCena);
         menu.add(barraArquivo);
         add(menu, BorderLayout.NORTH);
+        areaDesenho.setBorder(BorderFactory.createLineBorder(new Color(220, 224, 230)));
         add(areaDesenho, BorderLayout.CENTER);
+        msg.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(220, 224, 230)),
+            BorderFactory.createEmptyBorder(6, 10, 6, 10)));
         add(msg, BorderLayout.SOUTH);
 
         Eventos eventos = new Eventos();
@@ -168,6 +183,11 @@ public class Gui extends JFrame {
         jtPonto.setSelected(true);
         areaDesenho.setTipo(TiposPrimitivos.PONTO);
         jbCor.setBackground(Color.BLACK);
+        for (JToggleButton botao : new JToggleButton[] {
+                jtPonto, jtReta, jtRetangulo, jtTriangulo, jtCirculo, jtSelecao,
+                jtEspelhar }) {
+            botao.setMargin(new Insets(4, 8, 4, 8));
+        }
         setSize(larg, alt);
         setLocationRelativeTo(null);
         setVisible(true);
